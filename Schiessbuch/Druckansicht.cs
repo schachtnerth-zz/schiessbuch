@@ -179,14 +179,16 @@ namespace schiessbuch
                 // Die ersten drei Spalten stehen fest. Alles ab Spalte 4 ist eine Disziplin
                 int disziplinen = Schiessabend.Columns.Count - 3;
                 int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
+                MySqlConnection conn2 = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+                conn2.Open();
+                MySqlDataReader reader2;
                 for (int j = 0; j < disziplinen; j++)
                 {
-                    MySqlConnection conn2 = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
-                    conn2.Open();
+                    
                     //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
                     string cmdstr = "SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' HAVING Date='" + filterDateStr + "'";
                     MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
-                    MySqlDataReader reader2 = cmd2.ExecuteReader();
+                    reader2 = cmd2.ExecuteReader();
                     int count = 0;
                     string result = "";
                     while (reader2.Read())
@@ -203,13 +205,14 @@ namespace schiessbuch
                     //reader2.Dispose();
                     //cmd2.Cancel();
                     //cmd2.Dispose();
-                    conn2.Close();
+                    //conn2.Close();
                     //conn2.Dispose();
-                    MySqlConnection.ClearPool(conn2);
+                    
                     Schiessabend[j + 3, newRow].Value = result;
 
                 }
-                
+                conn2.Close();
+                MySqlConnection.ClearPool(conn2);
             }
             reader.Close();
             //reader.Dispose();
@@ -225,14 +228,16 @@ namespace schiessbuch
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (pd != null)
-                pd.Dispose();
-            else
+            if (pd== null) { 
                 pd = new PrintDocument();
+                pd.PrintPage += new PrintPageEventHandler(pd_PrintPage);
+            }
             printFont = new Font("Arial", 10);
             linesCount = Schiessabend.Rows.Count;
             //pd = new PrintDocument();
-            pd.PrintPage += new PrintPageEventHandler(pd_PrintPage);
+            if (printPreviewControl1.Document != null)
+                printPreviewControl1.Document.Dispose();
+            
             printPreviewControl1.Document = pd;
             button2.Enabled = true;
             //PrintPreviewDialog pvd = new PrintPreviewDialog();
