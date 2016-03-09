@@ -30,6 +30,8 @@ namespace schiessbuch
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet1.Vereine". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
             // TODO: This line of code loads data into the 'siusclubDataSet.treffer' table. You can move, or remove it, as needed.
             this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
             // TODO: This line of code loads data into the 'siusclubDataSet.schiessbuch' table. You can move, or remove it, as needed.
@@ -506,6 +508,86 @@ namespace schiessbuch
         {
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
+        }
+
+        private void bearbeitungsmodusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetEnableDisableEditControls(((ToolStripMenuItem)bearbeitungsmodusToolStripMenuItem).Checked);
+        }
+
+        private void SetEnableDisableEditControls(bool enable)
+        {
+            if (enable)
+            {
+                nameTextBox.ReadOnly = false;
+                vornameTextBox.ReadOnly = false;
+                emailTextBox.ReadOnly = false;
+                //vereinTextBox.ReadOnly = false;
+                vereinTextBox.Visible = false;
+                vereinComboBox.Visible = true;
+                bindingNavigatorAddNewItem.Enabled = true;
+                bindingNavigatorDeleteItem.Enabled = true;
+                //saveToolStripButton.Enabled = true;
+                //saveToolStripButton1.Enabled = true;
+            }
+            else
+            {
+                nameTextBox.ReadOnly = true;
+                vornameTextBox.ReadOnly = true;
+                emailTextBox.ReadOnly = true;
+                vereinTextBox.ReadOnly = true;
+                vereinComboBox.Visible = false;
+                vereinTextBox.Visible = true;
+                bindingNavigatorAddNewItem.Enabled = false;
+                bindingNavigatorDeleteItem.Enabled = false;
+                //saveToolStripButton.Enabled = false;
+
+            }
+        }
+
+        private void saveToolStripButton_Click(object sender, EventArgs e)
+        {
+            schuetzenBindingSource.EndEdit();
+            schuetzenTableAdapter.Update(siusclubDataSet.schuetzen);
+            saveToolStripButton1.Enabled = false;
+            ((ToolStripMenuItem)bearbeitungsmodusToolStripMenuItem).Checked = false;
+            SetEnableDisableEditControls(false);
+            schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+        }
+
+        private void nameTextBox_Leave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void bindingNavigatorDeleteItem1_Click(object sender, EventArgs e)
+        {
+            if (siusclubDataSet.HasChanges())
+                saveToolStripButton1.Enabled = true;
+        }
+
+        private void fillByToolStripButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.schuetzenTableAdapter.FillBy(this.siusclubDataSet.schuetzen);
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+
+        }
+
+        private void bindingNavigatorAddNewItem_Click(object sender, EventArgs e)
+        {
+            saveToolStripButton1.Enabled = true;
+        }
+
+        private void nameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (((ToolStripMenuItem)bearbeitungsmodusToolStripMenuItem).Checked == true)
+                saveToolStripButton1.Enabled = true;
         }
     }
 }

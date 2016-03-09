@@ -149,7 +149,16 @@ FROM            schiessbuch</CommandText>
               <Mapping SourceColumn="wert5" DataSetColumn="wert5" />
               <Mapping SourceColumn="fullname" DataSetColumn="fullname" />
             </Mappings>
-            <Sources />
+            <Sources>
+              <DbSource ConnectionRef="siusclubConnectionString (Settings)" DbObjectName="siusclub.schuetzen" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="FillBy" GenerateMethods="Fill" GenerateShortCommands="true" GeneratorSourceName="FillBy" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetDataBy" UserSourceName="FillBy">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT `id`, `name`, `vorname`, concat(name,', ',vorname) as fullname, `email`, `verein`, `wert1`, `wert2`, `wert3`, `wert4`, `wert5` FROM `schuetzen` group by verein</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </Sources>
           </TableAdapter>
           <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="trefferTableAdapter" GeneratorDataComponentClassName="trefferTableAdapter" Name="treffer" UserDataComponentName="trefferTableAdapter">
             <MainSource>
@@ -370,6 +379,23 @@ FROM            schiessbuch</CommandText>
             </Mappings>
             <Sources />
           </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="VereineTableAdapter" GeneratorDataComponentClassName="VereineTableAdapter" Name="Vereine" UserDataComponentName="VereineTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="siusclubConnectionString (Settings)" DbObjectName="siusclub.schuetzen" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT DISTINCT verein
+FROM            schuetzen</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="verein" DataSetColumn="verein" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
         </Tables>
         <Sources />
       </DataSource>
@@ -378,7 +404,7 @@ FROM            schiessbuch</CommandText>
   <xs:element name="siusclubDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="siusclubDataSet" msprop:Generator_UserDSName="siusclubDataSet">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="schiessbuch" msprop:Generator_TableClassName="schiessbuchDataTable" msprop:Generator_TableVarName="tableschiessbuch" msprop:Generator_RowChangedName="schiessbuchRowChanged" msprop:Generator_TablePropName="schiessbuch" msprop:Generator_RowDeletingName="schiessbuchRowDeleting" msprop:Generator_RowChangingName="schiessbuchRowChanging" msprop:Generator_RowEvHandlerName="schiessbuchRowChangeEventHandler" msprop:Generator_RowDeletedName="schiessbuchRowDeleted" msprop:Generator_RowClassName="schiessbuchRow" msprop:Generator_UserTableName="schiessbuch" msprop:Generator_RowEvArgName="schiessbuchRowChangeEvent">
+        <xs:element name="schiessbuch" msprop:Generator_TableClassName="schiessbuchDataTable" msprop:Generator_TableVarName="tableschiessbuch" msprop:Generator_TablePropName="schiessbuch" msprop:Generator_RowDeletingName="schiessbuchRowDeleting" msprop:Generator_RowChangingName="schiessbuchRowChanging" msprop:Generator_RowEvHandlerName="schiessbuchRowChangeEventHandler" msprop:Generator_RowDeletedName="schiessbuchRowDeleted" msprop:Generator_UserTableName="schiessbuch" msprop:Generator_RowChangedName="schiessbuchRowChanged" msprop:Generator_RowEvArgName="schiessbuchRowChangeEvent" msprop:Generator_RowClassName="schiessbuchRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="id" msprop:Generator_ColumnVarNameInTable="columnid" msprop:Generator_ColumnPropNameInRow="id" msprop:Generator_ColumnPropNameInTable="idColumn" msprop:Generator_UserColumnName="id" type="xs:int" />
@@ -442,7 +468,7 @@ FROM            schiessbuch</CommandText>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="schuetzen" msprop:Generator_TableClassName="schuetzenDataTable" msprop:Generator_TableVarName="tableschuetzen" msprop:Generator_RowChangedName="schuetzenRowChanged" msprop:Generator_TablePropName="schuetzen" msprop:Generator_RowDeletingName="schuetzenRowDeleting" msprop:Generator_RowChangingName="schuetzenRowChanging" msprop:Generator_RowEvHandlerName="schuetzenRowChangeEventHandler" msprop:Generator_RowDeletedName="schuetzenRowDeleted" msprop:Generator_RowClassName="schuetzenRow" msprop:Generator_UserTableName="schuetzen" msprop:Generator_RowEvArgName="schuetzenRowChangeEvent">
+        <xs:element name="schuetzen" msprop:Generator_TableClassName="schuetzenDataTable" msprop:Generator_TableVarName="tableschuetzen" msprop:Generator_TablePropName="schuetzen" msprop:Generator_RowDeletingName="schuetzenRowDeleting" msprop:Generator_RowChangingName="schuetzenRowChanging" msprop:Generator_RowEvHandlerName="schuetzenRowChangeEventHandler" msprop:Generator_RowDeletedName="schuetzenRowDeleted" msprop:Generator_UserTableName="schuetzen" msprop:Generator_RowChangedName="schuetzenRowChanged" msprop:Generator_RowEvArgName="schuetzenRowChangeEvent" msprop:Generator_RowClassName="schuetzenRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="id" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnid" msprop:Generator_ColumnPropNameInRow="id" msprop:Generator_ColumnPropNameInTable="idColumn" msprop:Generator_UserColumnName="id" type="xs:int" />
@@ -489,7 +515,7 @@ FROM            schiessbuch</CommandText>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="treffer" msprop:Generator_TableClassName="trefferDataTable" msprop:Generator_TableVarName="tabletreffer" msprop:Generator_RowChangedName="trefferRowChanged" msprop:Generator_TablePropName="treffer" msprop:Generator_RowDeletingName="trefferRowDeleting" msprop:Generator_RowChangingName="trefferRowChanging" msprop:Generator_RowEvHandlerName="trefferRowChangeEventHandler" msprop:Generator_RowDeletedName="trefferRowDeleted" msprop:Generator_RowClassName="trefferRow" msprop:Generator_UserTableName="treffer" msprop:Generator_RowEvArgName="trefferRowChangeEvent">
+        <xs:element name="treffer" msprop:Generator_TableClassName="trefferDataTable" msprop:Generator_TableVarName="tabletreffer" msprop:Generator_TablePropName="treffer" msprop:Generator_RowDeletingName="trefferRowDeleting" msprop:Generator_RowChangingName="trefferRowChanging" msprop:Generator_RowEvHandlerName="trefferRowChangeEventHandler" msprop:Generator_RowDeletedName="trefferRowDeleted" msprop:Generator_UserTableName="treffer" msprop:Generator_RowChangedName="trefferRowChanged" msprop:Generator_RowEvArgName="trefferRowChangeEvent" msprop:Generator_RowClassName="trefferRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="ring" msprop:Generator_ColumnVarNameInTable="columnring" msprop:Generator_ColumnPropNameInRow="ring" msprop:Generator_ColumnPropNameInTable="ringColumn" msprop:Generator_UserColumnName="ring" type="xs:int" minOccurs="0" />
@@ -552,6 +578,19 @@ FROM            schiessbuch</CommandText>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+        <xs:element name="Vereine" msprop:Generator_TableClassName="VereineDataTable" msprop:Generator_TableVarName="tableVereine" msprop:Generator_TablePropName="Vereine" msprop:Generator_RowDeletingName="VereineRowDeleting" msprop:Generator_RowChangingName="VereineRowChanging" msprop:Generator_RowEvHandlerName="VereineRowChangeEventHandler" msprop:Generator_RowDeletedName="VereineRowDeleted" msprop:Generator_UserTableName="Vereine" msprop:Generator_RowChangedName="VereineRowChanged" msprop:Generator_RowEvArgName="VereineRowChangeEvent" msprop:Generator_RowClassName="VereineRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="verein" msprop:Generator_ColumnVarNameInTable="columnverein" msprop:Generator_ColumnPropNameInRow="verein" msprop:Generator_ColumnPropNameInTable="vereinColumn" msprop:Generator_UserColumnName="verein" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:choice>
     </xs:complexType>
     <xs:unique name="Constraint1" msdata:PrimaryKey="true">
@@ -565,9 +604,9 @@ FROM            schiessbuch</CommandText>
   </xs:element>
   <xs:annotation>
     <xs:appinfo>
-      <msdata:Relationship name="schuetzen_schiessbuch" msdata:parent="schuetzen" msdata:child="schiessbuch" msdata:parentkey="id" msdata:childkey="id" msprop:Generator_UserChildTable="schiessbuch" msprop:Generator_ChildPropName="GetschiessbuchRows" msprop:Generator_UserRelationName="schuetzen_schiessbuch" msprop:Generator_RelationVarName="relationschuetzen_schiessbuch" msprop:Generator_UserParentTable="schuetzen" msprop:Generator_ParentPropName="schuetzenRow" />
-      <msdata:Relationship name="schuetzen_treffer" msdata:parent="schuetzen" msdata:child="treffer" msdata:parentkey="id" msdata:childkey="schuetze" msprop:Generator_UserChildTable="treffer" msprop:Generator_ChildPropName="GettrefferRows" msprop:Generator_UserRelationName="schuetzen_treffer" msprop:Generator_ParentPropName="schuetzenRow" msprop:Generator_RelationVarName="relationschuetzen_treffer" msprop:Generator_UserParentTable="schuetzen" />
-      <msdata:Relationship name="schiessbuch_treffer" msdata:parent="schiessbuch" msdata:child="treffer" msdata:parentkey="session" msdata:childkey="session" msprop:Generator_UserChildTable="treffer" msprop:Generator_ChildPropName="GettrefferRows" msprop:Generator_UserRelationName="schiessbuch_treffer" msprop:Generator_ParentPropName="schiessbuchRow" msprop:Generator_RelationVarName="relationschiessbuch_treffer" msprop:Generator_UserParentTable="schiessbuch" />
+      <msdata:Relationship name="schuetzen_schiessbuch" msdata:parent="schuetzen" msdata:child="schiessbuch" msdata:parentkey="id" msdata:childkey="id" msprop:Generator_UserChildTable="schiessbuch" msprop:Generator_ChildPropName="GetschiessbuchRows" msprop:Generator_UserRelationName="schuetzen_schiessbuch" msprop:Generator_ParentPropName="schuetzenRow" msprop:Generator_RelationVarName="relationschuetzen_schiessbuch" msprop:Generator_UserParentTable="schuetzen" />
+      <msdata:Relationship name="schuetzen_treffer" msdata:parent="schuetzen" msdata:child="treffer" msdata:parentkey="id" msdata:childkey="schuetze" msprop:Generator_UserChildTable="treffer" msprop:Generator_ChildPropName="GettrefferRows" msprop:Generator_UserRelationName="schuetzen_treffer" msprop:Generator_RelationVarName="relationschuetzen_treffer" msprop:Generator_UserParentTable="schuetzen" msprop:Generator_ParentPropName="schuetzenRow" />
+      <msdata:Relationship name="schiessbuch_treffer" msdata:parent="schiessbuch" msdata:child="treffer" msdata:parentkey="session" msdata:childkey="session" msprop:Generator_UserChildTable="treffer" msprop:Generator_ChildPropName="GettrefferRows" msprop:Generator_UserRelationName="schiessbuch_treffer" msprop:Generator_RelationVarName="relationschiessbuch_treffer" msprop:Generator_UserParentTable="schiessbuch" msprop:Generator_ParentPropName="schiessbuchRow" />
     </xs:appinfo>
   </xs:annotation>
 </xs:schema>
