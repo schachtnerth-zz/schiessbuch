@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
+using System.Configuration;
 
 namespace schiessbuch
 {
@@ -30,18 +31,26 @@ namespace schiessbuch
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            string _connectionStringName = "siusclubConnectionString";
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.ConnectionStrings.ConnectionStrings[_connectionStringName].ConnectionString = Properties.Settings.Default.siusclubConnectionString;
+            config.Save(ConfigurationSaveMode.Modified, true);
+            ConfigurationManager.RefreshSection("connectionStrings");
+
+            int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
             // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet1.Vereine". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
+            numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
             // TODO: This line of code loads data into the 'siusclubDataSet.treffer' table. You can move, or remove it, as needed.
-            this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
+            numAllRead += this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
             // TODO: This line of code loads data into the 'siusclubDataSet.schiessbuch' table. You can move, or remove it, as needed.
-            this.schiessbuchTableAdapter.Fill(this.siusclubDataSet.schiessbuch);
+            numAllRead += this.schiessbuchTableAdapter.Fill(this.siusclubDataSet.schiessbuch);
             // TODO: This line of code loads data into the 'siusclubDataSet.schuetzen' table. You can move, or remove it, as needed.
-            this.schuetzenTableAdapter.Fill(this.siusclubDataSet.schuetzen);
-            // TODO: This line of code loads data into the 'siusclubDataSet.schuetzen' table. You can move, or remove it, as needed.
-            this.schuetzenTableAdapter.Fill(this.siusclubDataSet.schuetzen);
-            // TODO: This line of code loads data into the 'siusclubDataSet.schuetzen' table. You can move, or remove it, as needed.
-            this.schuetzenTableAdapter.Fill(this.siusclubDataSet.schuetzen);
+            numAllRead += this.schuetzenTableAdapter.Fill(this.siusclubDataSet.schuetzen);
+
+            if (numAllRead == 0)
+            {
+                MessageBox.Show("Keine Datensätze aus der Datenbank gelesen. Möglicherweise keine Datenbankverbindung.");
+            }
 
             DoUpdates.Checked = true;
             UpdateKoenig();
@@ -413,19 +422,26 @@ namespace schiessbuch
         {
             KoenigTextBox.Clear();
             MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
-            conn.Open();
-            MySqlCommand cmd = new MySqlCommand("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
-            //MySqlCommand cmd = new MySqlCommand("select * from schuetzen", conn);
-            MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
-            KoenigTextBox.Font = new Font("Courier New", 16);
-            while (reader.Read())
-            {
-                KoenigTextBox.Text += String.Format("{0,3}  {1,-30}     {2,6}    {3,6}", reader["Rang"].ToString(), reader["Schuetze"].ToString(), reader["Teiler"].ToString(), reader["Typ"].ToString()) + Environment.NewLine;
+            try {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
+                //MySqlCommand cmd = new MySqlCommand("select * from schuetzen", conn);
+                MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+                KoenigTextBox.Font = new Font("Courier New", 16);
+                while (reader.Read())
+                {
+                    KoenigTextBox.Text += String.Format("{0,3}  {1,-30}     {2,6}    {3,6}", reader["Rang"].ToString(), reader["Schuetze"].ToString(), reader["Teiler"].ToString(), reader["Typ"].ToString()) + Environment.NewLine;
+                }
+                reader.Close();
+                reader.Dispose();
+                conn.Close();
+                conn.Dispose();
             }
-            reader.Close();
-            reader.Dispose();
-            conn.Close();
-            conn.Dispose();
+            catch (MySqlException mysqle)
+            {
+                MessageBox.Show("Kann Datenbank nicht öffnen. (" + mysqle.Message + ")");
+                Application.Exit();
+            }
         }
 
         private void trefferDataGridView_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
