@@ -25,7 +25,7 @@ namespace schiessbuch
             //pd.Print();
             //Properties.Settings.Default.siusclubConnectionString = "server=192.168.178.202;user id=siusclub;password=siusclub;persistsecurityinfo=True;data" +
             //"base=siusclub;Allow User Variables=true";
-
+            ErstelleAuswertung();
         }
 
         private Font printFont;
@@ -127,6 +127,11 @@ namespace schiessbuch
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
+            ErstelleAuswertung();
+        }
+
+        private void ErstelleAuswertung()
+        {
             Schiessabend.Columns.Clear();
             DataGridViewColumn col_id = new DataGridViewColumn();
             DataGridViewColumn col_name = new DataGridViewColumn();
@@ -152,7 +157,7 @@ namespace schiessbuch
             MySqlCommand cmd = new MySqlCommand("SELECT DISTINCT DISZIPLIN, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch HAVING Date='" + filterDateStr + "'", conn);
             MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
             //DataGridViewColumn[] cols = new DataGridViewColumnCollection();
-            int i=0;
+            int i = 0;
             Schiessabend.SuspendLayout();
             while (reader.Read())
             {
@@ -175,7 +180,7 @@ namespace schiessbuch
                 //row.Cells["ID"].Value = reader["SID"].ToString();
                 //row.Cells["Name"].Value = reader["name"];
                 //row.Cells["Vorname"].Value = reader["vorname"];
-                
+
                 // Die ersten drei Spalten stehen fest. Alles ab Spalte 4 ist eine Disziplin
                 int disziplinen = Schiessabend.Columns.Count - 3;
                 int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
@@ -184,7 +189,7 @@ namespace schiessbuch
                 MySqlDataReader reader2;
                 for (int j = 0; j < disziplinen; j++)
                 {
-                    
+
                     //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
                     string cmdstr = "SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' HAVING Date='" + filterDateStr + "'";
                     MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
@@ -207,7 +212,7 @@ namespace schiessbuch
                     //cmd2.Dispose();
                     //conn2.Close();
                     //conn2.Dispose();
-                    
+
                     Schiessabend[j + 3, newRow].Value = result;
 
                 }
