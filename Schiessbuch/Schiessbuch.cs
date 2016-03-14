@@ -8,11 +8,17 @@ using System.Text;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Configuration;
+using System.Drawing.Printing;
 
 namespace schiessbuch
 {
     public partial class Schiessbuch : Form
     {
+        PrintDocument pd;
+        private Font printFont;
+        private int linesCount;
+        private int currentLinesPrinted;
+
         public Schiessbuch()
         {
             InitializeComponent();
@@ -31,9 +37,13 @@ namespace schiessbuch
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string _connectionStringName = "siusclubConnectionString";
+            string connStr = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+            //string _connectionStringName = "schiessbuch.Properties.Settings.siusclubConnectionString";
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            config.ConnectionStrings.ConnectionStrings[_connectionStringName].ConnectionString = Properties.Settings.Default.siusclubConnectionString;
+            MessageBox.Show(Properties.Settings.Default.siusclubConnectionString);
+            config.ConnectionStrings.ConnectionStrings[0].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
+            config.ConnectionStrings.ConnectionStrings[1].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
+            config.ConnectionStrings.ConnectionStrings[2].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
             config.Save(ConfigurationSaveMode.Modified, true);
             ConfigurationManager.RefreshSection("connectionStrings");
 
@@ -470,8 +480,8 @@ namespace schiessbuch
 
         private void schießabendToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Druckansicht da = new Druckansicht();
-            da.ShowDialog();
+            //Druckansicht da = new Druckansicht();
+            //da.ShowDialog();
         }
 
         private void AuswertungLG30_TextChanged(object sender, EventArgs e)
@@ -524,6 +534,10 @@ namespace schiessbuch
         {
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
+            if (tabControl1.SelectedTab.Text.Equals("Tagesauswertung"))
+            {
+                ErstelleAuswertung();
+            }
         }
 
         private void bearbeitungsmodusToolStripMenuItem_Click(object sender, EventArgs e)
@@ -604,6 +618,340 @@ namespace schiessbuch
         {
             if (((ToolStripMenuItem)bearbeitungsmodusToolStripMenuItem).Checked == true)
                 saveToolStripButton1.Enabled = true;
+        }
+
+        private void ErstelleAuswertung()
+        {
+            Schiessabend.Columns.Clear();
+            DataGridViewColumn col_id = new DataGridViewColumn();
+            DataGridViewColumn col_name = new DataGridViewColumn();
+            DataGridViewColumn col_vorname = new DataGridViewColumn();
+            col_id.Name = "ID";
+            DataGridViewCell cell = new DataGridViewTextBoxCell();
+            col_id.CellTemplate = cell;
+            col_id.Width = 20;
+            Schiessabend.Columns.Add(col_id);
+            col_name.Name = "Name";
+            col_name.CellTemplate = cell;
+            Schiessabend.Columns.Add(col_name);
+            col_vorname.Name = "Vorname";
+            col_vorname.CellTemplate = cell;
+            Schiessabend.Columns.Add(col_vorname);
+            col_id.Dispose();
+            col_name.Dispose();
+            col_vorname.Dispose();
+            //MessageBox.Show(Properties.Settings.Default.siusclubConnectionString);
+            MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            conn.Open();
+            string filterDateStr = dateTimePicker1.Value.Year + "-" + dateTimePicker1.Value.Month + "-" + dateTimePicker1.Value.Day;
+            MySqlCommand cmd = new MySqlCommand("SELECT DISTINCT DISZIPLIN, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch HAVING Date='" + filterDateStr + "'", conn);
+            MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+            //DataGridViewColumn[] cols = new DataGridViewColumnCollection();
+            int i = 0;
+            Schiessabend.SuspendLayout();
+            while (reader.Read())
+            {
+                DataGridViewColumn col = new DataGridViewColumn();
+                col.Name = reader["disziplin"].ToString();
+                col.CellTemplate = cell;
+                Schiessabend.Columns.Add(col);
+                i++;
+                col.Dispose();
+            }
+            reader.Close();
+            //reader.Dispose();
+            //cmd.Cancel();
+            //cmd.Dispose();
+            cmd.CommandText = "SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id HAVING Date='" + filterDateStr + "' ORDER BY name, vorname";
+            reader = cmd.ExecuteReader(CommandBehavior.Default);
+            while (reader.Read())
+            {
+                //DataGridViewRow row = n
+                //row.Cells["ID"].Value = reader["SID"].ToString();
+                //row.Cells["Name"].Value = reader["name"];
+                //row.Cells["Vorname"].Value = reader["vorname"];
+
+                // Die ersten drei Spalten stehen fest. Alles ab Spalte 4 ist eine Disziplin
+                int disziplinen = Schiessabend.Columns.Count - 3;
+                int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
+                MySqlConnection conn2 = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+                conn2.Open();
+                MySqlDataReader reader2;
+                for (int j = 0; j < disziplinen; j++)
+                {
+
+                    //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
+                    string cmdstr = "SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' HAVING Date='" + filterDateStr + "'";
+                    MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
+                    reader2 = cmd2.ExecuteReader();
+                    int count = 0;
+                    string result = "";
+                    while (reader2.Read())
+                    {
+                        if (count == 0)
+                            result = reader2["ergebnis"].ToString();
+                        else
+                        {
+                            result += ", ";
+                            result += reader2["ergebnis"].ToString();
+                        }
+                    }
+                    reader2.Close();
+                    //reader2.Dispose();
+                    //cmd2.Cancel();
+                    //cmd2.Dispose();
+                    //conn2.Close();
+                    //conn2.Dispose();
+
+                    Schiessabend[j + 3, newRow].Value = result;
+
+                }
+                conn2.Close();
+                MySqlConnection.ClearPool(conn2);
+            }
+            reader.Close();
+            //reader.Dispose();
+            //cmd.Cancel();
+            //cmd.Dispose();
+            conn.Close();
+            conn.Dispose();
+            MySqlConnection.ClearPool(conn);
+            Schiessabend.ResumeLayout();
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            ErstelleAuswertung();
+        }
+
+        private void btnTagesAuswertungDrucken_Click(object sender, EventArgs e)
+        {
+            if (pd == null)
+            {
+                pd = new PrintDocument();
+                pd.PrintPage += new PrintPageEventHandler(pd_PrintPage);
+            }
+            printFont = new Font("Arial", 10);
+            linesCount = Schiessabend.Rows.Count;
+            //pd = new PrintDocument();
+            PrintPreviewDialog ppdlg = new PrintPreviewDialog();
+            //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
+            //if (printPreviewControl1.Document != null)
+            //    printPreviewControl1.Document.Dispose();
+            ppdlg.Document = pd;
+            ppdlg.ShowDialog();
+            //printPreviewControl1.Document = pd;
+            //button2.Enabled = true;
+            //PrintPreviewDialog pvd = new PrintPreviewDialog();
+            //pvd.Document = pd;
+            //pvd.ShowDialog();
+            //pd.Print();
+
+        }
+
+        private void pd_PrintPage(object sender, PrintPageEventArgs ev)
+        {
+            //ev.Graphics.Clear(Color.White);
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            //string line = null;
+
+            // calculate the number of lines per page
+            linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+
+            string str = "Schützengesellschaft Edelweiß Eltheim e. V.";
+            Font headFont = new Font("Arial", 20f);
+            Font headFont2 = new Font("Arial", 14);
+            int strl = (int)ev.Graphics.MeasureString(str, headFont).Width;
+            int headHeight = (int)ev.Graphics.MeasureString(str, headFont).Height;
+            ev.Graphics.DrawString(str, headFont, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            str = String.Format("Auswertung vom {0}", dateTimePicker1.Value.ToShortDateString());
+            strl = (int)ev.Graphics.MeasureString(str, headFont2).Width;
+            headHeight = (int)ev.Graphics.MeasureString(str, headFont2).Height;
+            ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+
+            int disc = Schiessabend.Columns.Count - 3;
+
+            // berechne maximale Textlänge der Disziplinen
+            int maxLen = 0;
+            for (int i = 0; i < disc; i++)
+            {
+                float l = ev.Graphics.MeasureString(Schiessabend.Columns[i + 3].Name, printFont).Width;
+                if ((int)l > maxLen)
+                    maxLen = (int)l;
+            }
+
+            yPos = topMargin + maxLen;
+            ev.Graphics.DrawString("Nr.", printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+            ev.Graphics.DrawString("Name", printFont, Brushes.Black, leftMargin + 35, yPos, new StringFormat());
+
+            for (int i = 0; i < disc; i++)
+            {
+                ev.Graphics.TranslateTransform(leftMargin + 220 + i * 40, yPos);
+                ev.Graphics.RotateTransform(-90);
+                ev.Graphics.DrawString(Schiessabend.Columns[i + 3].Name,
+                    printFont,
+                    Brushes.Black,
+                    0,
+                    0,
+                    new StringFormat());
+                ev.Graphics.RotateTransform(90);
+                ev.Graphics.TranslateTransform(-(leftMargin + 220 + i * 40), -yPos);
+            }
+
+
+            while (count < linesPerPage && currentLinesPrinted < linesCount)
+            {
+                if (Schiessabend["ID", currentLinesPrinted].Value != null)
+                {
+                    string idstr = Schiessabend["ID", currentLinesPrinted].Value.ToString();
+                    yPos = topMargin + maxLen + ((count + 1) * printFont.GetHeight(ev.Graphics));
+                    ev.Graphics.DrawString(idstr, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+                    ev.Graphics.DrawString(
+                        Schiessabend["name", currentLinesPrinted].Value.ToString() + ", " + Schiessabend["vorname", currentLinesPrinted].Value.ToString(),
+                        printFont,
+                        Brushes.Black,
+                        leftMargin + 35,
+                        yPos,
+                        new StringFormat());
+                    int disziplinen = Schiessabend.Columns.Count - 3;
+                    for (int i = 0; i < disziplinen; i++)
+                    {
+                        ev.Graphics.DrawString(Schiessabend[3 + i, currentLinesPrinted].Value.ToString(),
+                            printFont,
+                            Brushes.Black,
+                            leftMargin + 220 + i * 40,
+                            yPos,
+                            new StringFormat());
+                    }
+                    count++;
+                    currentLinesPrinted++;
+                }
+            }
+            if (currentLinesPrinted < Schiessabend.Rows.Count)
+                ev.HasMorePages = true;
+            else
+            {
+                ev.HasMorePages = false;
+                currentLinesPrinted = 0;
+            }
+        }
+
+        MySqlConnection TagesAuswertungListeConnection;
+        MySqlDataReader TagesAuswertungListeDataReader;
+
+        private void btnTagesAuswertungListeDrucken_Click(object sender, EventArgs e)
+        {
+            string filterDateStr = dateTimePicker1.Value.Year + "-" + dateTimePicker1.Value.Month + "-" + dateTimePicker1.Value.Day;
+            if (pd == null)
+            {
+                pd = new PrintDocument();
+                pd.PrintPage += new PrintPageEventHandler(pd_PrintPageListe);
+            }
+            printFont = new Font("Arial", 10);
+            linesCount = Schiessabend.Rows.Count;
+            //pd = new PrintDocument();
+            PrintPreviewDialog ppdlg = new PrintPreviewDialog();
+
+            TagesAuswertungListeConnection = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            TagesAuswertungListeConnection.Open();
+            MySqlCommand cmd = new MySqlCommand("SELECT `name`, vorname, concat(name, ', ', vorname) as fullname, disziplin, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' HAVING Date='" + filterDateStr + "'  order by fullname", TagesAuswertungListeConnection);
+            TagesAuswertungListeDataReader = cmd.ExecuteReader();
+
+            //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
+            //if (printPreviewControl1.Document != null)
+            //    printPreviewControl1.Document.Dispose();
+            ppdlg.Document = pd;
+            ppdlg.ShowDialog();
+            //printPreviewControl1.Document = pd;
+            //button2.Enabled = true;
+            //PrintPreviewDialog pvd = new PrintPreviewDialog();
+            //pvd.Document = pd;
+            //pvd.ShowDialog();
+            //pd.Print();
+        }
+
+        private void pd_PrintPageListe(object sender, PrintPageEventArgs ev)
+        {
+            //ev.Graphics.Clear(Color.White);
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            //string line = null;
+            int heightCount = 0;
+
+            
+
+            string str = "Schützengesellschaft Edelweiß Eltheim e. V.";
+            Font headFont = new Font("Arial", 20f);
+            Font headFont2 = new Font("Arial", 14);
+            int strl = (int)ev.Graphics.MeasureString(str, headFont).Width;
+            int headHeight = (int)ev.Graphics.MeasureString(str, headFont).Height;
+            ev.Graphics.DrawString(str, headFont, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            heightCount += headHeight;
+            str = String.Format("Auswertung vom {0}", dateTimePicker1.Value.ToShortDateString());
+            strl = (int)ev.Graphics.MeasureString(str, headFont2).Width;
+            headHeight = (int)ev.Graphics.MeasureString(str, headFont2).Height;
+            ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            heightCount += headHeight;
+
+            
+
+
+            yPos = topMargin;
+            Font UeberschriftFont = new Font("Arial", 12, FontStyle.Bold);
+            ev.Graphics.DrawString("Name", UeberschriftFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+            ev.Graphics.DrawString("Disziplin", UeberschriftFont, Brushes.Black, leftMargin + 200, yPos, new StringFormat());
+            ev.Graphics.DrawString("Ergebnis", UeberschriftFont, Brushes.Black, leftMargin + 400, yPos, new StringFormat());
+            yPos += (int)ev.Graphics.MeasureString("NrName.", UeberschriftFont).Height;
+
+            // calculate the number of lines per page
+            linesPerPage = (ev.MarginBounds.Height - heightCount) / printFont.GetHeight(ev.Graphics) - 2; // zwei Zeilen Rand halten unten
+            //yPos = topMargin + heightCount;
+
+            while (TagesAuswertungListeDataReader.Read())
+            {
+                if (count <= linesPerPage)
+                {
+                    string s_fullname;
+                    s_fullname = TagesAuswertungListeDataReader["fullname"].ToString();
+                    ev.Graphics.DrawString(s_fullname, printFont, Brushes.Black, leftMargin, yPos);
+                    string s_disziplin;
+                    s_disziplin = TagesAuswertungListeDataReader["disziplin"].ToString();
+                    ev.Graphics.DrawString(s_disziplin, printFont, Brushes.Black, leftMargin + 200, yPos);
+                    string s_ergebnis;
+                    s_ergebnis = TagesAuswertungListeDataReader["ergebnis"].ToString();
+                    ev.Graphics.DrawString(s_ergebnis, printFont, Brushes.Black, leftMargin + 400, yPos);
+                    int deltay = (int)ev.Graphics.MeasureString(s_fullname, printFont).Height;
+                    int tmpy;
+                    tmpy = (int)ev.Graphics.MeasureString(s_disziplin, printFont).Height;
+                    if (tmpy > deltay) deltay = tmpy;
+                    tmpy = (int)ev.Graphics.MeasureString(s_ergebnis, printFont).Height;
+                    if (tmpy > deltay) deltay = tmpy;
+                    yPos += deltay;
+                    count++;
+                } else
+                {
+                    ev.HasMorePages = true;
+                    return;
+                }
+            }
+
+            ev.HasMorePages = false;
+            TagesAuswertungListeDataReader.Close();
+            TagesAuswertungListeDataReader.Dispose();
+            TagesAuswertungListeConnection.Close();
+            TagesAuswertungListeConnection.Dispose();
+            MySqlConnection.ClearPool(TagesAuswertungListeConnection);
         }
     }
 }

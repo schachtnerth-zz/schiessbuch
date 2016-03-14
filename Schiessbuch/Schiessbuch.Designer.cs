@@ -32,6 +32,7 @@ namespace schiessbuch
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.Label vereinLabel1;
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -48,7 +49,6 @@ namespace schiessbuch
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.Label vereinLabel1;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Schiessbuch));
             this.idLabel = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
@@ -75,7 +75,11 @@ namespace schiessbuch
             this.fullnameComboBox = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.vereinComboBox = new System.Windows.Forms.ComboBox();
+            this.vereineBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.siusclubDataSet1 = new schiessbuch.siusclubDataSet();
             this.DoUpdates = new System.Windows.Forms.CheckBox();
+            this.vereinTextBox = new System.Windows.Forms.TextBox();
             this.schiessbuchBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.schiessbuchDataGridView = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -122,8 +126,9 @@ namespace schiessbuch
             this.zielscheibeTextBox = new System.Windows.Forms.TextBox();
             this.RefreshTimer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.bearbeitenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bearbeitungsmodusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.schießabendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.SchiessbuchTab = new System.Windows.Forms.TabPage();
@@ -160,32 +165,33 @@ namespace schiessbuch
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.textBox5 = new System.Windows.Forms.TextBox();
+            this.TagesAuswertung = new System.Windows.Forms.TabPage();
+            this.Schiessabend = new System.Windows.Forms.DataGridView();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.KoenigTextBox = new System.Windows.Forms.TextBox();
-            this.bearbeitenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bearbeitungsmodusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.vereinComboBox = new System.Windows.Forms.ComboBox();
-            this.siusclubDataSet1 = new schiessbuch.siusclubDataSet();
-            this.vereineBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.vereineTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.VereineTableAdapter();
             this.bindingNavigator1 = new System.Windows.Forms.BindingNavigator(this.components);
+            this.bindingNavigatorAddNewItem = new System.Windows.Forms.ToolStripButton();
+            this.bindingNavigatorCountItem = new System.Windows.Forms.ToolStripLabel();
+            this.bindingNavigatorDeleteItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorMoveFirstItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorMovePreviousItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.bindingNavigatorPositionItem = new System.Windows.Forms.ToolStripTextBox();
-            this.bindingNavigatorCountItem = new System.Windows.Forms.ToolStripLabel();
             this.bindingNavigatorSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.bindingNavigatorMoveNextItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.bindingNavigatorAddNewItem = new System.Windows.Forms.ToolStripButton();
-            this.bindingNavigatorDeleteItem = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.vereinTextBox = new System.Windows.Forms.TextBox();
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            this.btnTagesAuswertungDrucken = new System.Windows.Forms.Button();
+            this.btnTagesAuswertungListeDrucken = new System.Windows.Forms.Button();
             vereinLabel1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenBindingSource)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferBindingSource)).BeginInit();
@@ -203,12 +209,21 @@ namespace schiessbuch
             this.tabPage3.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.TagesAuswertung.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Schiessabend)).BeginInit();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).BeginInit();
             this.bindingNavigator1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // vereinLabel1
+            // 
+            vereinLabel1.AutoSize = true;
+            vereinLabel1.Location = new System.Drawing.Point(332, 174);
+            vereinLabel1.Name = "vereinLabel1";
+            vereinLabel1.Size = new System.Drawing.Size(39, 13);
+            vereinLabel1.TabIndex = 27;
+            vereinLabel1.Text = "verein:";
             // 
             // idLabel
             // 
@@ -441,6 +456,30 @@ namespace schiessbuch
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // vereinComboBox
+            // 
+            this.vereinComboBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenBindingSource, "verein", true));
+            this.vereinComboBox.DataSource = this.vereineBindingSource;
+            this.vereinComboBox.DisplayMember = "verein";
+            this.vereinComboBox.FormattingEnabled = true;
+            this.vereinComboBox.Location = new System.Drawing.Point(63, 124);
+            this.vereinComboBox.Name = "vereinComboBox";
+            this.vereinComboBox.Size = new System.Drawing.Size(305, 21);
+            this.vereinComboBox.TabIndex = 28;
+            this.vereinComboBox.ValueMember = "verein";
+            this.vereinComboBox.Visible = false;
+            this.vereinComboBox.TextChanged += new System.EventHandler(this.nameTextBox_TextChanged);
+            // 
+            // vereineBindingSource
+            // 
+            this.vereineBindingSource.DataMember = "Vereine";
+            this.vereineBindingSource.DataSource = this.siusclubDataSet1;
+            // 
+            // siusclubDataSet1
+            // 
+            this.siusclubDataSet1.DataSetName = "siusclubDataSet";
+            this.siusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
             // DoUpdates
             // 
             this.DoUpdates.Appearance = System.Windows.Forms.Appearance.Button;
@@ -451,6 +490,15 @@ namespace schiessbuch
             this.DoUpdates.TabIndex = 23;
             this.DoUpdates.UseVisualStyleBackColor = true;
             this.DoUpdates.CheckedChanged += new System.EventHandler(this.DoUpdates_CheckedChanged);
+            // 
+            // vereinTextBox
+            // 
+            this.vereinTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenBindingSource, "verein", true));
+            this.vereinTextBox.Location = new System.Drawing.Point(63, 124);
+            this.vereinTextBox.Name = "vereinTextBox";
+            this.vereinTextBox.ReadOnly = true;
+            this.vereinTextBox.Size = new System.Drawing.Size(305, 20);
+            this.vereinTextBox.TabIndex = 10;
             // 
             // schiessbuchBindingSource
             // 
@@ -967,21 +1015,29 @@ namespace schiessbuch
             this.menuStrip1.TabIndex = 28;
             this.menuStrip1.Text = "menuStrip1";
             // 
+            // bearbeitenToolStripMenuItem
+            // 
+            this.bearbeitenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bearbeitungsmodusToolStripMenuItem});
+            this.bearbeitenToolStripMenuItem.Name = "bearbeitenToolStripMenuItem";
+            this.bearbeitenToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.bearbeitenToolStripMenuItem.Text = "&Bearbeiten";
+            // 
+            // bearbeitungsmodusToolStripMenuItem
+            // 
+            this.bearbeitungsmodusToolStripMenuItem.CheckOnClick = true;
+            this.bearbeitungsmodusToolStripMenuItem.Name = "bearbeitungsmodusToolStripMenuItem";
+            this.bearbeitungsmodusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.bearbeitungsmodusToolStripMenuItem.Text = "&Bearbeitungsmodus";
+            this.bearbeitungsmodusToolStripMenuItem.Click += new System.EventHandler(this.bearbeitungsmodusToolStripMenuItem_Click);
+            // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.schießabendToolStripMenuItem,
             this.toolStripMenuItem2});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(50, 20);
             this.toolStripMenuItem1.Text = "&Druck";
-            // 
-            // schießabendToolStripMenuItem
-            // 
-            this.schießabendToolStripMenuItem.Name = "schießabendToolStripMenuItem";
-            this.schießabendToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.schießabendToolStripMenuItem.Text = "&Schießabend";
-            this.schießabendToolStripMenuItem.Click += new System.EventHandler(this.schießabendToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -997,6 +1053,7 @@ namespace schiessbuch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.SchiessbuchTab);
             this.tabControl1.Controls.Add(this.AuswertungTab);
+            this.tabControl1.Controls.Add(this.TagesAuswertung);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Location = new System.Drawing.Point(12, 55);
             this.tabControl1.Name = "tabControl1";
@@ -1503,6 +1560,34 @@ namespace schiessbuch
             this.textBox5.Size = new System.Drawing.Size(121, 20);
             this.textBox5.TabIndex = 6;
             // 
+            // TagesAuswertung
+            // 
+            this.TagesAuswertung.Controls.Add(this.btnTagesAuswertungListeDrucken);
+            this.TagesAuswertung.Controls.Add(this.btnTagesAuswertungDrucken);
+            this.TagesAuswertung.Controls.Add(this.dateTimePicker1);
+            this.TagesAuswertung.Controls.Add(this.Schiessabend);
+            this.TagesAuswertung.Location = new System.Drawing.Point(4, 22);
+            this.TagesAuswertung.Name = "TagesAuswertung";
+            this.TagesAuswertung.Padding = new System.Windows.Forms.Padding(3);
+            this.TagesAuswertung.Size = new System.Drawing.Size(952, 419);
+            this.TagesAuswertung.TabIndex = 3;
+            this.TagesAuswertung.Text = "Tagesauswertung";
+            this.TagesAuswertung.UseVisualStyleBackColor = true;
+            // 
+            // Schiessabend
+            // 
+            this.Schiessabend.AllowUserToAddRows = false;
+            this.Schiessabend.AllowUserToDeleteRows = false;
+            this.Schiessabend.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Schiessabend.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.Schiessabend.Location = new System.Drawing.Point(6, 32);
+            this.Schiessabend.Name = "Schiessabend";
+            this.Schiessabend.ReadOnly = true;
+            this.Schiessabend.Size = new System.Drawing.Size(940, 381);
+            this.Schiessabend.TabIndex = 3;
+            // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.KoenigTextBox);
@@ -1521,55 +1606,6 @@ namespace schiessbuch
             this.KoenigTextBox.Name = "KoenigTextBox";
             this.KoenigTextBox.Size = new System.Drawing.Size(952, 419);
             this.KoenigTextBox.TabIndex = 0;
-            // 
-            // bearbeitenToolStripMenuItem
-            // 
-            this.bearbeitenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bearbeitungsmodusToolStripMenuItem});
-            this.bearbeitenToolStripMenuItem.Name = "bearbeitenToolStripMenuItem";
-            this.bearbeitenToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
-            this.bearbeitenToolStripMenuItem.Text = "&Bearbeiten";
-            // 
-            // bearbeitungsmodusToolStripMenuItem
-            // 
-            this.bearbeitungsmodusToolStripMenuItem.CheckOnClick = true;
-            this.bearbeitungsmodusToolStripMenuItem.Name = "bearbeitungsmodusToolStripMenuItem";
-            this.bearbeitungsmodusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.bearbeitungsmodusToolStripMenuItem.Text = "&Bearbeitungsmodus";
-            this.bearbeitungsmodusToolStripMenuItem.Click += new System.EventHandler(this.bearbeitungsmodusToolStripMenuItem_Click);
-            // 
-            // vereinLabel1
-            // 
-            vereinLabel1.AutoSize = true;
-            vereinLabel1.Location = new System.Drawing.Point(332, 174);
-            vereinLabel1.Name = "vereinLabel1";
-            vereinLabel1.Size = new System.Drawing.Size(39, 13);
-            vereinLabel1.TabIndex = 27;
-            vereinLabel1.Text = "verein:";
-            // 
-            // vereinComboBox
-            // 
-            this.vereinComboBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenBindingSource, "verein", true));
-            this.vereinComboBox.DataSource = this.vereineBindingSource;
-            this.vereinComboBox.DisplayMember = "verein";
-            this.vereinComboBox.FormattingEnabled = true;
-            this.vereinComboBox.Location = new System.Drawing.Point(63, 124);
-            this.vereinComboBox.Name = "vereinComboBox";
-            this.vereinComboBox.Size = new System.Drawing.Size(305, 21);
-            this.vereinComboBox.TabIndex = 28;
-            this.vereinComboBox.ValueMember = "verein";
-            this.vereinComboBox.Visible = false;
-            this.vereinComboBox.TextChanged += new System.EventHandler(this.nameTextBox_TextChanged);
-            // 
-            // siusclubDataSet1
-            // 
-            this.siusclubDataSet1.DataSetName = "siusclubDataSet";
-            this.siusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // vereineBindingSource
-            // 
-            this.vereineBindingSource.DataMember = "Vereine";
-            this.vereineBindingSource.DataSource = this.siusclubDataSet1;
             // 
             // vereineTableAdapter
             // 
@@ -1605,6 +1641,35 @@ namespace schiessbuch
             this.bindingNavigator1.TabIndex = 31;
             this.bindingNavigator1.Text = "bindingNavigator1";
             // 
+            // bindingNavigatorAddNewItem
+            // 
+            this.bindingNavigatorAddNewItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.bindingNavigatorAddNewItem.Enabled = false;
+            this.bindingNavigatorAddNewItem.Image = ((System.Drawing.Image)(resources.GetObject("bindingNavigatorAddNewItem.Image")));
+            this.bindingNavigatorAddNewItem.Name = "bindingNavigatorAddNewItem";
+            this.bindingNavigatorAddNewItem.RightToLeftAutoMirrorImage = true;
+            this.bindingNavigatorAddNewItem.Size = new System.Drawing.Size(23, 22);
+            this.bindingNavigatorAddNewItem.Text = "Add new";
+            this.bindingNavigatorAddNewItem.Click += new System.EventHandler(this.bindingNavigatorAddNewItem_Click);
+            // 
+            // bindingNavigatorCountItem
+            // 
+            this.bindingNavigatorCountItem.Name = "bindingNavigatorCountItem";
+            this.bindingNavigatorCountItem.Size = new System.Drawing.Size(35, 22);
+            this.bindingNavigatorCountItem.Text = "of {0}";
+            this.bindingNavigatorCountItem.ToolTipText = "Total number of items";
+            // 
+            // bindingNavigatorDeleteItem
+            // 
+            this.bindingNavigatorDeleteItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.bindingNavigatorDeleteItem.Enabled = false;
+            this.bindingNavigatorDeleteItem.Image = ((System.Drawing.Image)(resources.GetObject("bindingNavigatorDeleteItem.Image")));
+            this.bindingNavigatorDeleteItem.Name = "bindingNavigatorDeleteItem";
+            this.bindingNavigatorDeleteItem.RightToLeftAutoMirrorImage = true;
+            this.bindingNavigatorDeleteItem.Size = new System.Drawing.Size(23, 22);
+            this.bindingNavigatorDeleteItem.Text = "Delete";
+            this.bindingNavigatorDeleteItem.Click += new System.EventHandler(this.bindingNavigatorDeleteItem1_Click);
+            // 
             // bindingNavigatorMoveFirstItem
             // 
             this.bindingNavigatorMoveFirstItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -1637,16 +1702,9 @@ namespace schiessbuch
             this.bindingNavigatorPositionItem.Text = "0";
             this.bindingNavigatorPositionItem.ToolTipText = "Current position";
             // 
-            // bindingNavigatorCountItem
-            // 
-            this.bindingNavigatorCountItem.Name = "bindingNavigatorCountItem";
-            this.bindingNavigatorCountItem.Size = new System.Drawing.Size(35, 22);
-            this.bindingNavigatorCountItem.Text = "of {0}";
-            this.bindingNavigatorCountItem.ToolTipText = "Total number of items";
-            // 
             // bindingNavigatorSeparator1
             // 
-            this.bindingNavigatorSeparator1.Name = "bindingNavigatorSeparator";
+            this.bindingNavigatorSeparator1.Name = "bindingNavigatorSeparator1";
             this.bindingNavigatorSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // bindingNavigatorMoveNextItem
@@ -1669,30 +1727,8 @@ namespace schiessbuch
             // 
             // bindingNavigatorSeparator2
             // 
-            this.bindingNavigatorSeparator2.Name = "bindingNavigatorSeparator";
+            this.bindingNavigatorSeparator2.Name = "bindingNavigatorSeparator2";
             this.bindingNavigatorSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // bindingNavigatorAddNewItem
-            // 
-            this.bindingNavigatorAddNewItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.bindingNavigatorAddNewItem.Enabled = false;
-            this.bindingNavigatorAddNewItem.Image = ((System.Drawing.Image)(resources.GetObject("bindingNavigatorAddNewItem.Image")));
-            this.bindingNavigatorAddNewItem.Name = "bindingNavigatorAddNewItem";
-            this.bindingNavigatorAddNewItem.RightToLeftAutoMirrorImage = true;
-            this.bindingNavigatorAddNewItem.Size = new System.Drawing.Size(23, 22);
-            this.bindingNavigatorAddNewItem.Text = "Add new";
-            this.bindingNavigatorAddNewItem.Click += new System.EventHandler(this.bindingNavigatorAddNewItem_Click);
-            // 
-            // bindingNavigatorDeleteItem
-            // 
-            this.bindingNavigatorDeleteItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.bindingNavigatorDeleteItem.Enabled = false;
-            this.bindingNavigatorDeleteItem.Image = ((System.Drawing.Image)(resources.GetObject("bindingNavigatorDeleteItem.Image")));
-            this.bindingNavigatorDeleteItem.Name = "bindingNavigatorDeleteItem";
-            this.bindingNavigatorDeleteItem.RightToLeftAutoMirrorImage = true;
-            this.bindingNavigatorDeleteItem.Size = new System.Drawing.Size(23, 22);
-            this.bindingNavigatorDeleteItem.Text = "Delete";
-            this.bindingNavigatorDeleteItem.Click += new System.EventHandler(this.bindingNavigatorDeleteItem1_Click);
             // 
             // saveToolStripButton1
             // 
@@ -1705,14 +1741,35 @@ namespace schiessbuch
             this.saveToolStripButton1.Text = "&Save";
             this.saveToolStripButton1.Click += new System.EventHandler(this.saveToolStripButton_Click);
             // 
-            // vereinTextBox
+            // dateTimePicker1
             // 
-            this.vereinTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenBindingSource, "verein", true));
-            this.vereinTextBox.Location = new System.Drawing.Point(63, 124);
-            this.vereinTextBox.Name = "vereinTextBox";
-            this.vereinTextBox.ReadOnly = true;
-            this.vereinTextBox.Size = new System.Drawing.Size(305, 20);
-            this.vereinTextBox.TabIndex = 10;
+            this.dateTimePicker1.Location = new System.Drawing.Point(6, 6);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(200, 20);
+            this.dateTimePicker1.TabIndex = 4;
+            this.dateTimePicker1.ValueChanged += new System.EventHandler(this.dateTimePicker1_ValueChanged);
+            // 
+            // btnTagesAuswertungDrucken
+            // 
+            this.btnTagesAuswertungDrucken.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTagesAuswertungDrucken.Location = new System.Drawing.Point(871, 3);
+            this.btnTagesAuswertungDrucken.Name = "btnTagesAuswertungDrucken";
+            this.btnTagesAuswertungDrucken.Size = new System.Drawing.Size(75, 23);
+            this.btnTagesAuswertungDrucken.TabIndex = 5;
+            this.btnTagesAuswertungDrucken.Text = "&Drucken...";
+            this.btnTagesAuswertungDrucken.UseVisualStyleBackColor = true;
+            this.btnTagesAuswertungDrucken.Click += new System.EventHandler(this.btnTagesAuswertungDrucken_Click);
+            // 
+            // btnTagesAuswertungListeDrucken
+            // 
+            this.btnTagesAuswertungListeDrucken.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTagesAuswertungListeDrucken.Location = new System.Drawing.Point(774, 3);
+            this.btnTagesAuswertungListeDrucken.Name = "btnTagesAuswertungListeDrucken";
+            this.btnTagesAuswertungListeDrucken.Size = new System.Drawing.Size(91, 23);
+            this.btnTagesAuswertungListeDrucken.TabIndex = 6;
+            this.btnTagesAuswertungListeDrucken.Text = "&Liste drucken...";
+            this.btnTagesAuswertungListeDrucken.UseVisualStyleBackColor = true;
+            this.btnTagesAuswertungListeDrucken.Click += new System.EventHandler(this.btnTagesAuswertungListeDrucken_Click);
             // 
             // Schiessbuch
             // 
@@ -1730,6 +1787,8 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenBindingSource)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferBindingSource)).EndInit();
@@ -1753,10 +1812,10 @@ namespace schiessbuch
             this.tableLayoutPanel3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.TagesAuswertung.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.Schiessabend)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).EndInit();
             this.bindingNavigator1.ResumeLayout(false);
             this.bindingNavigator1.PerformLayout();
@@ -1789,7 +1848,6 @@ namespace schiessbuch
         private System.Windows.Forms.Timer RefreshTimer;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem schießabendToolStripMenuItem;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage SchiessbuchTab;
         private System.Windows.Forms.TabPage AuswertungTab;
@@ -1898,6 +1956,11 @@ namespace schiessbuch
         private System.Windows.Forms.ToolStripSeparator bindingNavigatorSeparator2;
         private System.Windows.Forms.ToolStripButton saveToolStripButton1;
         private System.Windows.Forms.TextBox vereinTextBox;
+        private System.Windows.Forms.TabPage TagesAuswertung;
+        private System.Windows.Forms.DataGridView Schiessabend;
+        private System.Windows.Forms.DateTimePicker dateTimePicker1;
+        private System.Windows.Forms.Button btnTagesAuswertungDrucken;
+        private System.Windows.Forms.Button btnTagesAuswertungListeDrucken;
     }
 }
 
