@@ -45,6 +45,10 @@ namespace schiessbuch
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet.schuetzenliste". Sie können sie bei Bedarf verschieben oder entfernen.
+            //this.schuetzenlisteTableAdapter1.Fill(this.siusclubDataSet.schuetzenliste);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet11.schuetzenliste". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.schuetzenlisteTableAdapter1.Fill(this.siusclubDataSet.schuetzenliste);
             //string connStr = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
             string connStr = connStrLocal;
             //string _connectionStringName = "schiessbuch.Properties.Settings.siusclubConnectionString";
@@ -327,10 +331,11 @@ namespace schiessbuch
             reader = cmd.ExecuteReader(CommandBehavior.Default);
             while (reader.Read())
             {
-                if (Int16.Parse(reader["summe"].ToString()) > 0)
+                int summe = 0;
+                if (Int32.TryParse(reader["summe"].ToString(), out summe))
                 {
                     textbox.Text += String.Format("Anzahl: {0:6}", reader["count"].ToString()) + Environment.NewLine;
-                    textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
+                    textbox.Text += String.Format("Summe: {0:7}", summe);
                 }
             }
             reader.Close();
