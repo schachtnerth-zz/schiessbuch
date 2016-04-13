@@ -4,7 +4,11 @@
 
     partial class siusclubDataSet
     {
-        partial class DataTable1DataTable
+        partial class DataTable2DataTable
+        {
+        }
+
+        partial class schuetzenEnhancedDataTable
         {
         }
     }

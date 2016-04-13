@@ -32,8 +32,8 @@
             this.SchiessjahrTextbox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.SchiessjahrBeginn = new System.Windows.Forms.DateTimePicker();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.AnlegenButton = new System.Windows.Forms.Button();
+            this.AbbrechenButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -68,32 +68,35 @@
             this.SchiessjahrBeginn.Size = new System.Drawing.Size(200, 20);
             this.SchiessjahrBeginn.TabIndex = 3;
             // 
-            // button1
+            // AnlegenButton
             // 
-            this.button1.Location = new System.Drawing.Point(15, 115);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "&Anlegen";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.AnlegenButton.Location = new System.Drawing.Point(15, 115);
+            this.AnlegenButton.Name = "AnlegenButton";
+            this.AnlegenButton.Size = new System.Drawing.Size(75, 23);
+            this.AnlegenButton.TabIndex = 4;
+            this.AnlegenButton.Text = "&Anlegen";
+            this.AnlegenButton.UseVisualStyleBackColor = true;
+            this.AnlegenButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button2
+            // AbbrechenButton
             // 
-            this.button2.Location = new System.Drawing.Point(207, 115);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 5;
-            this.button2.Text = "Abbrechen";
-            this.button2.UseVisualStyleBackColor = true;
+            this.AbbrechenButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.AbbrechenButton.Location = new System.Drawing.Point(207, 115);
+            this.AbbrechenButton.Name = "AbbrechenButton";
+            this.AbbrechenButton.Size = new System.Drawing.Size(75, 23);
+            this.AbbrechenButton.TabIndex = 5;
+            this.AbbrechenButton.Text = "Abbrechen";
+            this.AbbrechenButton.UseVisualStyleBackColor = true;
             // 
             // NeuesSchiessjahr
             // 
+            this.AcceptButton = this.AnlegenButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.AbbrechenButton;
             this.ClientSize = new System.Drawing.Size(294, 161);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.AbbrechenButton);
+            this.Controls.Add(this.AnlegenButton);
             this.Controls.Add(this.SchiessjahrBeginn);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.SchiessjahrTextbox);
@@ -111,7 +114,7 @@
         private System.Windows.Forms.TextBox SchiessjahrTextbox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker SchiessjahrBeginn;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button AnlegenButton;
+        private System.Windows.Forms.Button AbbrechenButton;
     }
 }

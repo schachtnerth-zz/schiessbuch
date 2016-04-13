@@ -33,10 +33,14 @@ namespace schiessbuch
                     cmd.Parameters.Add("@SchiessjahrBeginn", MySqlDbType.Date).Value = SchiessjahrBeginn.Value.Date;
                     cmd.ExecuteNonQuery();
                 }
+                conn.Close();
+                conn.Dispose();
+                MySqlConnection.ClearPool(conn);
+                Close();
             }
-            catch
+            catch (MySqlException mysqle)
             {
-
+                MessageBox.Show("Ein Fehler ist aufgetreten beim Anlegen eines neuen Schießjahres (" + mysqle.Message + ").");
             }
         }
     }

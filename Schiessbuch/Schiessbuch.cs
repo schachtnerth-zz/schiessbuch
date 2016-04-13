@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Configuration;
 using System.Drawing.Printing;
+using System.Globalization;
+using System.Diagnostics;
+using System.IO;
 
 namespace schiessbuch
 {
@@ -37,10 +40,13 @@ namespace schiessbuch
 
         string connStrLocal = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
         string connStrRemote = "server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+        string backupDestination = "localhost";
+        //string backupDestination = "192.168.178.202";
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string connStr = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+            //string connStr = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+            string connStr = connStrLocal;
             //string _connectionStringName = "schiessbuch.Properties.Settings.siusclubConnectionString";
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //MessageBox.Show(Properties.Settings.Default.siusclubConnectionString);
@@ -61,7 +67,8 @@ namespace schiessbuch
         // global::schiessbuch.Properties.Settings.Default.siusclubConnectionString
         retry:
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
-            try {
+            try
+            {
                 // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet1.Vereine". Sie können sie bei Bedarf verschieben oder entfernen.
                 numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
                 // TODO: This line of code loads data into the 'siusclubDataSet.treffer' table. You can move, or remove it, as needed.
@@ -77,45 +84,13 @@ namespace schiessbuch
                 }
 
                 DoUpdates.Checked = true;
-                
+
                 ereignisse_count = GetEreignisseCount();
                 treffer_count = GetTrefferCount();
 
-                MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
-                MySqlCommand cmdJahre = new MySqlCommand("SELECT * FROM schiessjahr", conn);
-                conn.Open();
-                MySqlDataReader reader = cmdJahre.ExecuteReader();
-                while (reader.Read())
-                { 
-                    // Liste der Schiessjahre aktualisieren
-                    ToolStripMenuItem tsi = new ToolStripMenuItem();
-                    tsi.Text = reader["Schiessjahr"].ToString();
-                    tsi.Tag = reader["idSchiessjahr"];
-                    tsi.Click += Tsi_Click;
-                    schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
-                }
-                reader.Close();
-                // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
-                cmdJahre.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
-                int activeID = int.Parse(cmdJahre.ExecuteScalar().ToString());
-                foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
-                {
-                    if (int.Parse(tsi.Tag.ToString()) == activeID) {
-                        tsi.PerformClick();
-                    }
-                }
+                AktualisiereSchiessjahrMenu();
 
-                // prüfe, ob heute Wanderpokalschiessen ist
-                cmdJahre.CommandText = "SELECT COUNT(id) FROM termine_wanderpokal WHERE Termin = '" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
-                int wps = int.Parse(cmdJahre.ExecuteScalar().ToString());
-                if (wps > 0)
-                    lblWanderpokalschiessen.Visible = true;
-                else
-                    lblWanderpokalschiessen.Visible = false;
-
-                conn.Close();
-                conn.Dispose();
-                MySqlConnection.ClearPool(conn);
+                PruefeJahrespokalAbend();
                 FillWanderPokalTermine();
                 splitContainer1.SplitterDistance = splitContainer1.Width / 2;
                 splitContainer2.SplitterDistance = splitContainer2.Height / 2;
@@ -139,6 +114,65 @@ namespace schiessbuch
                 }
                 MessageBox.Show("Konnte Datenbank nicht öffnen.");
             }
+        }
+
+        private void PruefeJahrespokalAbend()
+        {
+            MySqlConnection conn;
+            MySqlCommand cmdJahre;
+
+            conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            conn.Open();
+            cmdJahre = new MySqlCommand();
+            cmdJahre.Connection = conn;
+
+            // prüfe, ob heute Wanderpokalschiessen ist
+            cmdJahre.CommandText = "SELECT COUNT(id) FROM termine_wanderpokal WHERE Termin = '" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+            int wps = int.Parse(cmdJahre.ExecuteScalar().ToString());
+            if (wps > 0)
+                lblWanderpokalschiessen.Visible = true;
+            else
+                lblWanderpokalschiessen.Visible = false;
+
+            conn.Close();
+            conn.Dispose();
+            MySqlConnection.ClearPool(conn);
+        }
+
+        private void AktualisiereSchiessjahrMenu()
+        {
+            // zuerst das schiessjahrAuswählenToolStripMenuItem leeren
+            schießjahrAuswählenToolStripMenuItem.DropDownItems.Clear();
+            MySqlConnection conn;
+            MySqlCommand cmdJahre;
+            conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            cmdJahre = new MySqlCommand("SELECT * FROM schiessjahr", conn);
+            conn.Open();
+            MySqlDataReader reader = cmdJahre.ExecuteReader();
+            while (reader.Read())
+            {
+                // Liste der Schiessjahre aktualisieren
+                ToolStripMenuItem tsi = new ToolStripMenuItem();
+                tsi.Text = reader["Schiessjahr"].ToString();
+                tsi.Tag = reader["idSchiessjahr"];
+                tsi.Click += Tsi_Click;
+                schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
+            }
+            reader.Close();
+            reader.Dispose();
+            // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
+            cmdJahre.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
+            int activeID = int.Parse(cmdJahre.ExecuteScalar().ToString());
+            foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
+            {
+                if (int.Parse(tsi.Tag.ToString()) == activeID)
+                {
+                    tsi.PerformClick();
+                }
+            }
+            conn.Close();
+            conn.Dispose();
+            MySqlConnection.ClearPool(conn);
         }
 
         private void FillWanderPokalTermine()
@@ -272,7 +306,7 @@ namespace schiessbuch
             // Erzeuge Auswertungen
             MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
             conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter, conn);
+            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC", conn);
             MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
             textbox.Text = Zeile1 + Environment.NewLine;
             textbox.Text += Zeile2 + Environment.NewLine;
@@ -308,7 +342,7 @@ namespace schiessbuch
             // Erzeuge Auswertungen
             MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
             conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + " ORDER BY ergebnis DESC LIMIT 15", conn);
+            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15", conn);
             MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
             textbox.Text = Zeile1 + Environment.NewLine;
             textbox.Text += Zeile2 + Environment.NewLine;
@@ -325,7 +359,7 @@ namespace schiessbuch
             textbox.Text += "----------------";
             textbox.Text += Environment.NewLine;
             reader.Close();
-            cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + " ORDER BY ergebnis DESC LIMIT 15) T";
+            cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
             //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
             reader = cmd.ExecuteReader(CommandBehavior.Default);
             while (reader.Read())
@@ -392,9 +426,9 @@ namespace schiessbuch
         private void CheckSchiessjahr()
         {
             if (dtJahrBeginn == dtJahrEnde)
-                schiessbuchBindingSource.Filter = "Datum >= '" + dtJahrBeginn.ToShortDateString() + "'";
+                schiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "'";
             else
-                schiessbuchBindingSource.Filter = "Datum >= '" + dtJahrBeginn.ToShortDateString() + "' AND Datum < '" + dtJahrEnde.ToShortDateString() + "'";
+                schiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "' AND dt < '" + dtJahrEnde.ToShortDateString() + "'";
         }
 
         private void trefferDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -872,12 +906,15 @@ namespace schiessbuch
             DataGridViewCell cell = new DataGridViewTextBoxCell();
             col_id.CellTemplate = cell;
             col_id.Width = 20;
+            col_id.ReadOnly = true;
             Schiessabend.Columns.Add(col_id);
             col_name.Name = "Name";
             col_name.CellTemplate = cell;
+            col_name.ReadOnly = true;
             Schiessabend.Columns.Add(col_name);
             col_vorname.Name = "Vorname";
             col_vorname.CellTemplate = cell;
+            col_vorname.ReadOnly = true;
             Schiessabend.Columns.Add(col_vorname);
             col_id.Dispose();
             col_name.Dispose();
@@ -898,15 +935,36 @@ namespace schiessbuch
                     DataGridViewColumn col = new DataGridViewColumn();
                     col.Name = reader["disziplin"].ToString();
                     col.CellTemplate = cell;
+                    col.ReadOnly = true;
                     Schiessabend.Columns.Add(col);
                     i++;
                     col.Dispose();
                 }
                 reader.Close();
+
+                DataGridViewColumn colKasse = new DataGridViewColumn();
+                colKasse.Name = "Kasse";
+                colKasse.HeaderText = "Kasse";
+                colKasse.CellTemplate = cell;
+                colKasse.ReadOnly = false;
+                colKasse.DefaultCellStyle.BackColor = Color.LightYellow;
+                colKasse.DefaultCellStyle.ForeColor = Color.Red;
+                colKasse.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                colKasse.DefaultCellStyle.ForeColor = System.Drawing.Color.Red;
+                colKasse.DefaultCellStyle.Format = "C2";
+                colKasse.DefaultCellStyle.NullValue = "0";
+                colKasse.ValueType = Type.GetType("System.Decimal");
+                colKasse.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.Yellow;
+                colKasse.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.Black;
+
+                Schiessabend.Columns.Add(colKasse);
+                colKasse.Dispose();
+
                 //reader.Dispose();
                 //cmd.Cancel();
                 //cmd.Dispose();
-                cmd.CommandText = "SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id HAVING Date='" + filterDateStr + "' ORDER BY name, vorname";
+                Schiessabend.SuspendLayout();
+                cmd.CommandText = "SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' HAVING Date='" + filterDateStr + "' ORDER BY name, vorname";
                 reader = cmd.ExecuteReader(CommandBehavior.Default);
                 while (reader.Read())
                 {
@@ -925,7 +983,7 @@ namespace schiessbuch
                     {
 
                         //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
-                        string cmdstr = "SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' HAVING Date='" + filterDateStr + "'";
+                        string cmdstr = "select MAX(ergebnis) AS ergebnis FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' AND status='beendet' HAVING Date='" + filterDateStr + "') T";
                         MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
                         reader2 = cmd2.ExecuteReader();
                         int count = 0;
@@ -950,6 +1008,18 @@ namespace schiessbuch
                         Schiessabend[j + 3, newRow].Value = result;
 
                     }
+                    // Betrag anzeigen
+                    string betragstr = "SELECT Betrag FROM kasse WHERE idSchuetze='" + reader["SID"] + "' AND DatumBezahlt='" + filterDateStr + "'";
+                    MySqlCommand cmd3 = new MySqlCommand(betragstr, conn2);
+                    float fBetrag;
+                    object o = cmd3.ExecuteScalar();
+                    if (o == null)
+                        fBetrag = 0f;
+                    else
+                        if (!float.TryParse(o.ToString(), out fBetrag)) fBetrag = 0f;
+                    Schiessabend["Kasse", newRow].Value = fBetrag;
+                    cmd3.Cancel();
+                    cmd3.Dispose();
                     conn2.Close();
                     MySqlConnection.ClearPool(conn2);
                 }
@@ -973,12 +1043,14 @@ namespace schiessbuch
             ErstelleAuswertung();
         }
 
+        PrintDocument pdTagesauswertung;
+
         private void btnTagesAuswertungDrucken_Click(object sender, EventArgs e)
         {
-            if (pd == null)
+            if (pdTagesauswertung == null)
             {
-                pd = new PrintDocument();
-                pd.PrintPage += new PrintPageEventHandler(pd_PrintPage);
+                pdTagesauswertung = new PrintDocument();
+                pdTagesauswertung.PrintPage += new PrintPageEventHandler(pd_PrintPage);
             }
             printFont = new Font("Arial", 10);
             linesCount = Schiessabend.Rows.Count;
@@ -987,7 +1059,7 @@ namespace schiessbuch
             //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
             //if (printPreviewControl1.Document != null)
             //    printPreviewControl1.Document.Dispose();
-            ppdlg.Document = pd;
+            ppdlg.Document = pdTagesauswertung;
             ppdlg.ShowDialog();
             //printPreviewControl1.Document = pd;
             //button2.Enabled = true;
@@ -1024,7 +1096,7 @@ namespace schiessbuch
             ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
             topMargin += headHeight;
 
-            int disc = Schiessabend.Columns.Count - 3;
+            int disc = Schiessabend.Columns.Count - 3 - 1; // ID, Name, Vorname und Kasse sind keine Disziplinen
 
             // berechne maximale Textlänge der Disziplinen
             int maxLen = 0;
@@ -1068,7 +1140,7 @@ namespace schiessbuch
                         leftMargin + 35,
                         yPos,
                         new StringFormat());
-                    int disziplinen = Schiessabend.Columns.Count - 3;
+                    int disziplinen = Schiessabend.Columns.Count - 3 - 1; // ID, Name, Vorname und Kasse sind keine Disziplinen
                     for (int i = 0; i < disziplinen; i++)
                     {
                         ev.Graphics.DrawString(Schiessabend[3 + i, currentLinesPrinted].Value.ToString(),
@@ -1112,6 +1184,7 @@ namespace schiessbuch
             MySqlCommand cmd = new MySqlCommand("SELECT `name`, vorname, concat(name, ', ', vorname) as fullname, disziplin, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' HAVING Date='" + filterDateStr + "'  order by fullname", TagesAuswertungListeConnection);
             TagesAuswertungListeDataReader = cmd.ExecuteReader();
 
+
             //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
             //if (printPreviewControl1.Document != null)
             //    printPreviewControl1.Document.Dispose();
@@ -1123,10 +1196,15 @@ namespace schiessbuch
             //pvd.Document = pd;
             //pvd.ShowDialog();
             //pd.Print();
+            TagesAuswertungListeConnection.Close();
+            TagesAuswertungListeConnection.Dispose();
+            MySqlConnection.ClearPool(TagesAuswertungListeConnection);
         }
 
         private void pd_PrintPageListe(object sender, PrintPageEventArgs ev)
         {
+            
+
             //ev.Graphics.Clear(Color.White);
             float linesPerPage = 0;
             float yPos = 0;
@@ -1222,6 +1300,7 @@ namespace schiessbuch
         {
             NeuesSchiessjahr neuSj = new NeuesSchiessjahr();
             neuSj.ShowDialog();
+            AktualisiereSchiessjahrMenu();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -1467,6 +1546,322 @@ namespace schiessbuch
         private void label20_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ErstelleAuswertung();
+        }
+
+        private void Schiessabend_CellLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            // stelle fest, ob eine Zelle in der Spalte "Kasse" verlassen wurde. Nur dann soll nämlich ein Update in der Datenbank durchgeführt werden.
+            if (Schiessabend.Columns[e.ColumnIndex].HeaderText.Equals("Kasse"))
+            {
+                try {
+                    Schiessabend.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                    string strDatum = dateTimePicker1.Value.ToString("yyyy-MM-dd"); // Datum, an dem bezahlt wurde (das Datum, für das die Tagesansicht erzeugt wird)
+                    int iSchuetze = int.Parse(Schiessabend["ID", e.RowIndex].Value.ToString()); // der Schütze, der bezahlt hat
+                    MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand("INSERT INTO kasse (idSchuetze, DatumBezahlt, Betrag) VALUES (@id, @datum, @betrag) ON DUPLICATE KEY UPDATE Betrag=@betrag", conn);
+                    cmd.Prepare();
+                    cmd.Parameters.Add("@id", MySqlDbType.Int16).Value = iSchuetze;
+                    cmd.Parameters.Add("@datum", MySqlDbType.Date).Value = dateTimePicker1.Value;
+                    cmd.Parameters.Add("@betrag", MySqlDbType.Float).Value = Schiessabend[e.ColumnIndex, e.RowIndex].Value;
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                    conn.Close();
+                    conn.Dispose();
+                    MySqlConnection.ClearPool(conn);
+                }
+                catch (FormatException fe)
+                {
+                    MessageBox.Show("Es darf nur ein Betrag eingegeben werden. Soll eine Zahlung gelöscht werden, dann 0 eintragen.", "Falsches Format", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        PrintDocument pdKasse;
+        private void btnKassenbericht_Click(object sender, EventArgs e)
+        {
+            if (pdKasse == null)
+            {
+                pdKasse = new PrintDocument();
+                pdKasse.PrintPage += new PrintPageEventHandler(pd_KassePrintPage);
+            }
+            printFont = new Font("Arial", 10);
+            linesCount = Schiessabend.Rows.Count + 1; // extra Zeile für die Summe
+            //pd = new PrintDocument();
+            PrintPreviewDialog ppdlg = new PrintPreviewDialog();
+            //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
+            //if (printPreviewControl1.Document != null)
+            //    printPreviewControl1.Document.Dispose();
+            ppdlg.Document = pdKasse;
+            ppdlg.ShowDialog();
+            //printPreviewControl1.Document = pd;
+            //button2.Enabled = true;
+            //PrintPreviewDialog pvd = new PrintPreviewDialog();
+            //pvd.Document = pd;
+            //pvd.ShowDialog();
+            //pd.Print();
+
+        }
+
+        private void pd_KassePrintPage(object sender, PrintPageEventArgs ev)
+        {
+            //ev.Graphics.Clear(Color.White);
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            //string line = null;
+
+            // calculate the number of lines per page
+            linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+
+            string str = "Schützengesellschaft Edelweiß Eltheim e. V.";
+            Font headFont = new Font("Arial", 20f);
+            Font headFont2 = new Font("Arial", 14);
+            int strl = (int)ev.Graphics.MeasureString(str, headFont).Width;
+            int headHeight = (int)ev.Graphics.MeasureString(str, headFont).Height;
+            ev.Graphics.DrawString(str, headFont, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            str = String.Format("Kassenbericht vom {0}", dateTimePicker1.Value.ToShortDateString());
+            strl = (int)ev.Graphics.MeasureString(str, headFont2).Width;
+            headHeight = (int)ev.Graphics.MeasureString(str, headFont2).Height;
+            ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+
+            int disc = Schiessabend.Columns.Count - 3;
+
+            // berechne maximale Textlänge der Disziplinen
+            int maxLen = 0;
+            for (int i = 0; i < disc; i++)
+            {
+                float l = ev.Graphics.MeasureString(Schiessabend.Columns[i + 3].Name, printFont).Width;
+                if ((int)l > maxLen)
+                    maxLen = (int)l;
+            }
+
+            yPos = topMargin + maxLen;
+            ev.Graphics.DrawString("Nr.", printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+            ev.Graphics.DrawString("Name", printFont, Brushes.Black, leftMargin + 35, yPos, new StringFormat());
+
+            for (int i = 0; i < disc; i++)
+            {
+                ev.Graphics.TranslateTransform(leftMargin + 220 + i * 40, yPos);
+                ev.Graphics.RotateTransform(-90);
+                ev.Graphics.DrawString(Schiessabend.Columns[i + 3].Name,
+                    printFont,
+                    Brushes.Black,
+                    0,
+                    0,
+                    new StringFormat());
+                ev.Graphics.RotateTransform(90);
+                ev.Graphics.TranslateTransform(-(leftMargin + 220 + i * 40), -yPos);
+            }
+
+            int disziplinen=0;
+            while (count < linesPerPage && currentLinesPrinted < linesCount)
+            {
+                if ((currentLinesPrinted < linesCount - 1) && Schiessabend["ID", currentLinesPrinted].Value != null)
+                {
+                    string idstr = Schiessabend["ID", currentLinesPrinted].Value.ToString();
+                    yPos = topMargin + maxLen + ((count + 1) * printFont.GetHeight(ev.Graphics));
+                    ev.Graphics.DrawString(idstr, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+                    ev.Graphics.DrawString(
+                        Schiessabend["name", currentLinesPrinted].Value.ToString() + ", " + Schiessabend["vorname", currentLinesPrinted].Value.ToString(),
+                        printFont,
+                        Brushes.Black,
+                        leftMargin + 35,
+                        yPos,
+                        new StringFormat());
+                    disziplinen = Schiessabend.Columns.Count - 4; // ID, Name, Vorname, Kasse sind keine Disziplinen, deshalb von den Spalten 4 abziehen
+                    for (int i = 0; i < disziplinen; i++)
+                    {
+                        if (Schiessabend[3+i, currentLinesPrinted].Value.ToString().Length != 0)
+                            ev.Graphics.DrawString("x",
+                                printFont,
+                                Brushes.Black,
+                                leftMargin + 220 + i * 40,
+                                yPos,
+                                new StringFormat());
+
+                        //ev.Graphics.DrawString(Schiessabend[3 + i, currentLinesPrinted].Value.ToString(),
+                        //    printFont,
+                        //    Brushes.Black,
+                        //    leftMargin + 220 + i * 40,
+                        //    yPos,
+                        //    new StringFormat());
+                    }
+                    string EinzelBetrag = String.Format(
+                            "{0:c}",
+                            float.Parse(Schiessabend[disziplinen + 3, currentLinesPrinted].Value.ToString()));
+                    float EinzelbetragBreite = ev.Graphics.MeasureString(EinzelBetrag, printFont).Width;
+                    ev.Graphics.DrawString(
+                        EinzelBetrag, 
+                        printFont, 
+                        Brushes.Black, 
+                        leftMargin + 220 + disziplinen * 40 + 50 - EinzelbetragBreite, 
+                        yPos, 
+                        new StringFormat());
+                    count++;
+                    currentLinesPrinted++;
+                }
+                if (currentLinesPrinted == linesCount - 1)
+                {
+                    // Summe der Beträge anzeigen
+                    string sum = "Summe:";
+                    yPos += printFont.GetHeight(ev.Graphics);
+                    ev.Graphics.DrawString(sum, printFont, Brushes.Black, leftMargin + 220 + disziplinen * 40 - ev.Graphics.MeasureString(sum, printFont).Width - 10, yPos, new StringFormat());
+                    float fSumme = 0.0f;
+                    for (int i = 0; i < Schiessabend.Rows.Count; i++)
+                    {
+                        fSumme += float.Parse(Schiessabend["Kasse", i].Value.ToString());
+                    }
+                    string Gesamtbetrag = String.Format("{0:c}", float.Parse(fSumme.ToString()));
+                    float GesamtbetragBreite = ev.Graphics.MeasureString(Gesamtbetrag, printFont).Width;
+                    ev.Graphics.DrawString(Gesamtbetrag, printFont, Brushes.Black, leftMargin + 220 + disziplinen * 40 + 50 - GesamtbetragBreite, yPos, new StringFormat());
+                    count++;
+                    currentLinesPrinted++;
+                }
+            }
+
+            if (currentLinesPrinted < Schiessabend.Rows.Count)
+                ev.HasMorePages = true;
+            else
+            {
+                ev.HasMorePages = false;
+                currentLinesPrinted = 0;
+            }
+        }
+
+        private void deleteEntry_Click(object sender, EventArgs e)
+        {
+            if (mouseLocation != null)
+            {
+                //schiessbuchTableAdapter.Delete(schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString());
+                //schiessbuchTableAdapter.UpdateQuerySetStatusForSession("ungültig", );
+                schiessbuchTableAdapter.UpdateQuerySetStatusForSessionAndOldStatus("ungültig", schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString(), "beendet");
+                //schiessbuchTableAdapter.Update(siusclubDataSet.schiessbuch);
+                //schiessbuchBindingSource.ResetCurrentItem();
+                schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                schiessbuchDataGridView.Invalidate();
+            }
+        }
+
+        DataGridViewCellEventArgs mouseLocation;
+
+        private void schiessbuchDataGridView_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            mouseLocation = e;
+        }
+
+        private void schiessbuchDataGridView_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            DialogResult res = MessageBox.Show("Eintrag wirklich löschen?", "Bestätigung", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (res == DialogResult.Yes)
+            {
+                e.Cancel = false;
+            }
+            if (res == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private void eintratgültigSetzenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (mouseLocation != null)
+            {
+                //schiessbuchTableAdapter.Delete(schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString());
+                //schiessbuchTableAdapter.UpdateQuerySetStatusForSession("beendet", );
+                schiessbuchTableAdapter.UpdateQuerySetStatusForSessionAndOldStatus("beendet", schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString(), "ungültig");
+                //schiessbuchTableAdapter.Update(siusclubDataSet.schiessbuch);
+                schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                schiessbuchDataGridView.Invalidate();
+            }
+        }
+
+        private void moveEntry_Click(object sender, EventArgs e)
+        {
+            SchiesserieVerschieben dlg = new SchiesserieVerschieben();
+            DialogResult res = dlg.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                DateTime dt = dlg.dateTimePicker1.Value;
+                string[] compoNow = dt.ToLongTimeString().Split(':');
+                TimeSpan toMidnight = new TimeSpan(int.Parse(compoNow[0]), int.Parse(compoNow[1]), int.Parse(compoNow[2]));
+                dt = dt.Subtract(toMidnight);
+                String strTime = ((DateTime)schiessbuchDataGridView["dt", mouseLocation.RowIndex].Value).ToLongTimeString();
+                string[] components = strTime.Split(':');
+                TimeSpan ts = new TimeSpan(int.Parse(components[0]), int.Parse(components[1]), int.Parse(components[2]));
+                dt = dt.Add(ts);
+                CultureInfo enus = new CultureInfo("en-US");
+                schiessbuchTableAdapter.UpdateQuerySetDatumForSession(dt.ToString("ddd MMM dd yyyy HH:mm:ss G'M'T+0200 (CEST)", enus), schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString());
+                schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                schiessbuchDataGridView.Invalidate();
+                dlg.Dispose();
+            }
+        }
+
+        private void Schiessbuch_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (res == DialogResult.Yes)
+            {
+                if (Properties.Settings.Default.BackupFileName.Length > 0 && Properties.Settings.Default.BackupDirectory.Length > 0)
+                {
+                    Process externalProcess = new Process();
+                    externalProcess.StartInfo.FileName = Properties.Settings.Default.BackupFileName;
+                    externalProcess.StartInfo.Arguments = "--add-drop-database --add-drop-table --add-drop-trigger --add-locks --complete-insert --create-options --extended-insert --single-transaction  --dump-date -u siusclub --host=" + backupDestination + " --password=\"siusclub\" siusclub";
+                    externalProcess.StartInfo.UseShellExecute = false;
+                    externalProcess.StartInfo.RedirectStandardOutput = true;
+                    externalProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    externalProcess.StartInfo.CreateNoWindow = true;
+                    externalProcess.Start();
+                    string output = externalProcess.StandardOutput.ReadToEnd();
+                    File.WriteAllText(Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sql", output);
+                    //MessageBox.Show(output);
+                    externalProcess.WaitForExit();
+                    MessageBox.Show("Backup erstellt.");
+                }
+                else
+                {
+                    MessageBox.Show("Es wurden keine Einstellungen für die Sicherungsverzeichnisse gefunden. Bitte Verzeichnisse festlegen.");
+                }
+            }
+        }
+
+        private void ordnerFürSicherungenFestlegenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.ShowNewFolderButton = true;
+            if (Properties.Settings.Default.BackupDirectory.Length > 0)
+                fbd.SelectedPath = Properties.Settings.Default.BackupDirectory;
+            DialogResult res = fbd.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                Properties.Settings.Default.BackupDirectory = fbd.SelectedPath;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void pfadZuMysqldumpFestlegenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.CheckFileExists = true;
+            ofd.CheckPathExists = true;
+            if (Properties.Settings.Default.BackupFileName.Length > 0)
+                ofd.InitialDirectory = Path.GetDirectoryName(Properties.Settings.Default.BackupFileName);
+            DialogResult res = ofd.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                Properties.Settings.Default.BackupFileName = ofd.FileName;
+                Properties.Settings.Default.Save();
+            }
         }
     }
 }
