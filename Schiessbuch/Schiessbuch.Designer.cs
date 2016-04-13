@@ -86,11 +86,11 @@ namespace schiessbuch
             this.emailTextBox = new System.Windows.Forms.TextBox();
             this.fullnameComboBox = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.lblWanderpokalschiessen = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.vereinComboBox = new System.Windows.Forms.ComboBox();
             this.vereineBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.siusclubDataSet1 = new schiessbuch.siusclubDataSet();
             this.DoUpdates = new System.Windows.Forms.CheckBox();
             this.vereinTextBox = new System.Windows.Forms.TextBox();
             this.schiessbuchBindingSource = new System.Windows.Forms.BindingSource(this.components);
@@ -568,6 +568,7 @@ namespace schiessbuch
             this.txtDisziplinStand4 = new System.Windows.Forms.Label();
             this.lblSchuetzeStand4 = new System.Windows.Forms.Label();
             this.txtSchuetzeStand4 = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.siusclubDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.vereineTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.VereineTableAdapter();
             this.bindingNavigator1 = new System.Windows.Forms.BindingNavigator(this.components);
@@ -583,13 +584,11 @@ namespace schiessbuch
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             vereinLabel1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenBindingSource)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).BeginInit();
             this.SchiessbuchContexMenu.SuspendLayout();
@@ -878,14 +877,11 @@ namespace schiessbuch
             // 
             this.fullnameComboBox.CausesValidation = false;
             this.fullnameComboBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenBindingSource, "fullname", true));
-            this.fullnameComboBox.DataSource = this.schuetzenBindingSource;
-            this.fullnameComboBox.DisplayMember = "fullname";
             this.fullnameComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.fullnameComboBox.Location = new System.Drawing.Point(63, 19);
             this.fullnameComboBox.Name = "fullnameComboBox";
             this.fullnameComboBox.Size = new System.Drawing.Size(383, 21);
             this.fullnameComboBox.TabIndex = 22;
-            this.fullnameComboBox.ValueMember = "id";
             this.fullnameComboBox.SelectedIndexChanged += new System.EventHandler(this.fullnameComboBox_SelectedIndexChanged);
             // 
             // groupBox1
@@ -913,6 +909,17 @@ namespace schiessbuch
             this.groupBox1.TabIndex = 23;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Schütze";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Herr",
+            "Frau"});
+            this.comboBox1.Location = new System.Drawing.Point(100, 46);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(84, 21);
+            this.comboBox1.TabIndex = 30;
             // 
             // lblWanderpokalschiessen
             // 
@@ -949,16 +956,6 @@ namespace schiessbuch
             this.vereinComboBox.ValueMember = "verein";
             this.vereinComboBox.Visible = false;
             this.vereinComboBox.TextChanged += new System.EventHandler(this.nameTextBox_TextChanged);
-            // 
-            // vereineBindingSource
-            // 
-            this.vereineBindingSource.DataMember = "Vereine";
-            this.vereineBindingSource.DataSource = this.siusclubDataSet1;
-            // 
-            // siusclubDataSet1
-            // 
-            this.siusclubDataSet1.DataSetName = "siusclubDataSet";
-            this.siusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // DoUpdates
             // 
@@ -1624,6 +1621,7 @@ namespace schiessbuch
             this.tabControl1.Controls.Add(this.KoenigTab);
             this.tabControl1.Controls.Add(this.wanderpokal);
             this.tabControl1.Controls.Add(this.tabStandUebersicht);
+            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(12, 55);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -6850,6 +6848,16 @@ namespace schiessbuch
             this.txtSchuetzeStand4.TabIndex = 0;
             this.txtSchuetzeStand4.Text = "Thomas Schachtner";
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(952, 419);
+            this.tabPage2.TabIndex = 7;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // siusclubDataSetBindingSource
             // 
             this.siusclubDataSetBindingSource.DataSource = this.siusclubDataSet;
@@ -6989,17 +6997,6 @@ namespace schiessbuch
             this.saveToolStripButton1.Text = "&Save";
             this.saveToolStripButton1.Click += new System.EventHandler(this.saveToolStripButton_Click);
             // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Herr",
-            "Frau"});
-            this.comboBox1.Location = new System.Drawing.Point(100, 46);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(84, 21);
-            this.comboBox1.TabIndex = 30;
-            // 
             // Schiessbuch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -7018,7 +7015,6 @@ namespace schiessbuch
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).EndInit();
             this.SchiessbuchContexMenu.ResumeLayout(false);
@@ -7251,7 +7247,6 @@ namespace schiessbuch
         private System.Windows.Forms.ToolStripMenuItem bearbeitenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bearbeitungsmodusToolStripMenuItem;
         private System.Windows.Forms.ComboBox vereinComboBox;
-        private siusclubDataSet siusclubDataSet1;
         private System.Windows.Forms.BindingSource vereineBindingSource;
         private VereineTableAdapter vereineTableAdapter;
         private System.Windows.Forms.BindingNavigator bindingNavigator1;
@@ -7663,6 +7658,7 @@ namespace schiessbuch
         private System.Windows.Forms.ToolStripMenuItem ordnerFürSicherungenFestlegenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pfadZuMysqldumpFestlegenToolStripMenuItem;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.TabPage tabPage2;
     }
 }
 

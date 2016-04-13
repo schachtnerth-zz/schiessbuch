@@ -45,6 +45,8 @@ namespace schiessbuch
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet.schuetzenliste". Sie können sie bei Bedarf verschieben oder entfernen.
+            //this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
             //string connStr = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
             string connStr = connStrLocal;
             //string _connectionStringName = "schiessbuch.Properties.Settings.siusclubConnectionString";
@@ -70,7 +72,7 @@ namespace schiessbuch
             try
             {
                 // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet1.Vereine". Sie können sie bei Bedarf verschieben oder entfernen.
-                numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
+                numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet.Vereine);
                 // TODO: This line of code loads data into the 'siusclubDataSet.treffer' table. You can move, or remove it, as needed.
                 numAllRead += this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
                 // TODO: This line of code loads data into the 'siusclubDataSet.schiessbuch' table. You can move, or remove it, as needed.

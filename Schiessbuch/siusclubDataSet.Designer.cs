@@ -34,10 +34,6 @@ namespace schiessbuch {
         
         private schuetzenlisteDataTable tableschuetzenliste;
         
-        private global::System.Data.DataRelation relationschuetzen_schiessbuch;
-        
-        private global::System.Data.DataRelation relationschuetzen_treffer;
-        
         private global::System.Data.DataRelation relationschiessbuch_treffer;
         
         private global::System.Data.DataRelation relationschiessbuch_schuetzenliste;
@@ -300,8 +296,6 @@ namespace schiessbuch {
                     this.tableschuetzenliste.InitVars();
                 }
             }
-            this.relationschuetzen_schiessbuch = this.Relations["schuetzen_schiessbuch"];
-            this.relationschuetzen_treffer = this.Relations["schuetzen_treffer"];
             this.relationschiessbuch_treffer = this.Relations["schiessbuch_treffer"];
             this.relationschiessbuch_schuetzenliste = this.Relations["schiessbuch_schuetzenliste"];
             this.relationschuetzenliste_treffer = this.Relations["schuetzenliste_treffer"];
@@ -325,14 +319,6 @@ namespace schiessbuch {
             base.Tables.Add(this.tableVereine);
             this.tableschuetzenliste = new schuetzenlisteDataTable();
             base.Tables.Add(this.tableschuetzenliste);
-            this.relationschuetzen_schiessbuch = new global::System.Data.DataRelation("schuetzen_schiessbuch", new global::System.Data.DataColumn[] {
-                        this.tableschuetzen.idColumn}, new global::System.Data.DataColumn[] {
-                        this.tableschiessbuch.idColumn}, false);
-            this.Relations.Add(this.relationschuetzen_schiessbuch);
-            this.relationschuetzen_treffer = new global::System.Data.DataRelation("schuetzen_treffer", new global::System.Data.DataColumn[] {
-                        this.tableschuetzen.idColumn}, new global::System.Data.DataColumn[] {
-                        this.tabletreffer.schuetzeColumn}, false);
-            this.Relations.Add(this.relationschuetzen_treffer);
             this.relationschiessbuch_treffer = new global::System.Data.DataRelation("schiessbuch_treffer", new global::System.Data.DataColumn[] {
                         this.tableschiessbuch.sessionColumn}, new global::System.Data.DataColumn[] {
                         this.tabletreffer.sessionColumn}, false);
@@ -624,10 +610,10 @@ namespace schiessbuch {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public schiessbuchRow AddschiessbuchRow(schuetzenRow parentschuetzenRowByschuetzen_schiessbuch, string disziplin, string ergebnis, string stand, string status, string session, string d, System.DateTime dt, string Datum, string Uhrzeit) {
+            public schiessbuchRow AddschiessbuchRow(int id, string disziplin, string ergebnis, string stand, string status, string session, string d, System.DateTime dt, string Datum, string Uhrzeit) {
                 schiessbuchRow rowschiessbuchRow = ((schiessbuchRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
-                        null,
+                        id,
                         disziplin,
                         ergebnis,
                         stand,
@@ -637,9 +623,6 @@ namespace schiessbuch {
                         dt,
                         Datum,
                         Uhrzeit};
-                if ((parentschuetzenRowByschuetzen_schiessbuch != null)) {
-                    columnValuesArray[0] = parentschuetzenRowByschuetzen_schiessbuch[0];
-                }
                 rowschiessbuchRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowschiessbuchRow);
                 return rowschiessbuchRow;
@@ -1608,7 +1591,7 @@ namespace schiessbuch {
                         float yinmm, 
                         float xrahmeninmm, 
                         float yrahmeninmm, 
-                        schuetzenRow parentschuetzenRowByschuetzen_treffer, 
+                        schuetzenlisteRow parentschuetzenlisteRowByschuetzenliste_treffer, 
                         string disziplin, 
                         string zielscheibe, 
                         float kaliber, 
@@ -1647,8 +1630,8 @@ namespace schiessbuch {
                         fehler,
                         null,
                         id};
-                if ((parentschuetzenRowByschuetzen_treffer != null)) {
-                    columnValuesArray[17] = parentschuetzenRowByschuetzen_treffer[0];
+                if ((parentschuetzenlisteRowByschuetzenliste_treffer != null)) {
+                    columnValuesArray[17] = parentschuetzenlisteRowByschuetzenliste_treffer[0];
                 }
                 if ((parentschiessbuchRowByschiessbuch_treffer != null)) {
                     columnValuesArray[25] = parentschiessbuchRowByschiessbuch_treffer[5];
@@ -2740,17 +2723,6 @@ namespace schiessbuch {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public schuetzenRow schuetzenRow {
-                get {
-                    return ((schuetzenRow)(this.GetParentRow(this.Table.ParentRelations["schuetzen_schiessbuch"])));
-                }
-                set {
-                    this.SetParentRow(value, this.Table.ParentRelations["schuetzen_schiessbuch"]);
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public bool IsergebnisNull() {
                 return this.IsNull(this.tableschiessbuch.ergebnisColumn);
             }
@@ -3123,28 +3095,6 @@ namespace schiessbuch {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public void SetfullnameNull() {
                 this[this.tableschuetzen.fullnameColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public schiessbuchRow[] GetschiessbuchRows() {
-                if ((this.Table.ChildRelations["schuetzen_schiessbuch"] == null)) {
-                    return new schiessbuchRow[0];
-                }
-                else {
-                    return ((schiessbuchRow[])(base.GetChildRows(this.Table.ChildRelations["schuetzen_schiessbuch"])));
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public trefferRow[] GettrefferRows() {
-                if ((this.Table.ChildRelations["schuetzen_treffer"] == null)) {
-                    return new trefferRow[0];
-                }
-                else {
-                    return ((trefferRow[])(base.GetChildRows(this.Table.ChildRelations["schuetzen_treffer"])));
-                }
             }
         }
         
@@ -3581,17 +3531,6 @@ namespace schiessbuch {
                 }
                 set {
                     this[this.tabletreffer.idColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public schuetzenRow schuetzenRow {
-                get {
-                    return ((schuetzenRow)(this.GetParentRow(this.Table.ParentRelations["schuetzen_treffer"])));
-                }
-                set {
-                    this.SetParentRow(value, this.Table.ParentRelations["schuetzen_treffer"]);
                 }
             }
             
@@ -9028,21 +8967,21 @@ FROM            schiessbuch";
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
         private int UpdateUpdatedRows(siusclubDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allChangedRows, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
             int result = 0;
-            if ((this._schuetzenTableAdapter != null)) {
-                global::System.Data.DataRow[] updatedRows = dataSet.schuetzen.Select(null, null, global::System.Data.DataViewRowState.ModifiedCurrent);
-                updatedRows = this.GetRealUpdatedRows(updatedRows, allAddedRows);
-                if (((updatedRows != null) 
-                            && (0 < updatedRows.Length))) {
-                    result = (result + this._schuetzenTableAdapter.Update(updatedRows));
-                    allChangedRows.AddRange(updatedRows);
-                }
-            }
             if ((this._schiessbuchTableAdapter != null)) {
                 global::System.Data.DataRow[] updatedRows = dataSet.schiessbuch.Select(null, null, global::System.Data.DataViewRowState.ModifiedCurrent);
                 updatedRows = this.GetRealUpdatedRows(updatedRows, allAddedRows);
                 if (((updatedRows != null) 
                             && (0 < updatedRows.Length))) {
                     result = (result + this._schiessbuchTableAdapter.Update(updatedRows));
+                    allChangedRows.AddRange(updatedRows);
+                }
+            }
+            if ((this._schuetzenTableAdapter != null)) {
+                global::System.Data.DataRow[] updatedRows = dataSet.schuetzen.Select(null, null, global::System.Data.DataViewRowState.ModifiedCurrent);
+                updatedRows = this.GetRealUpdatedRows(updatedRows, allAddedRows);
+                if (((updatedRows != null) 
+                            && (0 < updatedRows.Length))) {
+                    result = (result + this._schuetzenTableAdapter.Update(updatedRows));
                     allChangedRows.AddRange(updatedRows);
                 }
             }
@@ -9065,19 +9004,19 @@ FROM            schiessbuch";
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
         private int UpdateInsertedRows(siusclubDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
             int result = 0;
-            if ((this._schuetzenTableAdapter != null)) {
-                global::System.Data.DataRow[] addedRows = dataSet.schuetzen.Select(null, null, global::System.Data.DataViewRowState.Added);
-                if (((addedRows != null) 
-                            && (0 < addedRows.Length))) {
-                    result = (result + this._schuetzenTableAdapter.Update(addedRows));
-                    allAddedRows.AddRange(addedRows);
-                }
-            }
             if ((this._schiessbuchTableAdapter != null)) {
                 global::System.Data.DataRow[] addedRows = dataSet.schiessbuch.Select(null, null, global::System.Data.DataViewRowState.Added);
                 if (((addedRows != null) 
                             && (0 < addedRows.Length))) {
                     result = (result + this._schiessbuchTableAdapter.Update(addedRows));
+                    allAddedRows.AddRange(addedRows);
+                }
+            }
+            if ((this._schuetzenTableAdapter != null)) {
+                global::System.Data.DataRow[] addedRows = dataSet.schuetzen.Select(null, null, global::System.Data.DataViewRowState.Added);
+                if (((addedRows != null) 
+                            && (0 < addedRows.Length))) {
+                    result = (result + this._schuetzenTableAdapter.Update(addedRows));
                     allAddedRows.AddRange(addedRows);
                 }
             }
@@ -9107,19 +9046,19 @@ FROM            schiessbuch";
                     allChangedRows.AddRange(deletedRows);
                 }
             }
-            if ((this._schiessbuchTableAdapter != null)) {
-                global::System.Data.DataRow[] deletedRows = dataSet.schiessbuch.Select(null, null, global::System.Data.DataViewRowState.Deleted);
-                if (((deletedRows != null) 
-                            && (0 < deletedRows.Length))) {
-                    result = (result + this._schiessbuchTableAdapter.Update(deletedRows));
-                    allChangedRows.AddRange(deletedRows);
-                }
-            }
             if ((this._schuetzenTableAdapter != null)) {
                 global::System.Data.DataRow[] deletedRows = dataSet.schuetzen.Select(null, null, global::System.Data.DataViewRowState.Deleted);
                 if (((deletedRows != null) 
                             && (0 < deletedRows.Length))) {
                     result = (result + this._schuetzenTableAdapter.Update(deletedRows));
+                    allChangedRows.AddRange(deletedRows);
+                }
+            }
+            if ((this._schiessbuchTableAdapter != null)) {
+                global::System.Data.DataRow[] deletedRows = dataSet.schiessbuch.Select(null, null, global::System.Data.DataViewRowState.Deleted);
+                if (((deletedRows != null) 
+                            && (0 < deletedRows.Length))) {
+                    result = (result + this._schiessbuchTableAdapter.Update(deletedRows));
                     allChangedRows.AddRange(deletedRows);
                 }
             }
