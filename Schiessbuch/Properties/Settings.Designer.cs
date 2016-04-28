@@ -68,5 +68,29 @@ namespace schiessbuch.Properties {
                 return ((string)(this["siusclubConnectionStringTEST"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public float TimerInterval {
+            get {
+                return ((float)(this["TimerInterval"]));
+            }
+            set {
+                this["TimerInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int DatabaseInterval {
+            get {
+                return ((int)(this["DatabaseInterval"]));
+            }
+            set {
+                this["DatabaseInterval"] = value;
+            }
+        }
     }
 }

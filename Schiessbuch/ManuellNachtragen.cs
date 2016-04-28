@@ -19,10 +19,11 @@ namespace schiessbuch
         }
 
         public string id;
+        public string connStr;
 
         private void nachtragen_Click(object sender, EventArgs e)
         {
-            MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
             MySqlCommand cmd = new MySqlCommand("INSERT INTO schiessbuch (id, disziplin, ergebnis, datum, stand, status, session) VALUES (@id,@disziplin,@ergebnis,@datum,@stand,@status,@session)", conn);
             cmd.Parameters.AddWithValue("@id", id);

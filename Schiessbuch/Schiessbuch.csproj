@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Einstellungen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Einstellungen.Designer.cs">
+      <DependentUpon>Einstellungen.cs</DependentUpon>
+    </Compile>
     <Compile Include="GauligaAuswertung.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +95,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>siusclubDataSet.xsd</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Einstellungen.resx">
+      <DependentUpon>Einstellungen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="NeuesSchiessjahr.resx">
       <DependentUpon>NeuesSchiessjahr.cs</DependentUpon>
     </EmbeddedResource>
