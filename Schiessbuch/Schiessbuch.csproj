@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="disziplin.cs" />
     <Compile Include="Einstellungen.cs">
       <SubType>Form</SubType>
     </Compile>

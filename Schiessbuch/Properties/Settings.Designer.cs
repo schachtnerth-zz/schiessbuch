@@ -92,5 +92,17 @@ namespace schiessbuch.Properties {
                 this["DatabaseInterval"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int AnzLetzteTreffer {
+            get {
+                return ((int)(this["AnzLetzteTreffer"]));
+            }
+            set {
+                this["AnzLetzteTreffer"] = value;
+            }
+        }
     }
 }

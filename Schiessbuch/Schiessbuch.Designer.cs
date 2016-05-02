@@ -162,6 +162,8 @@ namespace schiessbuch
             this.schießjahrAuswählenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bearbeitenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bearbeitungsmodusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.einstellungenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.backupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -582,7 +584,7 @@ namespace schiessbuch
             this.lblSchuetzeStand4 = new System.Windows.Forms.Label();
             this.txtSchuetzeStand4 = new System.Windows.Forms.Label();
             this.tabEinzelscheibe = new System.Windows.Forms.TabPage();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.pictureBoxEinzelScheibe = new System.Windows.Forms.PictureBox();
             this.vereineTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.VereineTableAdapter();
             this.bindingNavigator1 = new System.Windows.Forms.BindingNavigator(this.components);
             this.bindingNavigatorAddNewItem = new System.Windows.Forms.ToolStripButton();
@@ -597,8 +599,6 @@ namespace schiessbuch
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.einstellungenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             vereinLabel1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).BeginInit();
@@ -698,7 +698,7 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.stand4Zielscheibe)).BeginInit();
             this.Stand4SchussPanel.SuspendLayout();
             this.tabEinzelscheibe.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEinzelScheibe)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).BeginInit();
             this.bindingNavigator1.SuspendLayout();
             this.SuspendLayout();
@@ -1659,6 +1659,18 @@ namespace schiessbuch
             this.bearbeitungsmodusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.bearbeitungsmodusToolStripMenuItem.Text = "&Bearbeitungsmodus";
             this.bearbeitungsmodusToolStripMenuItem.Click += new System.EventHandler(this.bearbeitungsmodusToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // einstellungenToolStripMenuItem
+            // 
+            this.einstellungenToolStripMenuItem.Name = "einstellungenToolStripMenuItem";
+            this.einstellungenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.einstellungenToolStripMenuItem.Text = "&Einstellungen ...";
+            this.einstellungenToolStripMenuItem.Click += new System.EventHandler(this.einstellungenToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -3798,6 +3810,7 @@ namespace schiessbuch
             this.stand2Zielscheibe.TabIndex = 1;
             this.stand2Zielscheibe.TabStop = false;
             this.stand2Zielscheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.stand2Zielscheibe_Paint);
+            this.stand2Zielscheibe.DoubleClick += new System.EventHandler(this.stand2Zielscheibe_DoubleClick);
             // 
             // txtSchussStand2
             // 
@@ -4434,6 +4447,7 @@ namespace schiessbuch
             this.stand3Zielscheibe.TabIndex = 1;
             this.stand3Zielscheibe.TabStop = false;
             this.stand3Zielscheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.stand3Zielscheibe_Paint);
+            this.stand3Zielscheibe.DoubleClick += new System.EventHandler(this.stand3Zielscheibe_DoubleClick);
             // 
             // txtSchussStand3
             // 
@@ -5070,6 +5084,7 @@ namespace schiessbuch
             this.stand6Zielscheibe.TabIndex = 1;
             this.stand6Zielscheibe.TabStop = false;
             this.stand6Zielscheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.stand6Zielscheibe_Paint);
+            this.stand6Zielscheibe.DoubleClick += new System.EventHandler(this.stand6Zielscheibe_DoubleClick);
             // 
             // txtSchussStand6
             // 
@@ -5706,6 +5721,7 @@ namespace schiessbuch
             this.stand5Zielscheibe.TabIndex = 1;
             this.stand5Zielscheibe.TabStop = false;
             this.stand5Zielscheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.stand5Zielscheibe_Paint);
+            this.stand5Zielscheibe.DoubleClick += new System.EventHandler(this.stand5Zielscheibe_DoubleClick);
             // 
             // txtSchussStand5
             // 
@@ -6342,6 +6358,7 @@ namespace schiessbuch
             this.stand4Zielscheibe.TabIndex = 1;
             this.stand4Zielscheibe.TabStop = false;
             this.stand4Zielscheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.stand4Zielscheibe_Paint);
+            this.stand4Zielscheibe.DoubleClick += new System.EventHandler(this.stand4Zielscheibe_DoubleClick);
             // 
             // Stand4SchussPanel
             // 
@@ -6946,7 +6963,7 @@ namespace schiessbuch
             // 
             // tabEinzelscheibe
             // 
-            this.tabEinzelscheibe.Controls.Add(this.pictureBox3);
+            this.tabEinzelscheibe.Controls.Add(this.pictureBoxEinzelScheibe);
             this.tabEinzelscheibe.Location = new System.Drawing.Point(4, 22);
             this.tabEinzelscheibe.Name = "tabEinzelscheibe";
             this.tabEinzelscheibe.Size = new System.Drawing.Size(952, 419);
@@ -6954,19 +6971,20 @@ namespace schiessbuch
             this.tabEinzelscheibe.Text = "Einzelscheibe";
             this.tabEinzelscheibe.UseVisualStyleBackColor = true;
             // 
-            // pictureBox3
+            // pictureBoxEinzelScheibe
             // 
-            this.pictureBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.pictureBoxEinzelScheibe.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.pictureBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox3.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
-            this.pictureBox3.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(372, 423);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 0;
-            this.pictureBox3.TabStop = false;
-            this.pictureBox3.Resize += new System.EventHandler(this.pictureBox3_Resize);
+            this.pictureBoxEinzelScheibe.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBoxEinzelScheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
+            this.pictureBoxEinzelScheibe.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxEinzelScheibe.Name = "pictureBoxEinzelScheibe";
+            this.pictureBoxEinzelScheibe.Size = new System.Drawing.Size(372, 423);
+            this.pictureBoxEinzelScheibe.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxEinzelScheibe.TabIndex = 0;
+            this.pictureBoxEinzelScheibe.TabStop = false;
+            this.pictureBoxEinzelScheibe.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxEinzelScheibe_Paint);
+            this.pictureBoxEinzelScheibe.Resize += new System.EventHandler(this.pictureBox3_Resize);
             // 
             // vereineTableAdapter
             // 
@@ -7101,18 +7119,6 @@ namespace schiessbuch
             this.saveToolStripButton1.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton1.Text = "&Save";
             this.saveToolStripButton1.Click += new System.EventHandler(this.saveToolStripButton_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
-            // 
-            // einstellungenToolStripMenuItem
-            // 
-            this.einstellungenToolStripMenuItem.Name = "einstellungenToolStripMenuItem";
-            this.einstellungenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.einstellungenToolStripMenuItem.Text = "&Einstellungen ...";
-            this.einstellungenToolStripMenuItem.Click += new System.EventHandler(this.einstellungenToolStripMenuItem_Click);
             // 
             // Schiessbuch
             // 
@@ -7252,7 +7258,7 @@ namespace schiessbuch
             this.Stand4SchussPanel.ResumeLayout(false);
             this.Stand4SchussPanel.PerformLayout();
             this.tabEinzelscheibe.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEinzelScheibe)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).EndInit();
             this.bindingNavigator1.ResumeLayout(false);
             this.bindingNavigator1.PerformLayout();
@@ -7795,7 +7801,7 @@ namespace schiessbuch
         private BindingSource schuetzenlisteschiessbuchBindingSource;
         private BindingSource schiessbuchtrefferBindingSource;
         private TabPage tabEinzelscheibe;
-        private PictureBox pictureBox3;
+        private PictureBox pictureBoxEinzelScheibe;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem einstellungenToolStripMenuItem;
     }

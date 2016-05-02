@@ -521,7 +521,12 @@ namespace schiessbuch
 
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (databaseRequestCounter == 0 && generateOverview)
+            if (generateEinzelScheibe)
+            {
+                setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
+                UpdateStandTrefferDaten(standFuerEinzelScheibe);
+            }
+            if (generateOverview)
             {
                 updateOverview();
                 stand1Zielscheibe.Invalidate();
@@ -531,97 +536,44 @@ namespace schiessbuch
                 stand5Zielscheibe.Invalidate();
                 stand6Zielscheibe.Invalidate();
             }
-            databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
-            // trefferBindingSource.ResetBindings(false);
-            // schuetzenBindingSource.ResetBindings(false);
-            // schiessbuchBindingSource.ResetBindings(false);
-            if (GetEreignisseCount() != ereignisse_count)
+            if (databaseRequestCounter == 0)
             {
-                ereignisse_count = GetEreignisseCount();
-                treffer_count = GetTrefferCount();
-                int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
-                int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
-                List<string> eventsSelected = new List<string>();
-                List<long> trefferSelected = new List<long>();
-                foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
-                {
-                    eventsSelected.Add(row.Cells["session"].Value.ToString());
-                }
-                foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
-                {
-                    trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
-                }
-                //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
-                {
-                    //row.Selected = false;
-                    foreach (string selItem in eventsSelected)
-                    {
-                        if (row.Cells["session"].Value.ToString() == selItem)
-                        {
-                            row.Selected = true;
-                            schiessbuchBindingSource.Position = row.Index;
-                        }
-                    }
-                }
-                foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                {
-                    row.Selected = false;
-                    foreach (long selId in trefferSelected)
-                    {
-                        if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                        {
-                            row.Selected = true;
-                        }
-                    }
-                }
-                //schiessbuchBindingSource.ResetBindings(false);
-                //trefferBindingSource.ResetBindings(false);
 
-                if (SchiessbuchScrollposition != -1)
-                    schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
-                if (TrefferScrollposition != -1)
-                    trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                //siusclubDataSet.Reset();
-                //schiessbuchBindingSource.ResetBindings(false);
 
-                //schiessbuchDataGridView.DataSource = null;
-                //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
-
-                //MessageBox.Show("Tick");
-                //schiessbuchBindingSource.ResetBindings(false);
-                //trefferBindingSource.ResetBindings(false);
-                //schuetzenBindingSource.ResetBindings(false);
-
-                //schiessbuchDataGridView.Refresh();
-                //schiessbuchDataGridView.Invalidate();
-
-                //siusclubDataSet.Reset();
-                //trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                //schiessbuchDataGridView.Invalidate();
-                // SELECT für König:
-                // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
-                // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
-                // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
-                //UpdateKoenig();
-            }
-            else
-            {
-                if (GetTrefferCount() != treffer_count)
+                // trefferBindingSource.ResetBindings(false);
+                // schuetzenBindingSource.ResetBindings(false);
+                // schiessbuchBindingSource.ResetBindings(false);
+                if (GetEreignisseCount() != ereignisse_count)
                 {
+                    ereignisse_count = GetEreignisseCount();
                     treffer_count = GetTrefferCount();
+                    int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
                     int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                    List<string> eventsSelected = new List<string>();
                     List<long> trefferSelected = new List<long>();
+                    foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
+                    {
+                        eventsSelected.Add(row.Cells["session"].Value.ToString());
+                    }
                     foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
                     {
                         trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                     }
-
+                    //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                    schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
                     trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                    foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
+                    {
+                        //row.Selected = false;
+                        foreach (string selItem in eventsSelected)
+                        {
+                            if (row.Cells["session"].Value.ToString() == selItem)
+                            {
+                                row.Selected = true;
+                                schiessbuchBindingSource.Position = row.Index;
+                            }
+                        }
+                    }
                     foreach (DataGridViewRow row in trefferDataGridView.Rows)
                     {
                         row.Selected = false;
@@ -635,11 +587,69 @@ namespace schiessbuch
                     }
                     //schiessbuchBindingSource.ResetBindings(false);
                     //trefferBindingSource.ResetBindings(false);
+
+                    if (SchiessbuchScrollposition != -1)
+                        schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
                     if (TrefferScrollposition != -1)
                         trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                    UpdateKoenig();
+                    //siusclubDataSet.Reset();
+                    //schiessbuchBindingSource.ResetBindings(false);
+
+                    //schiessbuchDataGridView.DataSource = null;
+                    //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
+
+                    //MessageBox.Show("Tick");
+                    //schiessbuchBindingSource.ResetBindings(false);
+                    //trefferBindingSource.ResetBindings(false);
+                    //schuetzenBindingSource.ResetBindings(false);
+
+                    //schiessbuchDataGridView.Refresh();
+                    //schiessbuchDataGridView.Invalidate();
+
+                    //siusclubDataSet.Reset();
+                    //trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                    //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                    //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                    //schiessbuchDataGridView.Invalidate();
+                    // SELECT für König:
+                    // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
+                    // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
+                    // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
+                    //UpdateKoenig();
+                }
+                else
+                {
+                    if (GetTrefferCount() != treffer_count)
+                    {
+                        treffer_count = GetTrefferCount();
+                        int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                        List<long> trefferSelected = new List<long>();
+                        foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+                        {
+                            trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
+                        }
+
+                        trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        foreach (DataGridViewRow row in trefferDataGridView.Rows)
+                        {
+                            row.Selected = false;
+                            foreach (long selId in trefferSelected)
+                            {
+                                if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                                {
+                                    row.Selected = true;
+                                }
+                            }
+                        }
+                        //schiessbuchBindingSource.ResetBindings(false);
+                        //trefferBindingSource.ResetBindings(false);
+                        if (TrefferScrollposition != -1)
+                            trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                        UpdateKoenig();
+                    }
                 }
             }
+            databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
         }
 
         private void updateOverview()
@@ -654,101 +664,8 @@ namespace schiessbuch
             float num3 = num * num2;
             try
             {
-                for (int i = 1; i <= 6; i++)
-                {
-                    this.aktuelleTreffer[i - 1].Clear();
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + i.ToString());
-                    request.Method = "GET";
-                    XDocument document = new XDocument();
-                    //document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    {
-                        document = XDocument.Load(response.GetResponseStream());
-                        string str = "";
-                        int iSchuetze = 0;
-                        string strZielscheibe = "";
-                        string strDisziplin = "";
-                        foreach (XElement element in document.Root.Elements())
-                        {
-                            if (element.Name.ToString().Equals("treffer"))
-                            {
-                                float xrahmeninmm = 0f;
-                                float yrahmeninmm = 0f;
-                                string str2 = "";
-                                int ring = 0;
-                                int schussnummer = 0;
-                                CultureInfo provider = new CultureInfo("en-US");
-                                foreach (XElement element2 in element.Elements())
-                                {
-                                    if (element2.Name.ToString().Equals("schuetze"))
-                                    {
-                                        if (iSchuetze == 0)
-                                        {
-                                            iSchuetze = int.Parse(element2.Value);
-                                        }
-                                        else
-                                        {
-                                            if (iSchuetze != int.Parse(element2.Value))
-                                            {
-                                                MessageBox.Show("verschiedene Schützen auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
-                                            }
-                                        }
-                                    }
-                                    if (element2.Name.ToString().Equals("disziplin"))
-                                    {
-                                        if (strDisziplin.Length == 0)
-                                        {
-                                            strDisziplin = element2.Value;
-                                        }
-                                        else
-                                        {
-                                            if (!element2.Value.Equals(strDisziplin))
-                                            {
-                                                MessageBox.Show("verschiedene Disziplinen auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
-                                            }
-                                        }
-                                    }
-                                    if (element2.Name.ToString().Equals("ring"))
-                                    {
-                                        ring = int.Parse(element2.Value);
-                                    }
-                                    if (element2.Name.ToString().Equals("zielscheibe"))
-                                    {
-                                        str2 = element2.Value;
-                                        if (strZielscheibe.Length == 0)
-                                        {
-                                            strZielscheibe = element2.Value;
-                                        }
-                                        else
-                                        {
-                                            if (!strZielscheibe.Equals(element2.Value))
-                                            {
-                                                MessageBox.Show("verschiedene Zielscheiben auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
-                                            }
-                                        }
-                                    }
-                                    if (element2.Name.ToString().Equals("xRahmenInMm"))
-                                    {
-                                        xrahmeninmm = float.Parse(element2.Value.ToString(), provider);
-                                    }
-                                    if (element2.Name.ToString().Equals("yRahmenInMm"))
-                                    {
-                                        yrahmeninmm = float.Parse(element2.Value.ToString(), provider);
-                                    }
-                                    if (element2.Name.ToString().Equals("schussnummer"))
-                                    {
-                                        schussnummer = int.Parse(element2.Value);
-                                        if (schussnummer == 1) aktuelleTreffer[i - 1].Clear();
-                                    }
-                                }
-                                if ((str.Length == 0) || str.Equals(str2))
-                                {
-                                    this.aktuelleTreffer[i - 1].Add(new SchussInfo(xrahmeninmm, yrahmeninmm, ring, schussnummer, strZielscheibe, iSchuetze, strDisziplin));
-                                }
-                            }
-                        }
-                    }
-                }
+                for (int stand = 1; stand <= 6; stand++)
+                    UpdateStandTrefferDaten(stand);
 
             }
             catch (WebException)
@@ -759,6 +676,102 @@ namespace schiessbuch
             }            // Zeichne die richtigen Zielscheiben
             for (int iStand = 0; iStand < 6; iStand++)
                 this.setzeZielscheibeInUebersicht(iStand);
+        }
+
+        private void UpdateStandTrefferDaten(int stand)
+        {
+            this.aktuelleTreffer[stand - 1].Clear();
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            request.Method = "GET";
+            XDocument document = new XDocument();
+//            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                document = XDocument.Load(response.GetResponseStream());
+                string str = "";
+                int iSchuetze = 0;
+                string strZielscheibe = "";
+                string strDisziplin = "";
+                foreach (XElement element in document.Root.Elements())
+                {
+                    if (element.Name.ToString().Equals("treffer"))
+                    {
+                        float xrahmeninmm = 0f;
+                        float yrahmeninmm = 0f;
+                        string str2 = "";
+                        int ring = 0;
+                        int schussnummer = 0;
+                        CultureInfo provider = new CultureInfo("en-US");
+                        foreach (XElement element2 in element.Elements())
+                        {
+                            if (element2.Name.ToString().Equals("schuetze"))
+                            {
+                                if (iSchuetze == 0)
+                                {
+                                    iSchuetze = int.Parse(element2.Value);
+                                }
+                                else
+                                {
+                                    if (iSchuetze != int.Parse(element2.Value))
+                                    {
+                                        MessageBox.Show("verschiedene Schützen auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
+                                    }
+                                }
+                            }
+                            if (element2.Name.ToString().Equals("disziplin"))
+                            {
+                                if (strDisziplin.Length == 0)
+                                {
+                                    strDisziplin = element2.Value;
+                                }
+                                else
+                                {
+                                    if (!element2.Value.Equals(strDisziplin))
+                                    {
+                                        MessageBox.Show("verschiedene Disziplinen auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
+                                    }
+                                }
+                            }
+                            if (element2.Name.ToString().Equals("ring"))
+                            {
+                                ring = int.Parse(element2.Value);
+                            }
+                            if (element2.Name.ToString().Equals("zielscheibe"))
+                            {
+                                str2 = element2.Value;
+                                if (strZielscheibe.Length == 0)
+                                {
+                                    strZielscheibe = element2.Value;
+                                }
+                                else
+                                {
+                                    if (!strZielscheibe.Equals(element2.Value))
+                                    {
+                                        MessageBox.Show("verschiedene Zielscheiben auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
+                                    }
+                                }
+                            }
+                            if (element2.Name.ToString().Equals("xRahmenInMm"))
+                            {
+                                xrahmeninmm = float.Parse(element2.Value.ToString(), provider);
+                            }
+                            if (element2.Name.ToString().Equals("yRahmenInMm"))
+                            {
+                                yrahmeninmm = float.Parse(element2.Value.ToString(), provider);
+                            }
+                            if (element2.Name.ToString().Equals("schussnummer"))
+                            {
+                                schussnummer = int.Parse(element2.Value);
+                                if (schussnummer == 1) aktuelleTreffer[stand - 1].Clear();
+                            }
+                        }
+                        if ((str.Length == 0) || str.Equals(str2))
+                        {
+                            this.aktuelleTreffer[stand - 1].Add(new SchussInfo(xrahmeninmm, yrahmeninmm, ring, schussnummer, strZielscheibe, iSchuetze, strDisziplin));
+                        }
+                    }
+                }
+            }
         }
 
         private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand)
@@ -773,46 +786,52 @@ namespace schiessbuch
             float num6 = width / num5;
             int stand1 = stand + 1;
             int iSumme = 0;
+            int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
+            int anzeigenAb = this.aktuelleTreffer[stand].Count - AnzTreffer;
+            int trefferZaehler = 0;
             foreach (SchussInfo info in this.aktuelleTreffer[stand])
             {
-                Brush brush;
-                float num9;
-                float height;
-                float num7 = (info.xrahmeninmm - (num / 2f)) * num2;
-                float num8 = (info.yrahmeninmm - (num / 2f)) * num2;
-                if (info == aktuelleTreffer[stand].Last<SchussInfo>())
+                trefferZaehler++;
+                if (trefferZaehler > anzeigenAb)
                 {
-                    brush = new SolidBrush(Color.FromArgb(120, Color.Red));
-                }
-                else if (info.ring < 10)
-                {
-                    brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
-                }
-                else
-                {
-                    brush = new SolidBrush(Color.FromArgb(120, Color.Green));
-                }
-                Rectangle rect = new Rectangle(((int)(num7 / num6)) + (pictureBox.Width / 2), ((int)(num8 / num6)) + (pictureBox.Height / 2), (int)(num3 / num6), (int)(num3 / num6));
-                e.Graphics.FillEllipse(brush, rect);
-                e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
-                string text = info.schussnummer.ToString();
-                while (true)
-                {
-                    num9 = e.Graphics.MeasureString(text, font).Width;
-                    height = e.Graphics.MeasureString(text, font).Height;
-                    if ((height > (rect.Height * 0.8)) || (num9 > (rect.Width * 0.8)))
+                    Brush brush;
+                    float num9;
+                    float height;
+                    float num7 = (info.xrahmeninmm - (num / 2f)) * num2;
+                    float num8 = (info.yrahmeninmm - (num / 2f)) * num2;
+                    if (info == aktuelleTreffer[stand].Last<SchussInfo>())
                     {
-                        break;
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Red));
                     }
-                    font = new Font("Arial", font.Size + 1f);
+                    else if (info.ring < 10)
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
+                    }
+                    else
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Green));
+                    }
+                    Rectangle rect = new Rectangle(((int)(num7 / num6)) + (pictureBox.Width / 2), ((int)(num8 / num6)) + (pictureBox.Height / 2), (int)(num3 / num6), (int)(num3 / num6));
+                    e.Graphics.FillEllipse(brush, rect);
+                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    string text = info.schussnummer.ToString();
+                    while (true)
+                    {
+                        num9 = e.Graphics.MeasureString(text, font).Width;
+                        height = e.Graphics.MeasureString(text, font).Height;
+                        if ((height > (rect.Height * 0.8)) || (num9 > (rect.Width * 0.8)))
+                        {
+                            break;
+                        }
+                        font = new Font("Arial", font.Size + 1f);
+                    }
+                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (num9 / 2f)), (float)((rect.Y + (rect.Height / 2)) - (height / 2f)));
                 }
-                e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (num9 / 2f)), (float)((rect.Y + (rect.Height / 2)) - (height / 2f)));
                 int spalte = (info.schussnummer - 1) % 5;
                 int zeile = (info.schussnummer - 1) / 5;
                 string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
 
                 ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
-
                 iSumme += info.ring;
             }
             ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
@@ -995,6 +1014,7 @@ namespace schiessbuch
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.stopUebersicht();
+            this.stopEinzelScheibe();
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
             if (tabControl1.SelectedTab.Text.Equals("Tagesauswertung"))
@@ -1003,7 +1023,20 @@ namespace schiessbuch
                 startUebersicht();
             if (!tabControl1.SelectedTab.Name.Equals("tabEinzelscheibe"))
                 tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
+            else
+                startEinzelScheibe();
         }
+        private int standFuerEinzelScheibe;
+        private void startEinzelScheibe()
+        {
+            this.generateEinzelScheibe = true;
+        }
+
+        private void stopEinzelScheibe()
+        {
+            this.generateEinzelScheibe = false;
+        }
+
         private void stopUebersicht()
         {
             this.generateOverview = false;
@@ -1399,10 +1432,12 @@ namespace schiessbuch
 
         MySqlConnection TagesAuswertungListeConnection;
         MySqlDataReader TagesAuswertungListeDataReader;
+        bool TagesAuswertungConnectionIsActive = false;
+
+
 
         private void btnTagesAuswertungListeDrucken_Click(object sender, EventArgs e)
         {
-            string filterDateStr = dateTimePicker1.Value.Year + "-" + dateTimePicker1.Value.Month + "-" + dateTimePicker1.Value.Day;
             if (pd == null)
             {
                 pd = new PrintDocument();
@@ -1413,10 +1448,7 @@ namespace schiessbuch
             //pd = new PrintDocument();
             PrintPreviewDialog ppdlg = new PrintPreviewDialog();
 
-            TagesAuswertungListeConnection = new MySqlConnection(connStr);
-            TagesAuswertungListeConnection.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT `name`, vorname, concat(name, ', ', vorname) as fullname, disziplin, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' HAVING Date='" + filterDateStr + "'  order by fullname", TagesAuswertungListeConnection);
-            TagesAuswertungListeDataReader = cmd.ExecuteReader();
+            ConnectToDatabaseForTagesAuswertungListe();
 
 
             //PrintPreviewControl printPreviewControl1 = new PrintPreviewControl();
@@ -1435,9 +1467,19 @@ namespace schiessbuch
             MySqlConnection.ClearPool(TagesAuswertungListeConnection);
         }
 
+        private void ConnectToDatabaseForTagesAuswertungListe()
+        {
+            string filterDateStr = dateTimePicker1.Value.Year + "-" + dateTimePicker1.Value.Month + "-" + dateTimePicker1.Value.Day;
+            TagesAuswertungListeConnection = new MySqlConnection(connStr);
+            TagesAuswertungListeConnection.Open();
+            MySqlCommand cmd = new MySqlCommand("SELECT `name`, vorname, concat(name, ', ', vorname) as fullname, disziplin, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' HAVING Date='" + filterDateStr + "'  order by fullname", TagesAuswertungListeConnection);
+            TagesAuswertungListeDataReader = cmd.ExecuteReader();
+            TagesAuswertungConnectionIsActive = true;
+        }
+
         private void pd_PrintPageListe(object sender, PrintPageEventArgs ev)
         {
-
+            if (!TagesAuswertungConnectionIsActive) ConnectToDatabaseForTagesAuswertungListe();
 
             //ev.Graphics.Clear(Color.White);
             float linesPerPage = 0;
@@ -1514,6 +1556,7 @@ namespace schiessbuch
             TagesAuswertungListeConnection.Close();
             TagesAuswertungListeConnection.Dispose();
             MySqlConnection.ClearPool(TagesAuswertungListeConnection);
+            TagesAuswertungConnectionIsActive = false;
         }
 
         private void splitContainer1_Resize(object sender, EventArgs e)
@@ -2151,7 +2194,7 @@ namespace schiessbuch
         const string strZielscheibeLuftpistoleBlattlRot = "DSB Luftpistole 10m Blattl rot";
         const string strZielscheibeLuftgewehrBlattl = "DSB Luftgewehr 10m Blattl schwarz";
         const string strZielscheibeLuftpistoleBlattl = "DSB Luftpistole 10m Blattl schwarz";
-
+        private bool generateEinzelScheibe;
 
         private void setzeZielscheibeInUebersicht(int stand)
         {
@@ -2243,11 +2286,96 @@ namespace schiessbuch
             }
         }
 
+        private void setzeZielscheibeInEinzelansicht(int stand)
+        {
+            stand--; // Ich brauche die 0-basierte Standnummer
+            string strStand = (stand + 1).ToString();
+            Bitmap bScheibe = schiessbuch.Properties.Resources.Luftgewehr;
+            try
+            {
+                string strZielscheibeInXML = aktuelleTreffer[stand][0].strZielscheibe; // ich lese die Zielscheibe einfach aus dem ersten schuss aus und hoffe, dass diese dann auch bei allen anderen schüssen die selbe ist. Falls nicht, wird sowieso eine Fehlermeldung ausgegeben.
+                if (strZielscheibeInXML.Equals(strZielscheibeLuftgewehr) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattlRot))
+                    bScheibe = schiessbuch.Properties.Resources.Luftgewehr;
+                if (strZielscheibeInXML.Equals(strZielscheibeLuftpistole) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattlRot) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleRot))
+                    bScheibe = schiessbuch.Properties.Resources.Luftpistole;
+            }
+            catch (ArgumentOutOfRangeException)
+            { // Exception soll einfach ignoriert werden 
+            }
+            if (!pictureBoxEinzelScheibe.Image.Equals(bScheibe)) pictureBoxEinzelScheibe.Image = bScheibe;
+            //((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]).Image = bScheibe;
+
+            // Disziplin setzen
+            /*
+            try
+            {
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]).Text = aktuelleTreffer[stand][0].disziplin;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]).Text = "keine";
+            }
+
+            // Schütze setzen
+            MySqlConnection conn = new MySqlConnection(connStr);
+            try
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM schuetzenliste WHERE id='" + aktuelleTreffer[stand][0].schuetze.ToString() + "' AND SchiessjahrID='" + aktuellesSchiessjahrID.ToString() + "'", conn);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = reader["fullname"].ToString();
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "kein Schütze";
+            }
+            conn.Clone();
+            conn.Dispose();
+            MySqlConnection.ClearPool(conn);
+            */
+        }
+
         private void stand1Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(1, sender, e);
+        }
+
+        private void stand2Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(2, sender, e);
+        }
+
+        private void stand3Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(3, sender, e);
+        }
+
+        private void stand4Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(4, sender, e);
+        }
+
+        private void stand5Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(5, sender, e);
+        }
+
+        private void stand6Zielscheibe_DoubleClick(object sender, EventArgs e)
+        {
+            standXZielscheibe_DoubleClick(6, sender, e);
+        }
+
+        private void standXZielscheibe_DoubleClick(int stand, object sender, EventArgs e)
         {
             int num = this.tabControl1.TabPages.IndexOfKey("tabStandUebersicht");
             this.tabControl1.TabPages.Insert(num + 1, this.EinzelScheibe);
             this.tabControl1.SelectTab("tabEinzelscheibe");
+            standFuerEinzelScheibe = stand;
+            
         }
 
         private void pictureBox3_Resize(object sender, EventArgs e)
@@ -2255,13 +2383,13 @@ namespace schiessbuch
             if (tabEinzelscheibe.ClientRectangle.Width > tabEinzelscheibe.ClientRectangle.Height) {
                 // Das Fenster ist breiter als hoch
                 // Dann die Breite der PictureBox auf die Höhe beschränken, so dass es quadratisch wird.
-                pictureBox3.Height = tabEinzelscheibe.ClientRectangle.Height;
-                pictureBox3.Width = pictureBox3.Height;
+                pictureBoxEinzelScheibe.Height = tabEinzelscheibe.ClientRectangle.Height;
+                pictureBoxEinzelScheibe.Width = pictureBoxEinzelScheibe.Height;
             } else
             {
                 // Das Fenster ist höher als breit. Ich kann mir zwar nicht vorstellen, dass das mal vorkommen wird, aber wer weiss :-)
-                pictureBox3.Width = tabEinzelscheibe.ClientRectangle.Width;
-                pictureBox3.Height = pictureBox3.Width;
+                pictureBoxEinzelScheibe.Width = tabEinzelscheibe.ClientRectangle.Width;
+                pictureBoxEinzelScheibe.Height = pictureBoxEinzelScheibe.Width;
             }
         }
 
@@ -2302,6 +2430,7 @@ namespace schiessbuch
             Einstellungen einstellungenDlg = new Einstellungen();
             einstellungenDlg.tbTimerInterval.Text = Properties.Settings.Default.TimerInterval.ToString();
             einstellungenDlg.tbDatabaseRefresh.Text = Properties.Settings.Default.DatabaseInterval.ToString();
+            einstellungenDlg.tbAnzLetzteTreffer.Text = Properties.Settings.Default.AnzLetzteTreffer.ToString();
             DialogResult result = einstellungenDlg.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -2324,11 +2453,26 @@ namespace schiessbuch
                     enus,
                     out iValue);
                 Properties.Settings.Default.DatabaseInterval = iValue;
+
+                iValue = 1;
+                int.TryParse(einstellungenDlg.tbAnzLetzteTreffer.Text,
+                    NumberStyles.Integer
+                    | NumberStyles.Number,
+                    enus,
+                    out iValue);
+                Properties.Settings.Default.AnzLetzteTreffer = iValue;
                 Properties.Settings.Default.Save();
                 einstellungenDlg.Close();
                 einstellungenDlg.Dispose();
             }
 
+        }
+
+        private void pictureBoxEinzelScheibe_Paint(object sender, PaintEventArgs e)
+        {
+            // this.cleanSchussTable(0); nur benötigt, wenn eine Tabelle mit allen Schüssen angezeigt werden soll
+            // setze die richtige Zielscheibe ein
+            ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, e, standFuerEinzelScheibe - 1);
         }
     }
 }
