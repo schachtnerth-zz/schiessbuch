@@ -36,37 +36,37 @@ namespace schiessbuch
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.Label vereinLabel1;
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle43 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle47 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle48 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Schiessbuch));
             this.KlasseName = new System.Windows.Forms.TextBox();
-            this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
+            this.schuetzenListeBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.siusclubDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.siusclubDataSet = new schiessbuch.siusclubDataSet();
             this.GeburtstagDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -214,8 +214,8 @@ namespace schiessbuch
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.KoenigTextBox = new System.Windows.Forms.TextBox();
             this.KoenigTab = new System.Windows.Forms.TabPage();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.splitContainerKoenig1 = new System.Windows.Forms.SplitContainer();
+            this.splitContainerKoenig2 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.SchuetzenklasseLabel = new System.Windows.Forms.Label();
             this.KoenigSKGridView = new System.Windows.Forms.DataGridView();
@@ -232,7 +232,7 @@ namespace schiessbuch
             this.DatumDK = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TeilerDK = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TypDK = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.splitContainerKoenig3 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
             this.KoenigAuflageGridView = new System.Windows.Forms.DataGridView();
@@ -600,7 +600,7 @@ namespace schiessbuch
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
             vereinLabel1 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSourceA)).BeginInit();
@@ -632,22 +632,22 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.Schiessabend)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.KoenigTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
-            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig1)).BeginInit();
+            this.splitContainerKoenig1.Panel1.SuspendLayout();
+            this.splitContainerKoenig1.Panel2.SuspendLayout();
+            this.splitContainerKoenig1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig2)).BeginInit();
+            this.splitContainerKoenig2.Panel1.SuspendLayout();
+            this.splitContainerKoenig2.Panel2.SuspendLayout();
+            this.splitContainerKoenig2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigSKGridView)).BeginInit();
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigDKGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
-            this.splitContainer3.Panel1.SuspendLayout();
-            this.splitContainer3.Panel2.SuspendLayout();
-            this.splitContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig3)).BeginInit();
+            this.splitContainerKoenig3.Panel1.SuspendLayout();
+            this.splitContainerKoenig3.Panel2.SuspendLayout();
+            this.splitContainerKoenig3.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigAuflageGridView)).BeginInit();
             this.tableLayoutPanel7.SuspendLayout();
@@ -714,17 +714,17 @@ namespace schiessbuch
             // 
             // KlasseName
             // 
-            this.KlasseName.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "Jahrgangsklasse", true));
+            this.KlasseName.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "Jahrgangsklasse", true));
             this.KlasseName.Location = new System.Drawing.Point(346, 20);
             this.KlasseName.Name = "KlasseName";
             this.KlasseName.ReadOnly = true;
             this.KlasseName.Size = new System.Drawing.Size(100, 20);
             this.KlasseName.TabIndex = 33;
             // 
-            // bindingSource1
+            // schuetzenListeBindingSource
             // 
-            this.bindingSource1.DataMember = "schuetzenliste";
-            this.bindingSource1.DataSource = this.siusclubDataSetBindingSource;
+            this.schuetzenListeBindingSource.DataMember = "schuetzenliste";
+            this.schuetzenListeBindingSource.DataSource = this.siusclubDataSetBindingSource;
             // 
             // siusclubDataSetBindingSource
             // 
@@ -748,7 +748,7 @@ namespace schiessbuch
             // 
             // geburtsdatumTextBox
             // 
-            this.geburtsdatumTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "geburtsdatum", true));
+            this.geburtsdatumTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "geburtsdatum", true));
             this.geburtsdatumTextBox.Location = new System.Drawing.Point(125, 46);
             this.geburtsdatumTextBox.Name = "geburtsdatumTextBox";
             this.geburtsdatumTextBox.ReadOnly = true;
@@ -757,7 +757,7 @@ namespace schiessbuch
             // 
             // geschlechtTextBox
             // 
-            this.geschlechtTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "geschlecht", true));
+            this.geschlechtTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "geschlecht", true));
             this.geschlechtTextBox.Location = new System.Drawing.Point(100, 46);
             this.geschlechtTextBox.Name = "geschlechtTextBox";
             this.geschlechtTextBox.ReadOnly = true;
@@ -910,7 +910,7 @@ namespace schiessbuch
             // 
             // idTextBox
             // 
-            this.idTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "id", true));
+            this.idTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "id", true));
             this.idTextBox.Location = new System.Drawing.Point(63, 46);
             this.idTextBox.Name = "idTextBox";
             this.idTextBox.ReadOnly = true;
@@ -919,7 +919,7 @@ namespace schiessbuch
             // 
             // nameTextBox
             // 
-            this.nameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "name", true));
+            this.nameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "name", true));
             this.nameTextBox.Location = new System.Drawing.Point(63, 72);
             this.nameTextBox.Name = "nameTextBox";
             this.nameTextBox.ReadOnly = true;
@@ -929,7 +929,7 @@ namespace schiessbuch
             // 
             // vornameTextBox
             // 
-            this.vornameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "vorname", true));
+            this.vornameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "vorname", true));
             this.vornameTextBox.Location = new System.Drawing.Point(247, 72);
             this.vornameTextBox.Name = "vornameTextBox";
             this.vornameTextBox.ReadOnly = true;
@@ -939,7 +939,7 @@ namespace schiessbuch
             // 
             // emailTextBox
             // 
-            this.emailTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "email", true));
+            this.emailTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "email", true));
             this.emailTextBox.Location = new System.Drawing.Point(63, 98);
             this.emailTextBox.Name = "emailTextBox";
             this.emailTextBox.ReadOnly = true;
@@ -950,7 +950,7 @@ namespace schiessbuch
             // fullnameComboBox
             // 
             this.fullnameComboBox.CausesValidation = false;
-            this.fullnameComboBox.DataSource = this.bindingSource1;
+            this.fullnameComboBox.DataSource = this.schuetzenListeBindingSource;
             this.fullnameComboBox.DisplayMember = "fullname";
             this.fullnameComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.fullnameComboBox.Location = new System.Drawing.Point(63, 19);
@@ -1047,7 +1047,7 @@ namespace schiessbuch
             // 
             // vereinTextBox
             // 
-            this.vereinTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "verein", true));
+            this.vereinTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "verein", true));
             this.vereinTextBox.Location = new System.Drawing.Point(63, 124);
             this.vereinTextBox.Name = "vereinTextBox";
             this.vereinTextBox.ReadOnly = true;
@@ -1068,14 +1068,14 @@ namespace schiessbuch
             this.schiessbuchDataGridView.AutoGenerateColumns = false;
             this.schiessbuchDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
             this.schiessbuchDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle29.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle29.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle29.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle29.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle29.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.schiessbuchDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.schiessbuchDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.schiessbuchDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.schiessbuchDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn2,
@@ -1087,26 +1087,26 @@ namespace schiessbuch
             this.dt});
             this.schiessbuchDataGridView.ContextMenuStrip = this.SchiessbuchContexMenu;
             this.schiessbuchDataGridView.DataSource = this.schuetzenlisteschiessbuchBindingSource;
-            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle34.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle34.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle34.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle34.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle34.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.schiessbuchDataGridView.DefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.schiessbuchDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
             this.schiessbuchDataGridView.Location = new System.Drawing.Point(6, 190);
             this.schiessbuchDataGridView.MultiSelect = false;
             this.schiessbuchDataGridView.Name = "schiessbuchDataGridView";
             this.schiessbuchDataGridView.ReadOnly = true;
-            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle35.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle35.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle35.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle35.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle35.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle35.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.schiessbuchDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle35;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.schiessbuchDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle7;
             this.schiessbuchDataGridView.RowHeadersWidth = 10;
             this.schiessbuchDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.schiessbuchDataGridView.ShowEditingIcon = false;
@@ -1129,8 +1129,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn4
             // 
             this.dataGridViewTextBoxColumn4.DataPropertyName = "stand";
-            dataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewTextBoxColumn4.HeaderText = "Stand";
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
@@ -1148,8 +1148,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn3
             // 
             this.dataGridViewTextBoxColumn3.DataPropertyName = "ergebnis";
-            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.dataGridViewTextBoxColumn3.DefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTextBoxColumn3.HeaderText = "Ergebnis";
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.ReadOnly = true;
@@ -1168,9 +1168,9 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn8
             // 
             this.dataGridViewTextBoxColumn8.DataPropertyName = "dt";
-            dataGridViewCellStyle32.Format = "d";
-            dataGridViewCellStyle32.NullValue = null;
-            this.dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle4.Format = "d";
+            dataGridViewCellStyle4.NullValue = null;
+            this.dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewTextBoxColumn8.HeaderText = "Datum";
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
@@ -1180,9 +1180,9 @@ namespace schiessbuch
             // dt
             // 
             this.dt.DataPropertyName = "dt";
-            dataGridViewCellStyle33.Format = "T";
-            dataGridViewCellStyle33.NullValue = null;
-            this.dt.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle5.Format = "T";
+            dataGridViewCellStyle5.NullValue = null;
+            this.dt.DefaultCellStyle = dataGridViewCellStyle5;
             this.dt.HeaderText = "Uhrzeit";
             this.dt.Name = "dt";
             this.dt.ReadOnly = true;
@@ -1228,7 +1228,7 @@ namespace schiessbuch
             // schuetzenlisteschiessbuchBindingSource
             // 
             this.schuetzenlisteschiessbuchBindingSource.DataMember = "schuetzenliste_schiessbuch";
-            this.schuetzenlisteschiessbuchBindingSource.DataSource = this.bindingSource1;
+            this.schuetzenlisteschiessbuchBindingSource.DataSource = this.schuetzenListeBindingSource;
             // 
             // SchiessabendPicker
             // 
@@ -1270,14 +1270,14 @@ namespace schiessbuch
             this.trefferDataGridView.AutoGenerateColumns = false;
             this.trefferDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
             this.trefferDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.trefferDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.trefferDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this.trefferDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.trefferDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.schritt,
@@ -1309,25 +1309,25 @@ namespace schiessbuch
             this.id,
             this.SchrittText});
             this.trefferDataGridView.DataSource = this.schiessbuchtrefferBindingSource;
-            dataGridViewCellStyle40.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle40.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle40.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle40.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle40.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle40.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle40.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.trefferDataGridView.DefaultCellStyle = dataGridViewCellStyle40;
+            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.trefferDataGridView.DefaultCellStyle = dataGridViewCellStyle15;
             this.trefferDataGridView.Location = new System.Drawing.Point(464, 6);
             this.trefferDataGridView.Name = "trefferDataGridView";
             this.trefferDataGridView.ReadOnly = true;
-            dataGridViewCellStyle41.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle41.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle41.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle41.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle41.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle41.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle41.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.trefferDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle41;
+            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.trefferDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
             this.trefferDataGridView.RowHeadersWidth = 10;
             this.trefferDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.trefferDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -1340,8 +1340,8 @@ namespace schiessbuch
             // schritt
             // 
             this.schritt.DataPropertyName = "schritt";
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.schritt.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.schritt.DefaultCellStyle = dataGridViewCellStyle9;
             this.schritt.HeaderText = "Schritt";
             this.schritt.Name = "schritt";
             this.schritt.ReadOnly = true;
@@ -1350,8 +1350,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn29
             // 
             this.dataGridViewTextBoxColumn29.DataPropertyName = "serie";
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.dataGridViewTextBoxColumn29.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.dataGridViewTextBoxColumn29.DefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridViewTextBoxColumn29.HeaderText = "Serie";
             this.dataGridViewTextBoxColumn29.Name = "dataGridViewTextBoxColumn29";
             this.dataGridViewTextBoxColumn29.ReadOnly = true;
@@ -1360,8 +1360,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn15
             // 
             this.dataGridViewTextBoxColumn15.DataPropertyName = "schussnummer";
-            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle36;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle11;
             this.dataGridViewTextBoxColumn15.HeaderText = "S";
             this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
             this.dataGridViewTextBoxColumn15.ReadOnly = true;
@@ -1370,8 +1370,8 @@ namespace schiessbuch
             // ring
             // 
             this.ring.DataPropertyName = "ring";
-            dataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.ring.DefaultCellStyle = dataGridViewCellStyle37;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.ring.DefaultCellStyle = dataGridViewCellStyle12;
             this.ring.HeaderText = "Ring";
             this.ring.Name = "ring";
             this.ring.ReadOnly = true;
@@ -1388,8 +1388,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn7
             // 
             this.dataGridViewTextBoxColumn7.DataPropertyName = "zehntel";
-            dataGridViewCellStyle38.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle38;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle13;
             this.dataGridViewTextBoxColumn7.HeaderText = "Zehntel";
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
@@ -1398,8 +1398,8 @@ namespace schiessbuch
             // dataGridViewTextBoxColumn9
             // 
             this.dataGridViewTextBoxColumn9.DataPropertyName = "teiler";
-            dataGridViewCellStyle39.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle39;
+            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle14;
             this.dataGridViewTextBoxColumn9.HeaderText = "Teiler";
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
             this.dataGridViewTextBoxColumn9.ReadOnly = true;
@@ -1595,7 +1595,7 @@ namespace schiessbuch
             // 
             this.zielscheibeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.zielscheibeTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.trefferBindingSource, "zielscheibe", true));
+            this.zielscheibeTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schiessbuchtrefferBindingSource, "zielscheibe", true));
             this.zielscheibeTextBox.Location = new System.Drawing.Point(805, 6);
             this.zielscheibeTextBox.Name = "zielscheibeTextBox";
             this.zielscheibeTextBox.ReadOnly = true;
@@ -2185,7 +2185,7 @@ namespace schiessbuch
             // 
             // textBox1
             // 
-            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "id", true));
+            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "id", true));
             this.textBox1.Location = new System.Drawing.Point(63, 46);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
@@ -2194,7 +2194,7 @@ namespace schiessbuch
             // 
             // textBox2
             // 
-            this.textBox2.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "verein", true));
+            this.textBox2.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "verein", true));
             this.textBox2.Location = new System.Drawing.Point(63, 124);
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
@@ -2203,7 +2203,7 @@ namespace schiessbuch
             // 
             // textBox3
             // 
-            this.textBox3.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "name", true));
+            this.textBox3.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "name", true));
             this.textBox3.Location = new System.Drawing.Point(63, 72);
             this.textBox3.Name = "textBox3";
             this.textBox3.ReadOnly = true;
@@ -2212,7 +2212,7 @@ namespace schiessbuch
             // 
             // textBox4
             // 
-            this.textBox4.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "email", true));
+            this.textBox4.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "email", true));
             this.textBox4.Location = new System.Drawing.Point(63, 98);
             this.textBox4.Name = "textBox4";
             this.textBox4.ReadOnly = true;
@@ -2221,7 +2221,7 @@ namespace schiessbuch
             // 
             // textBox5
             // 
-            this.textBox5.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.bindingSource1, "vorname", true));
+            this.textBox5.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.schuetzenListeBindingSource, "vorname", true));
             this.textBox5.Location = new System.Drawing.Point(247, 72);
             this.textBox5.Name = "textBox5";
             this.textBox5.ReadOnly = true;
@@ -2332,7 +2332,7 @@ namespace schiessbuch
             // 
             // KoenigTab
             // 
-            this.KoenigTab.Controls.Add(this.splitContainer1);
+            this.KoenigTab.Controls.Add(this.splitContainerKoenig1);
             this.KoenigTab.Location = new System.Drawing.Point(4, 22);
             this.KoenigTab.Name = "KoenigTab";
             this.KoenigTab.Padding = new System.Windows.Forms.Padding(3);
@@ -2341,43 +2341,43 @@ namespace schiessbuch
             this.KoenigTab.Text = "König 2";
             this.KoenigTab.UseVisualStyleBackColor = true;
             // 
-            // splitContainer1
+            // splitContainerKoenig1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
-            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainerKoenig1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerKoenig1.Location = new System.Drawing.Point(3, 3);
+            this.splitContainerKoenig1.Name = "splitContainerKoenig1";
             // 
-            // splitContainer1.Panel1
+            // splitContainerKoenig1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.splitContainer2);
+            this.splitContainerKoenig1.Panel1.Controls.Add(this.splitContainerKoenig2);
             // 
-            // splitContainer1.Panel2
+            // splitContainerKoenig1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer1.Size = new System.Drawing.Size(946, 413);
-            this.splitContainer1.SplitterDistance = 371;
-            this.splitContainer1.TabIndex = 0;
-            this.splitContainer1.Resize += new System.EventHandler(this.splitContainer1_Resize);
+            this.splitContainerKoenig1.Panel2.Controls.Add(this.splitContainerKoenig3);
+            this.splitContainerKoenig1.Size = new System.Drawing.Size(946, 413);
+            this.splitContainerKoenig1.SplitterDistance = 371;
+            this.splitContainerKoenig1.TabIndex = 0;
+            this.splitContainerKoenig1.Resize += new System.EventHandler(this.splitContainer1_Resize);
             // 
-            // splitContainer2
+            // splitContainerKoenig2
             // 
-            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.IsSplitterFixed = true;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.splitContainerKoenig2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerKoenig2.IsSplitterFixed = true;
+            this.splitContainerKoenig2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerKoenig2.Name = "splitContainerKoenig2";
+            this.splitContainerKoenig2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer2.Panel1
+            // splitContainerKoenig2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.tableLayoutPanel4);
+            this.splitContainerKoenig2.Panel1.Controls.Add(this.tableLayoutPanel4);
             // 
-            // splitContainer2.Panel2
+            // splitContainerKoenig2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel5);
-            this.splitContainer2.Size = new System.Drawing.Size(371, 413);
-            this.splitContainer2.SplitterDistance = 174;
-            this.splitContainer2.TabIndex = 0;
-            this.splitContainer2.Resize += new System.EventHandler(this.splitContainer2_Resize);
+            this.splitContainerKoenig2.Panel2.Controls.Add(this.tableLayoutPanel5);
+            this.splitContainerKoenig2.Size = new System.Drawing.Size(371, 413);
+            this.splitContainerKoenig2.SplitterDistance = 174;
+            this.splitContainerKoenig2.TabIndex = 0;
+            this.splitContainerKoenig2.Resize += new System.EventHandler(this.splitContainer2_Resize);
             // 
             // tableLayoutPanel4
             // 
@@ -2438,16 +2438,16 @@ namespace schiessbuch
             // 
             // Datum
             // 
-            dataGridViewCellStyle42.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.Datum.DefaultCellStyle = dataGridViewCellStyle42;
+            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.Datum.DefaultCellStyle = dataGridViewCellStyle17;
             this.Datum.HeaderText = "Datum";
             this.Datum.Name = "Datum";
             this.Datum.ReadOnly = true;
             // 
             // Teiler
             // 
-            dataGridViewCellStyle43.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.Teiler.DefaultCellStyle = dataGridViewCellStyle43;
+            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.Teiler.DefaultCellStyle = dataGridViewCellStyle18;
             this.Teiler.HeaderText = "Teiler";
             this.Teiler.Name = "Teiler";
             this.Teiler.ReadOnly = true;
@@ -2455,8 +2455,8 @@ namespace schiessbuch
             // 
             // Typ
             // 
-            dataGridViewCellStyle44.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.Typ.DefaultCellStyle = dataGridViewCellStyle44;
+            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.Typ.DefaultCellStyle = dataGridViewCellStyle19;
             this.Typ.HeaderText = "Typ";
             this.Typ.Name = "Typ";
             this.Typ.ReadOnly = true;
@@ -2521,16 +2521,16 @@ namespace schiessbuch
             // 
             // DatumDK
             // 
-            dataGridViewCellStyle45.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.DatumDK.DefaultCellStyle = dataGridViewCellStyle45;
+            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.DatumDK.DefaultCellStyle = dataGridViewCellStyle20;
             this.DatumDK.HeaderText = "Datum";
             this.DatumDK.Name = "DatumDK";
             this.DatumDK.ReadOnly = true;
             // 
             // TeilerDK
             // 
-            dataGridViewCellStyle46.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TeilerDK.DefaultCellStyle = dataGridViewCellStyle46;
+            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TeilerDK.DefaultCellStyle = dataGridViewCellStyle21;
             this.TeilerDK.HeaderText = "Teiler";
             this.TeilerDK.Name = "TeilerDK";
             this.TeilerDK.ReadOnly = true;
@@ -2538,31 +2538,31 @@ namespace schiessbuch
             // 
             // TypDK
             // 
-            dataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TypDK.DefaultCellStyle = dataGridViewCellStyle47;
+            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TypDK.DefaultCellStyle = dataGridViewCellStyle22;
             this.TypDK.HeaderText = "Typ";
             this.TypDK.Name = "TypDK";
             this.TypDK.ReadOnly = true;
             this.TypDK.Width = 30;
             // 
-            // splitContainer3
+            // splitContainerKoenig3
             // 
-            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer3.Name = "splitContainer3";
-            this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.splitContainerKoenig3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerKoenig3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerKoenig3.Name = "splitContainerKoenig3";
+            this.splitContainerKoenig3.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer3.Panel1
+            // splitContainerKoenig3.Panel1
             // 
-            this.splitContainer3.Panel1.Controls.Add(this.tableLayoutPanel6);
+            this.splitContainerKoenig3.Panel1.Controls.Add(this.tableLayoutPanel6);
             // 
-            // splitContainer3.Panel2
+            // splitContainerKoenig3.Panel2
             // 
-            this.splitContainer3.Panel2.Controls.Add(this.tableLayoutPanel7);
-            this.splitContainer3.Size = new System.Drawing.Size(571, 413);
-            this.splitContainer3.SplitterDistance = 190;
-            this.splitContainer3.TabIndex = 0;
-            this.splitContainer3.Resize += new System.EventHandler(this.splitContainer3_Resize);
+            this.splitContainerKoenig3.Panel2.Controls.Add(this.tableLayoutPanel7);
+            this.splitContainerKoenig3.Size = new System.Drawing.Size(571, 413);
+            this.splitContainerKoenig3.SplitterDistance = 190;
+            this.splitContainerKoenig3.TabIndex = 0;
+            this.splitContainerKoenig3.Resize += new System.EventHandler(this.splitContainer3_Resize);
             // 
             // tableLayoutPanel6
             // 
@@ -2623,16 +2623,16 @@ namespace schiessbuch
             // 
             // DatumAuflage
             // 
-            dataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.DatumAuflage.DefaultCellStyle = dataGridViewCellStyle48;
+            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.DatumAuflage.DefaultCellStyle = dataGridViewCellStyle23;
             this.DatumAuflage.HeaderText = "Datum";
             this.DatumAuflage.Name = "DatumAuflage";
             this.DatumAuflage.ReadOnly = true;
             // 
             // TeilerAuflage
             // 
-            dataGridViewCellStyle49.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TeilerAuflage.DefaultCellStyle = dataGridViewCellStyle49;
+            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TeilerAuflage.DefaultCellStyle = dataGridViewCellStyle24;
             this.TeilerAuflage.HeaderText = "Teiler";
             this.TeilerAuflage.Name = "TeilerAuflage";
             this.TeilerAuflage.ReadOnly = true;
@@ -2640,8 +2640,8 @@ namespace schiessbuch
             // 
             // TypAuflage
             // 
-            dataGridViewCellStyle50.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TypAuflage.DefaultCellStyle = dataGridViewCellStyle50;
+            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TypAuflage.DefaultCellStyle = dataGridViewCellStyle25;
             this.TypAuflage.HeaderText = "Typ";
             this.TypAuflage.Name = "TypAuflage";
             this.TypAuflage.ReadOnly = true;
@@ -2708,16 +2708,16 @@ namespace schiessbuch
             // 
             // DatumJUG
             // 
-            dataGridViewCellStyle51.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.DatumJUG.DefaultCellStyle = dataGridViewCellStyle51;
+            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.DatumJUG.DefaultCellStyle = dataGridViewCellStyle26;
             this.DatumJUG.HeaderText = "Datum";
             this.DatumJUG.Name = "DatumJUG";
             this.DatumJUG.ReadOnly = true;
             // 
             // TeilerJUG
             // 
-            dataGridViewCellStyle52.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TeilerJUG.DefaultCellStyle = dataGridViewCellStyle52;
+            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TeilerJUG.DefaultCellStyle = dataGridViewCellStyle27;
             this.TeilerJUG.HeaderText = "Teiler";
             this.TeilerJUG.Name = "TeilerJUG";
             this.TeilerJUG.ReadOnly = true;
@@ -2725,8 +2725,8 @@ namespace schiessbuch
             // 
             // TypJUG
             // 
-            dataGridViewCellStyle53.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            this.TypJUG.DefaultCellStyle = dataGridViewCellStyle53;
+            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            this.TypJUG.DefaultCellStyle = dataGridViewCellStyle28;
             this.TypJUG.HeaderText = "Typ";
             this.TypJUG.Name = "TypJUG";
             this.TypJUG.ReadOnly = true;
@@ -6993,7 +6993,7 @@ namespace schiessbuch
             // bindingNavigator1
             // 
             this.bindingNavigator1.AddNewItem = this.bindingNavigatorAddNewItem;
-            this.bindingNavigator1.BindingSource = this.bindingSource1;
+            this.bindingNavigator1.BindingSource = this.schuetzenListeBindingSource;
             this.bindingNavigator1.CountItem = this.bindingNavigatorCountItem;
             this.bindingNavigator1.DeleteItem = this.bindingNavigatorDeleteItem;
             this.bindingNavigator1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -7134,7 +7134,7 @@ namespace schiessbuch
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Schiessbuch_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Schiessbuch_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSourceA)).EndInit();
@@ -7174,24 +7174,24 @@ namespace schiessbuch
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.KoenigTab.ResumeLayout(false);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
+            this.splitContainerKoenig1.Panel1.ResumeLayout(false);
+            this.splitContainerKoenig1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig1)).EndInit();
+            this.splitContainerKoenig1.ResumeLayout(false);
+            this.splitContainerKoenig2.Panel1.ResumeLayout(false);
+            this.splitContainerKoenig2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig2)).EndInit();
+            this.splitContainerKoenig2.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigSKGridView)).EndInit();
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigDKGridView)).EndInit();
-            this.splitContainer3.Panel1.ResumeLayout(false);
-            this.splitContainer3.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
-            this.splitContainer3.ResumeLayout(false);
+            this.splitContainerKoenig3.Panel1.ResumeLayout(false);
+            this.splitContainerKoenig3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig3)).EndInit();
+            this.splitContainerKoenig3.ResumeLayout(false);
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigAuflageGridView)).EndInit();
@@ -7401,12 +7401,12 @@ namespace schiessbuch
         private System.Windows.Forms.Button btnTagesAuswertungDrucken;
         private System.Windows.Forms.Button btnTagesAuswertungListeDrucken;
         private System.Windows.Forms.TabPage KoenigTab;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer splitContainerKoenig1;
+        private System.Windows.Forms.SplitContainer splitContainerKoenig2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.Label SchuetzenklasseLabel;
         private System.Windows.Forms.DataGridView KoenigSKGridView;
-        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.SplitContainer splitContainerKoenig3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.Label SchuetzenlieslLabel;
         private System.Windows.Forms.DataGridView KoenigDKGridView;
@@ -7797,7 +7797,7 @@ namespace schiessbuch
         private TextBox geburtsdatumTextBox;
         private DateTimePicker GeburtstagDateTimePicker;
         private TextBox geschlechtTextBox;
-        private BindingSource bindingSource1;
+        private BindingSource schuetzenListeBindingSource;
         private BindingSource schuetzenlisteschiessbuchBindingSource;
         private BindingSource schiessbuchtrefferBindingSource;
         private TabPage tabEinzelscheibe;

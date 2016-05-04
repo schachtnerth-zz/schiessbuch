@@ -17,124 +17,196 @@ namespace schiessbuch
 {
     public partial class Schiessbuch : Form
     {
+
+        /// <summary>
+        /// Properties
+        /// </summary>
         PrintDocument pd;
         private Font printFont;
         private int linesCount;
         private int currentLinesPrinted;
+        long ereignisse_count = 0;
+        long treffer_count = 0;
+        private string connStr;
+        Configuration configuration;
+        /// <summary>
+        /// Die ID des aktuell ausgewählten Schießjahrs. Diese ID entspricht der ID in der entsprechenden Datenbanktabelle.
+        /// </summary>
+        private int aktuellesSchiessjahrID;
+        public DateTime dtJahrBeginn;
+        public DateTime dtJahrEnde;
+        string strSchiessjahrFilter;
+        private int databaseRequestCounter = 0; // wenn 0, dann wird die Datenbank gelesen (sorgt dafür, dass die Datenbank (z. B. Schiessbuch) nur bei jedem n. Mal durch den Timer gelesen wird. Die restlichen Male werden nur die aktuellen Schiessergebnisse der momentan schießenden Schützen abgefragt
+        private int standFuerEinzelScheibe;
+        private bool generateEinzelScheibe;
+        PrintDocument pdTagesauswertung;
+        MySqlConnection TagesAuswertungListeConnection;
+        MySqlDataReader TagesAuswertungListeDataReader;
+        bool TagesAuswertungConnectionIsActive = false;
+        PrintDocument pdKasse;
+        DataGridViewCellEventArgs mouseLocation;
+        private List<SchussInfo>[] aktuelleTreffer;
+        private TabPage EinzelScheibe;
+        private string strSchuetzenListeBindingSourceFilter;
+        private bool generateOverview;
 
+        /// <summary>
+        /// Konstanten
+        /// </summary>
+        string connStrLocal = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+        string connStrRemote = "server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+        string backupDestination = "192.168.178.202";
+        //string backupDestination = "localhost";
+        const string strZielscheibeLuftgewehr = "DSB Luftgewehr 10m";
+        const string strZielscheibeLuftpistole = "DSB Luftpistole 10m";
+        const string strZielscheibeLuftpistoleRot = "DSB Luftpistole 10m rot";
+        const string strZielscheibeLuftgewehrBlattlRot = "DSB Luftgewehr 10m Blattl rot";
+        const string strZielscheibeLuftpistoleBlattlRot = "DSB Luftpistole 10m Blattl rot";
+        const string strZielscheibeLuftgewehrBlattl = "DSB Luftgewehr 10m Blattl schwarz";
+        const string strZielscheibeLuftpistoleBlattl = "DSB Luftpistole 10m Blattl schwarz";
+
+        /// <summary>
+        /// Konstruktor
+        /// </summary>
         public Schiessbuch()
         {
             InitializeComponent();
         }
 
-        private void schuetzenBindingNavigatorSaveItem_Click(object sender, EventArgs e)
-        {
-            this.Validate();
-            this.schuetzenBindingSource.EndEdit();
-            this.tableAdapterManager.UpdateAll(this.siusclubDataSet);
-
-        }
-        long ereignisse_count = 0;
-        long treffer_count = 0;
-        private string connStr;
-        string connStrLocal = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
-        string connStrRemote = "server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
-        //string backupDestination = "localhost";
-        string backupDestination = "192.168.178.202";
-
+        /// <summary>
+        /// Eventhandler für das Load-Event des Hauptformulars
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.connStr = this.connStrRemote;
+            // Festlegen des Connection Strings. Standardmäßig wird die Datenbank am Schießstand verwendet. Erst wenn die nicht verfügbar ist,
+            // wird eine lokale Datenbank versucht. Das passiert automatisch über eine Exception
+            connStr = connStrRemote;
+
+            // Zum Aktualisieren der Ergebnisse aller gerade schießenden Schützen wird ein Timer verwendet, der alle x Sekunden
+            // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
+            // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
+            RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
+
+        retry:
+            // Die Connection Strings in den Properties werden aktualisiert und die Properties dann abgespeichert
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.ConnectionStrings.ConnectionStrings[0].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
             config.ConnectionStrings.ConnectionStrings[1].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
             config.ConnectionStrings.ConnectionStrings[2].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
             config.Save(ConfigurationSaveMode.Modified, true);
             ConfigurationManager.RefreshSection("connectionStrings");
-            RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
+
+            // Die Zugriffe aller TableAdapters sollen auf die richtige Datenbank erfolgen. Deshalb wird hier der Connection String entsprechend gesetzt.
             schiessbuchTableAdapter.Connection.ConnectionString = connStr;
             schuetzenTableAdapter.Connection.ConnectionString = connStr;
             trefferTableAdapter.Connection.ConnectionString = connStr;
             vereineTableAdapter.Connection.ConnectionString = connStr;
             schuetzenlisteTableAdapter.Connection.ConnectionString = connStr;
-        retry:
+
+            // Jetzt wird versucht, Werte aus der Datenbank zu lesen
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
             try
             {
+                // alle in der Datenbank abgespeicherten Vereine werden eingelesen
                 numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
+                // alle in der Datenbank abgespeicherten Treffer werden eingelesen
                 numAllRead += this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
+                // außerdem wird der TableAdapter für die Tabelle schuetzenliste gefüllt
                 this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
                 if (numAllRead == 0)
                 {
+                    // sollte nichts gelesen worden sein, wird eine Warnung ausgegeben, das Programm läuft aber weiter.
                     MessageBox.Show("Keine Datensätze aus der Datenbank gelesen. Möglicherweise keine Datenbankverbindung.");
                 }
 
+                // Hier werden standardmäßig die periodischen Aktualisierungen der Schießergebnisse aktiviert
                 DoUpdates.Checked = true;
 
+                // Die Anzahl an Übungsschießen/Wettkämpfen wird in eine Variable gelesen
+                // Diese Variable wird später dazu verwenden, herauszufinden, ob in der Zwischenzeit 
+                // ein neuer Schütze an den Stand gegangen ist bzw. ein bereits schießender Schütze eine weitere Disziplin schießt.
                 ereignisse_count = GetEreignisseCount();
+
+                // Hier wird die Anzahl an Schüssen in eine Variable gelesen.
+                // Mithilfe dieser Variable soll ermittelt werden, ob seit dem letzten Aktualisieren ein Schuss abgegeben wurde
+                // ist dem nicht so, kann man sich das Auslesen der Schüsse sparen. Ein erneutes Auslesen wird keine neuen Erkenntnisse geben...
                 treffer_count = GetTrefferCount();
 
+                // Dieser Bereich sollte überarbeitet werden.
+                // Leider muss die Methode Aktualisiere SchiessjahrMenu() zweimal aufgerufen werden.
                 AktualisiereSchiessjahrMenu();
+                // Die Liste der Schützen wird aktualisiert. Je nach ausgewähltem Schießjahr kann ein Schütze noch oder schon
+                // nicht mehr zur Jugendklasse zählen
                 UpdateSchuetzenListe();
-                AktualisiereSchiessjahrMenu();
+
+                //AktualisiereSchiessjahrMenu();
+
+                // Die Termine, zu denen für den Jahrespokal geschossen werden darf, werden in der Datenbank hinterlegt.
+                // Hier soll geprüft werden, ob heute ein solcher Termin ist. Wenn ja, wird eine Meldung angezeigt.
                 PruefeJahrespokalAbend();
+
+                // Alle Termine für den Jahrespokal werden aus der Datenbank gelesen und im Hauptformular angezeigt
                 FillWanderPokalTermine();
-                splitContainer1.SplitterDistance = splitContainer1.Width / 2;
-                splitContainer2.SplitterDistance = splitContainer2.Height / 2;
-                splitContainer3.SplitterDistance = splitContainer3.Height / 2;
 
+                // Für die Auswertung des Königsschießens soll das Hauptformular in vier gleiche Teile geteilt werden.
+                // Das wird mittels SplitContainern bewerkstelligt.
+                splitContainerKoenig1.SplitterDistance = splitContainerKoenig1.Width / 2;
+                splitContainerKoenig2.SplitterDistance = splitContainerKoenig2.Height / 2;
+                splitContainerKoenig3.SplitterDistance = splitContainerKoenig3.Height / 2;
 
+                // TODO: Was wird hier genau gemacht?
+                // Diese Methoden werden zur Berechnung des Schützenkönigs verwendet.
+                // Sie werden aber nicht mehr gebraucht.
                 ResizeAllKoenigGridViews();
+
+                // Hier werden die Ergebnisse aus dem Königsschießen ausgewertet und angezeigt.
                 UpdateKoenig();
 
+                // Dieser Teil könnte wahrscheinlich verschoben werden in die Methode, die aufgerufen wird, wenn der Tab "Übersicht" angeklickt wird.
                 for (int stand = 1; stand <= 6; stand++)
                     for (int schuss = 0; schuss < 40; schuss++)
                         setSchussValue(stand, schuss, schuss.ToString());
             }
-            catch (MySqlException mysqle)
+            catch (MySqlException) // Wenn beim Lesen aus der Datenbank was schief läuft
             {
                 if (connStr.Equals(connStrRemote))
                 {
+                    // sollte der aktuelle Connection String noch immer auf die Schießstand-Datenbank zeigen, ändere das und
+                    // versuche, die lokale Datenbank zu kontaktieren
                     MessageBox.Show("SIUSCLUB-Datenbank auf dem Schießstand-Rechner nicht erreichbar. Versuche lokale Verbindung.");
                     this.connStr = this.connStrLocal;
-                    configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                    configuration.ConnectionStrings.ConnectionStrings[0].ConnectionString = this.connStr;
-                    configuration.ConnectionStrings.ConnectionStrings[1].ConnectionString = this.connStr;
-                    configuration.ConnectionStrings.ConnectionStrings[2].ConnectionString = this.connStr;
-                    configuration.Save(ConfigurationSaveMode.Modified, true);
-                    ConfigurationManager.RefreshSection("connectionStrings");
-                    this.schiessbuchTableAdapter.Connection.ConnectionString = this.connStr;
-                    this.schuetzenTableAdapter.Connection.ConnectionString = this.connStr;
-                    this.trefferTableAdapter.Connection.ConnectionString = this.connStr;
-                    this.vereineTableAdapter.Connection.ConnectionString = this.connStr;
-                    this.schuetzenlisteTableAdapter.Connection.ConnectionString = this.connStr;
                     goto retry;
-
                 }
+
+                // Hierher kommen wir, wenn bereits die lokale Datenbank verwendet wurde und diese auch nicht erreichbar war.
+                // Dann macht es keinen Sinn, mit dem Programm weiterzumachen. Wir schließen es deshalb.
                 MessageBox.Show("Konnte Datenbank nicht öffnen.");
                 Application.Exit();
             }
-            this.aktuelleTreffer = new List<SchussInfo>[6];
+
+            // Die Struktur "aktuelleTreffer" wird initialisiert
+            // Sie wird später gebraucht, wenn über den REST Webservice die Daten der aktuell schießenden Schützen ausgelesen werden
+            // Diese Daten werden dann in "aktuelleTreffer" geschrieben und aus dieser Struktur werden die Daten aus dem Übersicht-Tab befüllt.
+            aktuelleTreffer = new List<SchussInfo>[6];
             for (int i = 0; i < 6; i++)
             {
-                this.aktuelleTreffer[i] = new List<SchussInfo>();
+                aktuelleTreffer[i] = new List<SchussInfo>();
             }
-            this.EinzelScheibe = this.tabControl1.TabPages["tabEinzelscheibe"];
+
+            // Hier wird ein Handle auf den Tab "tabEinzelscheibe" geholt...
+            EinzelScheibe = tabControl1.TabPages["tabEinzelscheibe"];
+            // und dieser Tab dann aus dem TabControl entfernt. Er wird wieder eingehängt, wenn jemand in der Übersicht auf eine
+            // Scheibe mit der Maus doppelklickt.
             this.tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
         }
 
-        Configuration configuration;
-
-        private void UpdateSchuetzenListe()
-        {
-            this.bindingSource1.Filter = this.strSchuetzenListeBindingSourceFilter;
-            this.schuetzenListeBindingSourceA.ResetBindings(false);
-            this.siusclubDataSet.schuetzenliste.Clear();
-            this.siusclubDataSet.EnforceConstraints = false;
-            this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
-        }
-
-
+        /// <summary>
+        /// Hier wird geprüft, ob heute ein Termin zum Jahrespokalschießen ist.
+        /// Wenn ja, dann wird eine entsprechende Meldung im Hauptfenster angezeigt.
+        /// Wenn nein, dann wird diese Meldung im Hauptfenster versteckt.
+        /// </summary>
         private void PruefeJahrespokalAbend()
         {
             MySqlConnection conn;
@@ -158,42 +230,11 @@ namespace schiessbuch
             MySqlConnection.ClearPool(conn);
         }
 
-        private void AktualisiereSchiessjahrMenu()
-        {
-            // zuerst das schiessjahrAuswählenToolStripMenuItem leeren
-            schießjahrAuswählenToolStripMenuItem.DropDownItems.Clear();
-            MySqlConnection conn;
-            MySqlCommand cmdJahre;
-            conn = new MySqlConnection(connStr);
-            cmdJahre = new MySqlCommand("SELECT * FROM schiessjahr", conn);
-            conn.Open();
-            MySqlDataReader reader = cmdJahre.ExecuteReader();
-            while (reader.Read())
-            {
-                // Liste der Schiessjahre aktualisieren
-                ToolStripMenuItem tsi = new ToolStripMenuItem();
-                tsi.Text = reader["Schiessjahr"].ToString();
-                tsi.Tag = reader["idSchiessjahr"];
-                tsi.Click += Tsi_Click;
-                schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
-            }
-            reader.Close();
-            reader.Dispose();
-            // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
-            cmdJahre.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
-            int activeID = int.Parse(cmdJahre.ExecuteScalar().ToString());
-            foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
-            {
-                if (int.Parse(tsi.Tag.ToString()) == activeID)
-                {
-                    tsi.PerformClick();
-                }
-            }
-            conn.Close();
-            conn.Dispose();
-            MySqlConnection.ClearPool(conn);
-        }
-
+        /// <summary>
+        /// Hier werden alle Termine für das Jahrespokalschießen aus der Datenbank gelesen
+        /// Diese Werte werden dann im entsprechenden Reiter im Hauptfenster eingetragen
+        /// und können von dort aus eingesehen und verändert werden.
+        /// </summary>
         private void FillWanderPokalTermine()
         {
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -225,47 +266,13 @@ namespace schiessbuch
             MySqlConnection.ClearPool(conn);
         }
 
-        private void Tsi_Click(object sender, EventArgs e)
-        {
-            //throw new NotImplementedException();
-            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)sender).Tag.ToString());
-            MySqlConnection conn = new MySqlConnection(connStr);
-            conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'", conn);
-            dtJahrBeginn = (DateTime)cmd.ExecuteScalar();
-            // Das Ende wird bestimmt, indem der Eintrag gesucht wird, in dem das nächsthöhere Datum abgespeichert ist
-            cmd.CommandText = "SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1";
-            try
-            {
-                dtJahrEnde = (DateTime)cmd.ExecuteScalar();
-            }
-            catch (NullReferenceException)
-            {
-                dtJahrEnde = dtJahrBeginn;
-            }
-            foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
-            {
-                tsi.Checked = false;
-            }
-            ((ToolStripMenuItem)sender).Checked = true;
-            populateSchiessjahrFilter();
-            CheckSchiessjahr();
-            ComboBoxSelectionChange();
-            FillWanderPokalTermine();
-            UpdateKoenig();
-            UpdateSchuetzenListe();
-            UpdateSchiessbuch();
-        }
-
-        private int aktuellesSchiessjahrID;
-        public DateTime dtJahrBeginn;
-        public DateTime dtJahrEnde;
-
-        private void UpdateSchiessbuch()
-        {
-            this.schiessbuchTableAdapter.Fill(this.siusclubDataSet.schiessbuch);
-        }
-
+        /// <summary>
+        /// Hier werden alle Einträge aus dem Schießbuch gezählt und zurückgeliefert.
+        /// Dieser Wert kann in eine Variable geschrieben werden und dazu verwendet werden, zu überprüfen,
+        /// ob sich seit dem letzten Aufruf im Schießbuch etwas geändert hat. Wenn nein, muss keine Aktualisierung
+        /// aus der Datenbank und keine Aktualisierung des Schießbuch-UI erfolgen.
+        /// </summary>
+        /// <returns>Anzahl der Einträge im Schießbuch</returns>
         private long GetEreignisseCount()
         {
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -285,6 +292,13 @@ namespace schiessbuch
             }
         }
 
+        /// <summary>
+        /// Hier werden alle Einträge aus der Treffertabelle in der Datenbank gezählt und zurückgeliefert.
+        /// Dieser Wert kann in eine Variable geschrieben werden und dazu verwenden werden, zu überprüfen,
+        /// ob sich seit dem letzten Aufruf in der Treffertabelle etwas geändert hat. Wenn nein, muss keine Aktualisierung
+        /// aus der Datengank und keine Aktualisierung der Trefferliste im Hauptdialog (Schießbuch-Tab) erfolgen.
+        /// </summary>
+        /// <returns>Anzahl der Einträge in der Treffer-Tabelle der Datenbank</returns>
         private long GetTrefferCount()
         {
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -294,6 +308,195 @@ namespace schiessbuch
             tmpCount = long.Parse(cmd.ExecuteScalar().ToString());
             conn.Close();
             return tmpCount;
+        }
+
+        /// <summary>
+        /// Das Menü, in dem die einzelnen Schießjahre ausgewählt werden können, wird hier aus der Datenbank befüllt bzw. aktualisiert
+        /// </summary>
+        private void AktualisiereSchiessjahrMenu()
+        {
+            // zuerst das schiessjahrAuswählenToolStripMenuItem leeren
+            schießjahrAuswählenToolStripMenuItem.DropDownItems.Clear();
+
+            // Verbindung zur Datenbank aufbauen
+            MySqlConnection conn;
+            MySqlCommand cmdJahre;
+            conn = new MySqlConnection(connStr);
+            // Alle Schießjahre auswählen
+            cmdJahre = new MySqlCommand("SELECT * FROM schiessjahr", conn);
+            conn.Open();
+            MySqlDataReader reader = cmdJahre.ExecuteReader();
+            while (reader.Read())
+            {
+                // Liste der Schiessjahre aktualisieren
+                ToolStripMenuItem tsi = new ToolStripMenuItem();
+                tsi.Text = reader["Schiessjahr"].ToString();
+                tsi.Tag = reader["idSchiessjahr"];
+                // OnClick Eventhandler hinzufügen
+                tsi.Click += Tsi_Click;
+                // Eintrag zu Menü hinzufügen
+                schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
+            }
+            // Datenbankverbindung aufräumen
+            reader.Close();
+            reader.Dispose();
+
+            // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
+            cmdJahre.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
+            int activeID = int.Parse(cmdJahre.ExecuteScalar().ToString());
+            // Gehe durch alle Schießjahre im Menü und schau, welcher Eintrag dem aktuellen Schießjahr entspricht. Dieser Eintrag soll dann ausgewählt werden.
+            foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
+            {
+                if (int.Parse(tsi.Tag.ToString()) == activeID)
+                {
+                    // Schießjahr auswählen (und entsprechende EventHandler abfeuern)
+                    tsi.PerformClick();
+                }
+            }
+            // Datenbank aufräumen
+            conn.Close();
+            conn.Dispose();
+            MySqlConnection.ClearPool(conn);
+        }
+
+        /// <summary>
+        /// Auf die für die Darstellung des Schießbuchs verwendete BindingSource (schuetzenListeBindingSource) wird ein Filter angewandt, um
+        /// nur die Einträge des aktuell ausgewählten Schießjahrs sehen zu können
+        /// </summary>
+        private void populateSchiessjahrFilter()
+        {
+            if (dtJahrBeginn == dtJahrEnde)
+                strSchiessjahrFilter = " HAVING Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "'";
+            else
+                strSchiessjahrFilter = " HAVING Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' AND Date < '" + dtJahrEnde.ToString("yyyy-MM-dd") + "'";
+            strSchuetzenListeBindingSourceFilter = "  Jahr = '" + dtJahrBeginn.ToString("yyyy") + "'";
+            schuetzenListeBindingSource.Filter = strSchuetzenListeBindingSourceFilter;
+
+            if (dtJahrBeginn == dtJahrEnde)
+                schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "'";
+            else
+                schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "' AND dt < '" + dtJahrEnde.ToShortDateString() + "'";
+
+        }
+
+        /// <summary>
+        /// Wenn sich bei Rahmendaten (z. B. ausgewählter Schütze oder Schießjahr) etwas ändert,
+        /// müssen auch die zu diesem Schützen gehörenden Statistiken aktualisiert werden.
+        /// Das wird hier erledigt.
+        /// </summary>
+        private void AktuellerSchuetzeStatistikAktualisieren()
+        {
+            checkBox1.Checked = false;
+            printSchiessAuswertung("LG 20 Schuss", AuswertungLG20, "20 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 20 Schuss", AuswertungLG20_15, "20 Schuss", "15 Beste");
+            printSchiessAuswertung("LG 30 Schuss", AuswertungLG30, "30 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 30 Schuss", AuswertungLG30_15, "30 Schuss", "15 Beste");
+            printSchiessAuswertung("LG 40 Schuss", AuswertungLG40, "40 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 40 Schuss", AuswertungLG40_15, "40 Schuss", "15 Beste");
+
+            printSchiessAuswertung("LG 20 Schuss Auflage", AuswertungLG20A, "20 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 20 Schuss Auflage", AuswertungLG20A_15, "20 Schuss", "15 Beste");
+            printSchiessAuswertung("LG 30 Schuss Auflage", AuswertungLG30A, "30 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 30 Schuss Auflage", AuswertungLG30A_15, "30 Schuss", "15 Beste");
+            printSchiessAuswertung("LG 40 Schuss Auflage", AuswertungLG40A, "40 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LG 40 Schuss Auflage", AuswertungLG40A_15, "40 Schuss", "15 Beste");
+
+            printSchiessAuswertung("LP 20 Schuss", AuswertungLP20, "20 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LP 20 Schuss", AuswertungLP20_15, "20 Schuss", "15 Beste");
+            printSchiessAuswertung("LP 30 Schuss", AuswertungLP30, "30 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LP 30 Schuss", AuswertungLP30_15, "30 Schuss", "15 Beste");
+            printSchiessAuswertung("LP 40 Schuss", AuswertungLP40, "40 Schuss", "Alle Ergebnisse:");
+            printSchiessAuswertungBest15("LP 40 Schuss", AuswertungLP40_15, "40 Schuss", "15 Beste");
+        }
+
+        private void schuetzenBindingNavigatorSaveItem_Click(object sender, EventArgs e)
+        {
+            this.Validate();
+            this.schuetzenBindingSource.EndEdit();
+            this.tableAdapterManager.UpdateAll(this.siusclubDataSet);
+
+        }
+
+        /// <summary>
+        /// Die Schützenliste (mit Geschlecht, Geburtsdatum und Schützenklasse) wird neu aus der Datenbank gelesen
+        /// und die zugehörigen TableAdapters werden aktualisiert.
+        /// </summary>
+        private void UpdateSchuetzenListe()
+        {
+            // Die Schützenliste wird neu aus der Datenbank gelesen
+
+            // Vielleicht brauche ich das gar nicht mehr???
+            //this.schuetzenListeBindingSourceA.ResetBindings(false);
+            this.siusclubDataSet.schuetzenliste.Clear();
+            //this.siusclubDataSet.EnforceConstraints = false;
+            this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
+        }        
+
+        /// <summary>
+        /// Eventhandler, der beim Auswählen eines Eintrags aus der Schießjahrauswahl aufgerufen wird (ToolStripMenuItem)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Tsi_Click(object sender, EventArgs e)
+        {
+            // Zwischenspeichern des aktuell ausgewählten Schützen, da dieser nach Ändern des Schießjahres wieder ausgewählt werden soll
+            int aktuellerSchuetze = int.Parse(((DataRowView)schuetzenListeBindingSource.Current)["id"].ToString());
+            //int aktuellerSchuetze = schuetzenListeBindingSource.Position;
+
+            // Befülle oder aktualisiere die globale Variable aktuellesSchiessjahrID, in der die ID des aktuellen Schießjahrs gespeichert wird.
+            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)sender).Tag.ToString());
+
+            // Öffne die Datenbank und lese die einzelnen Anfangsdaten der Schießjahre
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'", conn);
+            dtJahrBeginn = (DateTime)cmd.ExecuteScalar();
+            // Das Ende wird bestimmt, indem der Eintrag gesucht wird, in dem das nächsthöhere Datum abgespeichert ist
+            cmd.CommandText = "SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1";
+            try
+            {
+                // Wenn es keinen Eintrag in der Datenbank mit einem höheren Datum gibt, dann ist dieses Schießjahr das aktuelle.
+                // In diesem Fall wird eine Exception ausgelöst und wir setzen Anfangsdatum und Enddatum gleich, um auszudrücken, dass
+                // es sich um das aktuelle Schiessjahr handelt.
+                dtJahrEnde = (DateTime)cmd.ExecuteScalar();
+            }
+            catch (NullReferenceException)
+            {
+                // Es handelt sich um das aktuelle Schießjahr (s. o.)
+                dtJahrEnde = dtJahrBeginn;
+            }
+            foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
+            {
+                // Entferne den Haken bei allen Schießjahren im Menü
+                tsi.Checked = false;
+            }
+            // Setze einen Haken beim aktuell ausgewählten Schießjahr
+            ((ToolStripMenuItem)sender).Checked = true;
+
+            // Einige zusätzliche Aufgaben müssen erledigt werden, wenn ein neues Schießjahr ausgewählt wird.
+            
+            // Der Filter für die schuetzenListeBindingSource wird mit dem aktuellen Jahr aktualisiert
+            populateSchiessjahrFilter();
+
+            // Da sich das aktuelle Schießjahr geändert hat, sollen auch für den ausgewählten Schützen
+            // die Statistiken des ausgewählten Schießjahres angezeigt werden. Das soll hier angestoßen werden.
+            AktuellerSchuetzeStatistikAktualisieren();
+
+            // Die Jahrespokaltermine für dieses Jahr müssen ebenfalls aus der Datenbank gelesen werden und
+            // ins Hauptformular eingetragen werden:
+            FillWanderPokalTermine();
+
+            // Die Auswertung für den Schießkönig soll aktualisiert werden, um das aktuelle Jahr anzuzeigen
+            UpdateKoenig();
+
+            // Da sich durch die Änderung des Schießjahres auch die Zugehörigkeit von Schützen zu Schützenklassen ändern kann,
+            // soll die Schützenliste neu eingelesen werden.
+            UpdateSchuetzenListe();
+
+            // Die Änderungen sollen im DataGridView des Schießbuches reflektiert werden,
+            // deshalb wird die entsprechende Tabelle neu befüllt.
+            schiessbuchTableAdapter.Fill(this.siusclubDataSet.schiessbuch);
+            schuetzenListeBindingSource.Position = schuetzenListeBindingSource.Find("id", aktuellerSchuetze);
         }
 
         private void schuetzenBindingNavigatorSaveItem_Click_1(object sender, EventArgs e)
@@ -317,16 +520,6 @@ namespace schiessbuch
             //MessageBox.Show(schiessbuchBindingSource.Filter);
             //MessageBox.Show(SchiessabendPicker.Value.ToShortDateString());
             schiessbuchBindingSource.Filter = "Datum = '" + SchiessabendPicker.Value.ToShortDateString() + "' OR Datum='" + SchiessabendPicker.Value.AddDays(1).ToShortDateString() + "'";
-        }
-
-        string strSchiessjahrFilter;
-        private void populateSchiessjahrFilter()
-        {
-            if (dtJahrBeginn == dtJahrEnde)
-                strSchiessjahrFilter = " HAVING Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "'";
-            else
-                strSchiessjahrFilter = " HAVING Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' AND Date < '" + dtJahrEnde.ToString("yyyy-MM-dd") + "'";
-			strSchuetzenListeBindingSourceFilter = "  Jahr = '" + dtJahrBeginn.ToString("yyyy") + "'";
         }
 
         private void printSchiessAuswertung(string strDisziplin, TextBox textbox, string Zeile1, string Zeile2)
@@ -399,34 +592,9 @@ namespace schiessbuch
             conn.Close();
         }
 
-        private void ComboBoxSelectionChange()
-        {
-            checkBox1.Checked = false;
-            printSchiessAuswertung("LG 20 Schuss", AuswertungLG20, "20 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 20 Schuss", AuswertungLG20_15, "20 Schuss", "15 Beste");
-            printSchiessAuswertung("LG 30 Schuss", AuswertungLG30, "30 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 30 Schuss", AuswertungLG30_15, "30 Schuss", "15 Beste");
-            printSchiessAuswertung("LG 40 Schuss", AuswertungLG40, "40 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 40 Schuss", AuswertungLG40_15, "40 Schuss", "15 Beste");
-
-            printSchiessAuswertung("LG 20 Schuss Auflage", AuswertungLG20A, "20 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 20 Schuss Auflage", AuswertungLG20A_15, "20 Schuss", "15 Beste");
-            printSchiessAuswertung("LG 30 Schuss Auflage", AuswertungLG30A, "30 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 30 Schuss Auflage", AuswertungLG30A_15, "30 Schuss", "15 Beste");
-            printSchiessAuswertung("LG 40 Schuss Auflage", AuswertungLG40A, "40 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LG 40 Schuss Auflage", AuswertungLG40A_15, "40 Schuss", "15 Beste");
-
-            printSchiessAuswertung("LP 20 Schuss", AuswertungLP20, "20 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LP 20 Schuss", AuswertungLP20_15, "20 Schuss", "15 Beste");
-            printSchiessAuswertung("LP 30 Schuss", AuswertungLP30, "30 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LP 30 Schuss", AuswertungLP30_15, "30 Schuss", "15 Beste");
-            printSchiessAuswertung("LP 40 Schuss", AuswertungLP40, "40 Schuss", "Alle Ergebnisse:");
-            printSchiessAuswertungBest15("LP 40 Schuss", AuswertungLP40_15, "40 Schuss", "15 Beste");
-        }
-
         private void fullnameComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ComboBoxSelectionChange();
+            AktuellerSchuetzeStatistikAktualisieren();
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -437,26 +605,16 @@ namespace schiessbuch
                 SchiessabendPicker.Enabled = false;
         }
 
-
-
         private void SchiessabendPicker_EnabledChanged(object sender, EventArgs e)
         {
             if (SchiessabendPicker.Enabled == false)
             {
-                CheckSchiessjahr();
+                populateSchiessjahrFilter();
             }
             else
             {
                 SchiessabendPicker_ValueChanged(this, e);
             }
-        }
-
-        private void CheckSchiessjahr()
-        {
-            if (dtJahrBeginn == dtJahrEnde)
-                schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "'";
-            else
-                schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "' AND dt < '" + dtJahrEnde.ToShortDateString() + "'";
         }
 
         private void trefferDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -516,8 +674,6 @@ namespace schiessbuch
             }
 
         }
-
-        private int databaseRequestCounter=0; // wenn 0, dann wird die Datenbank gelesen (sorgt dafür, dass die Datenbank (z. B. Schiessbuch) nur bei jedem n. Mal durch den Timer gelesen wird. Die restlichen Male werden nur die aktuellen Schiessergebnisse der momentan schießenden Schützen abgefragt
 
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
@@ -837,6 +993,9 @@ namespace schiessbuch
             ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
 
+        /// <summary>
+        /// Berechnung und Anzeige des Schützenkönigs
+        /// </summary>
         private void UpdateKoenig()
         {
             KoenigTextBox.Clear();
@@ -1026,7 +1185,7 @@ namespace schiessbuch
             else
                 startEinzelScheibe();
         }
-        private int standFuerEinzelScheibe;
+
         private void startEinzelScheibe()
         {
             this.generateEinzelScheibe = true;
@@ -1041,6 +1200,7 @@ namespace schiessbuch
         {
             this.generateOverview = false;
         }
+
         private void startUebersicht()
         {
             this.generateOverview = true;
@@ -1151,7 +1311,6 @@ namespace schiessbuch
                 MessageBox.Show("Nicht alle notwendigen Angaben wurden in der Maske gemacht.");
             }
         }
-
 
         private void nameTextBox_Leave(object sender, EventArgs e)
         {
@@ -1334,9 +1493,6 @@ namespace schiessbuch
             ErstelleAuswertung();
         }
 
-        PrintDocument pdTagesauswertung;
-
-
         private void pd_PrintPage(object sender, PrintPageEventArgs ev)
         {
             //ev.Graphics.Clear(Color.White);
@@ -1429,12 +1585,6 @@ namespace schiessbuch
                 currentLinesPrinted = 0;
             }
         }
-
-        MySqlConnection TagesAuswertungListeConnection;
-        MySqlDataReader TagesAuswertungListeDataReader;
-        bool TagesAuswertungConnectionIsActive = false;
-
-
 
         private void btnTagesAuswertungListeDrucken_Click(object sender, EventArgs e)
         {
@@ -1561,19 +1711,18 @@ namespace schiessbuch
 
         private void splitContainer1_Resize(object sender, EventArgs e)
         {
-            splitContainer1.SplitterDistance = splitContainer1.Width / 2;
+            splitContainerKoenig1.SplitterDistance = splitContainerKoenig1.Width / 2;
         }
 
         private void splitContainer2_Resize(object sender, EventArgs e)
         {
-            splitContainer2.SplitterDistance = splitContainer2.Height / 2;
+            splitContainerKoenig2.SplitterDistance = splitContainerKoenig2.Height / 2;
         }
 
         private void splitContainer3_Resize(object sender, EventArgs e)
         {
-            splitContainer3.SplitterDistance = splitContainer3.Height / 2;
+            splitContainerKoenig3.SplitterDistance = splitContainerKoenig3.Height / 2;
         }
-
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -1699,6 +1848,8 @@ namespace schiessbuch
             ResizeAllKoenigGridViews();
         }
 
+
+        #region Alte Königsberechnungen
         private void ResizeAllKoenigGridViews()
         {
             KoenigSKGridView_SetWidts();
@@ -1719,6 +1870,7 @@ namespace schiessbuch
                 KoenigSKGridView.Columns["Datum"].Width -
                 KoenigSKGridView.Columns["Typ"].Width - 20;
         }
+
         private void KoenigJUGGridView_SetWidts()
         {
             KoenigJUGGridView.Columns["PositionJUG"].Width = 30;
@@ -1731,6 +1883,7 @@ namespace schiessbuch
                 KoenigJUGGridView.Columns["DatumJUG"].Width -
                 KoenigJUGGridView.Columns["TypJUG"].Width - 20;
         }
+
         private void KoenigAuflageGridView_SetWidts()
         {
             KoenigAuflageGridView.Columns["PositionAuflage"].Width = 30;
@@ -1743,6 +1896,7 @@ namespace schiessbuch
                 KoenigAuflageGridView.Columns["DatumAuflage"].Width -
                 KoenigAuflageGridView.Columns["TypAuflage"].Width - 20;
         }
+        #endregion
 
         private void tableLayoutPanel9_Resize(object sender, EventArgs e)
         {
@@ -1842,7 +1996,6 @@ namespace schiessbuch
             }
         }
 
-        PrintDocument pdKasse;
         private void btnKassenbericht_Click(object sender, EventArgs e)
         {
             if (pdKasse == null)
@@ -2012,12 +2165,6 @@ namespace schiessbuch
             }
         }
 
-        DataGridViewCellEventArgs mouseLocation;
-        private List<SchussInfo>[] aktuelleTreffer;
-        private TabPage EinzelScheibe;
-        private string strSchuetzenListeBindingSourceFilter;
-        private bool generateOverview;
-
         private void schiessbuchDataGridView_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             mouseLocation = e;
@@ -2129,6 +2276,7 @@ namespace schiessbuch
                 KoenigDKGridView.Columns["DatumDK"].Width -
                 KoenigDKGridView.Columns["TypDK"].Width - 20;
         }
+
         private void btnTagesAuswertungDrucken_Click(object sender, EventArgs e)
         {
             if (pdTagesauswertung == null)
@@ -2172,6 +2320,7 @@ namespace schiessbuch
                 ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + num2.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + num2.ToString() + "SchussPanel"]).Controls[str].Text = "";
             }
         }
+
         private void GeburtstagDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
             if (this.bearbeitungsmodusToolStripMenuItem.Checked)
@@ -2186,15 +2335,6 @@ namespace schiessbuch
             // setze die richtige Zielscheibe ein
             this.ZeichneTrefferInZielscheibe(this.stand1Zielscheibe, e, 0);
         }
-
-        const string strZielscheibeLuftgewehr = "DSB Luftgewehr 10m";
-        const string strZielscheibeLuftpistole = "DSB Luftpistole 10m";
-        const string strZielscheibeLuftpistoleRot = "DSB Luftpistole 10m rot";
-        const string strZielscheibeLuftgewehrBlattlRot = "DSB Luftgewehr 10m Blattl rot";
-        const string strZielscheibeLuftpistoleBlattlRot = "DSB Luftpistole 10m Blattl rot";
-        const string strZielscheibeLuftgewehrBlattl = "DSB Luftgewehr 10m Blattl schwarz";
-        const string strZielscheibeLuftpistoleBlattl = "DSB Luftpistole 10m Blattl schwarz";
-        private bool generateEinzelScheibe;
 
         private void setzeZielscheibeInUebersicht(int stand)
         {
@@ -2263,8 +2403,6 @@ namespace schiessbuch
             this.ZeichneTrefferInZielscheibe(this.stand4Zielscheibe, e, 3);
         }
 
-
-
         private void stand5Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(4);
@@ -2276,7 +2414,6 @@ namespace schiessbuch
             this.cleanSchussTable(5);
             this.ZeichneTrefferInZielscheibe(this.stand6Zielscheibe, e, 5);
         }
-
 
         private void geschlechtTextBox_TextChanged(object sender, EventArgs e)
         {
