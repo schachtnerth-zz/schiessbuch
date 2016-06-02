@@ -878,10 +878,10 @@ namespace schiessbuch
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
             request.Method = "GET";
             XDocument document = new XDocument();
-            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
-//            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-//            {
-//                document = XDocument.Load(response.GetResponseStream());
+//            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                document = XDocument.Load(response.GetResponseStream());
                 string str = "";
                 int iSchuetze = 0;
                 string strZielscheibe = "";
@@ -965,7 +965,7 @@ namespace schiessbuch
                         }
                     }
                 }
-            //}
+            }
         }
 
         private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand)
