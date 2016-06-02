@@ -48,7 +48,6 @@ namespace schiessbuch
         private TabPage EinzelScheibe;
         private string strSchuetzenListeBindingSourceFilter;
         private bool generateOverview;
-        private Bitmap[] StandZielscheiben;
 
         /// <summary>
         /// Konstanten
@@ -88,9 +87,6 @@ namespace schiessbuch
             // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
             // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
             RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
-
-            StandZielscheiben = new Bitmap[6];
-            for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
 
         retry:
             // Die Connection Strings in den Properties werden aktualisiert und die Properties dann abgespeichert
@@ -841,7 +837,6 @@ namespace schiessbuch
             databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
         }
 
-        
 
         /// <summary>
         /// Hier wird die Übersichtsseite aktualisiert, also neu gezeichnet.
@@ -878,10 +873,10 @@ namespace schiessbuch
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
             request.Method = "GET";
             XDocument document = new XDocument();
-            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
-//            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-//            {
-//                document = XDocument.Load(response.GetResponseStream());
+//            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                document = XDocument.Load(response.GetResponseStream());
                 string str = "";
                 int iSchuetze = 0;
                 string strZielscheibe = "";
@@ -965,7 +960,7 @@ namespace schiessbuch
                         }
                     }
                 }
-            //}
+            }
         }
 
         private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand)
@@ -983,8 +978,6 @@ namespace schiessbuch
             int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
             int anzeigenAb = this.aktuelleTreffer[stand].Count - AnzTreffer;
             int trefferZaehler = 0;
-            Bitmap scheibeBitmap = new Bitmap(StandZielscheiben[stand]);
-            Graphics graphics = Graphics.FromImage(scheibeBitmap);
             foreach (SchussInfo info in this.aktuelleTreffer[stand])
             {
                 trefferZaehler++;
@@ -996,18 +989,8 @@ namespace schiessbuch
                     float textHeight;
                     float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
                     float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    float AbstandVonMitteX, AbstandVonMitteY;
-                    if (schussPosLinks < 0)
-                        AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    else
-                        AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
-                    if (schussPosOben < 0)
-                        AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    else
-                        AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
-
-                    if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
-                    if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
+                    if (Math.Abs(schussPosLinks) > maxX) maxX = Math.Abs(schussPosLinks);
+                    if (Math.Abs(schussPosOben) > maxY) maxY = Math.Abs(schussPosOben);
                     if (info == aktuelleTreffer[stand].Last<SchussInfo>())
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Red));
@@ -1020,72 +1003,23 @@ namespace schiessbuch
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Green));
                     }
-                    Rectangle rect = new Rectangle(((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), (int)(schusslochDurchmesser), (int)(schusslochDurchmesser));
-
-                    graphics.FillEllipse(brush, rect);
-                    graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    Rectangle rect = new Rectangle(((int)(schussPosLinks / zoomFactor)) + (pictureBox.Width / 2), ((int)(schussPosOben / zoomFactor)) + (pictureBox.Height / 2), (int)(schusslochDurchmesser / zoomFactor), (int)(schusslochDurchmesser / zoomFactor));
+                    e.Graphics.FillEllipse(brush, rect);
+                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
                     string text = info.schussnummer.ToString();
                     while (true)
                     {
-                        textWidth = graphics.MeasureString(text, font).Width;
-                        textHeight = graphics.MeasureString(text, font).Height;
+                        textWidth = e.Graphics.MeasureString(text, font).Width;
+                        textHeight = e.Graphics.MeasureString(text, font).Height;
                         if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
                         {
                             break;
                         }
                         font = new Font("Arial", font.Size + 1f);
                     }
-                    graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
-
-//                    e.Graphics.FillEllipse(brush, rect);
-//                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
-//                    string text = info.schussnummer.ToString();
-//                    while (true)
-//                    {
-//                        textWidth = e.Graphics.MeasureString(text, font).Width;
-//                        textHeight = e.Graphics.MeasureString(text, font).Height;
-//                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
-//                        {
-//                            break;
-//                        }
-//                        font = new Font("Arial", font.Size + 1f);
-//                    }
-//                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
                 }
                 // So, jetzt kümmern wir uns mal um das Zoomen...
-                float maxAbstand;
-                if (maxX > maxY)
-                    maxAbstand = maxX;
-                else
-                    maxAbstand = maxY;
-
-                if (maxAbstand < 200)
-                    maxAbstand = 200;
-
-                //maxAbstand = 200;
-                //MessageBox.Show(pictureBox.Name);
-                //MessageBox.Show("Size: " + pictureBox.Image.Width + "," + pictureBox.Image.Height + ".");
-
-                // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
-                int seitenlaenge;
-                if (pictureBox.Width < pictureBox.Height)
-                    seitenlaenge = pictureBox.Width;
-                else
-                    seitenlaenge = pictureBox.Height;
-
-                                e.Graphics.DrawImage(
-                                    scheibeBitmap, 
-                                    new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge , seitenlaenge), 
-                                    new Rectangle(
-                                        (int)(StandZielscheiben[stand].Width / 2 - maxAbstand), 
-                                        (int)(StandZielscheiben[stand].Height / 2 - maxAbstand), 
-                                        (int)(2 * maxAbstand), (int)(2 * maxAbstand)), 
-                                    GraphicsUnit.Pixel);
-
-                //e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
-
-
-
 
 
                 int spalte = (info.schussnummer - 1) % 5;
@@ -2429,15 +2363,9 @@ namespace schiessbuch
             {
                 string strZielscheibeInXML = aktuelleTreffer[stand][0].strZielscheibe; // ich lese die Zielscheibe einfach aus dem ersten schuss aus und hoffe, dass diese dann auch bei allen anderen schüssen die selbe ist. Falls nicht, wird sowieso eine Fehlermeldung ausgegeben.
                 if (strZielscheibeInXML.Equals(strZielscheibeLuftgewehr) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattlRot))
-                {
                     bScheibe = schiessbuch.Properties.Resources.Luftgewehr;
-                    StandZielscheiben[stand] = Properties.Resources.Luftgewehr;
-                }
                 if (strZielscheibeInXML.Equals(strZielscheibeLuftpistole) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattlRot) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleRot))
-                {
                     bScheibe = schiessbuch.Properties.Resources.Luftpistole;
-                    StandZielscheiben[stand] = Properties.Resources.Luftpistole;
-                }
             }
             catch (ArgumentOutOfRangeException)
             { // Exception soll einfach ignoriert werden 
