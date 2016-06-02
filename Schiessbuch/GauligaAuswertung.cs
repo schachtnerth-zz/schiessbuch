@@ -149,7 +149,7 @@ namespace schiessbuch
 
             // jetzt lese alle Schützen der Heimmannschaft und prüfe, ob es mehr als 5 sind.
             string strHeimschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
-            reader.Dispose();
+            //reader.Dispose();
             cmd.CommandText = strHeimschuetzen;
             reader = cmd.ExecuteReader();
             int countSchuetzen=0;

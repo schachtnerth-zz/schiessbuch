@@ -28,7 +28,6 @@ namespace schiessbuch
         long ereignisse_count = 0;
         long treffer_count = 0;
         private string connStr;
-        Configuration configuration;
         /// <summary>
         /// Die ID des aktuell ausgewählten Schießjahrs. Diese ID entspricht der ID in der entsprechenden Datenbanktabelle.
         /// </summary>
@@ -49,6 +48,7 @@ namespace schiessbuch
         private TabPage EinzelScheibe;
         private string strSchuetzenListeBindingSourceFilter;
         private bool generateOverview;
+        private Bitmap[] StandZielscheiben;
 
         /// <summary>
         /// Konstanten
@@ -88,6 +88,9 @@ namespace schiessbuch
             // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
             // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
             RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
+
+            StandZielscheiben = new Bitmap[6];
+            for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
 
         retry:
             // Die Connection Strings in den Properties werden aktualisiert und die Properties dann abgespeichert
@@ -285,7 +288,7 @@ namespace schiessbuch
                 conn.Close();
                 return tmpCount;
             }
-            catch (MySqlException mysqle)
+            catch (MySqlException)
             {
                 MessageBox.Show("Konnte keine Verbindung zur Datenbank herstellen. Methode: GetEreignisseCount()");
                 return 0;
@@ -499,22 +502,13 @@ namespace schiessbuch
             schuetzenListeBindingSource.Position = schuetzenListeBindingSource.Find("id", aktuellerSchuetze);
         }
 
-        private void schuetzenBindingNavigatorSaveItem_Click_1(object sender, EventArgs e)
-        {
-            this.Validate();
-            this.schuetzenBindingSource.EndEdit();
-            this.tableAdapterManager.UpdateAll(this.siusclubDataSet);
-
-        }
-
-        private void schuetzenBindingNavigatorSaveItem_Click_2(object sender, EventArgs e)
-        {
-            this.Validate();
-            this.schuetzenBindingSource.EndEdit();
-            this.tableAdapterManager.UpdateAll(this.siusclubDataSet);
-
-        }
-
+        /// <summary>
+        /// Die Anzeige im Schießbuch kann auf nur einen Tag beschränkt werden. Dazu muss der entsprechende DateTimePicker aktiviert werden
+        /// (Checkbox) und dann das gewünschte Datum eingetragen werden. Nach Eintragen des Datums wird dieser Eventhandler aufgerufen, der
+        /// die Beschränkung der Anzeige auf diesen einen Tag vornimmt.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SchiessabendPicker_ValueChanged(object sender, EventArgs e)
         {
             //MessageBox.Show(schiessbuchBindingSource.Filter);
@@ -522,6 +516,14 @@ namespace schiessbuch
             schiessbuchBindingSource.Filter = "Datum = '" + SchiessabendPicker.Value.ToShortDateString() + "' OR Datum='" + SchiessabendPicker.Value.AddDays(1).ToShortDateString() + "'";
         }
 
+        /// <summary>
+        /// Im Tab "Auswertung" wird eine Übersicht der Schießergebnisse des aktuellen Jahres angezeigt. Diese Methode erzeugt diese Übersicht
+        /// abhängig von den mitgegebenen Argumenten (wie z. B. die Disziplin)
+        /// </summary>
+        /// <param name="strDisziplin">Disziplin, für die die Auswertung erstellt werden soll</param>
+        /// <param name="textbox">TextBox, in die die Auswertung geschrieben werden soll</param>
+        /// <param name="Zeile1">Erste Zeile der Überschrift/Beschreibung dieser Auswertung</param>
+        /// <param name="Zeile2">Zweite Zeile der Überschrift/Beschreibung dieser Auswertung</param>
         private void printSchiessAuswertung(string strDisziplin, TextBox textbox, string Zeile1, string Zeile2)
         {
             // Erzeuge Auswertungen
@@ -558,6 +560,14 @@ namespace schiessbuch
             conn.Close();
         }
 
+        /// <summary>
+        /// Im Tab "Auswertung" wird eine Übersicht der Schießergebnisse des aktuellen Jahres angezeigt. Diese Methode erzeugt die Übersicht über die
+        /// 15 besten Ergebnisse abhängig von den mitgegebenen Argumenten (wie z. B. die Disziplin)
+        /// </summary>
+        /// <param name="strDisziplin">Disziplin, für die die Auswertung erstellt werden soll</param>
+        /// <param name="textbox">TextBox, in die die Auswertung geschrieben werden soll</param>
+        /// <param name="Zeile1">Erste Zeile der Überschrift/Beschreibung dieser Auswertung</param>
+        /// <param name="Zeile2">Zweite Zeile der Überschrift/Beschreibung dieser Auswertung</param>
         private void printSchiessAuswertungBest15(string strDisziplin, TextBox textbox, string Zeile1, string Zeile2)
         {
             // Erzeuge Auswertungen
@@ -592,11 +602,24 @@ namespace schiessbuch
             conn.Close();
         }
 
+        /// <summary>
+        /// Wenn ein neuer Schütze in der fullnameComboBox ausgewählt wird, müssen auch alle Statistiken neu erstellt werden.
+        /// Die Anzeige von Schießbuch und Trefferliste wird durch das DataBinding automatisch bewerkstelligt.
+        /// Dieser EventHandler SelectedIndexChanged von fullnameComboBox kümmert sich um die Aktualisierung der Statistiken.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void fullnameComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             AktuellerSchuetzeStatistikAktualisieren();
         }
 
+        /// <summary>
+        /// Dieser EventHandler aktiviert oder deaktiviert den DateTimePicker, mit dem die Anzeige im Schießbuch auf nur einen Tag
+        /// beschränkt werden kann.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox1.Checked)
@@ -605,14 +628,24 @@ namespace schiessbuch
                 SchiessabendPicker.Enabled = false;
         }
 
+        /// <summary>
+        /// Je nach dem, ob die CheckBox aktiviert oder deaktiviert wurde, wird hier festgelegt, ob die Anzeige im Schießbuch sich auf
+        /// das aktuelle Schießjahr oder auf das aktuell im Picker ausgewählte Datum beschränken soll.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SchiessabendPicker_EnabledChanged(object sender, EventArgs e)
         {
             if (SchiessabendPicker.Enabled == false)
             {
+                // Das ganze Jahr soll angezeigt werden.
                 populateSchiessjahrFilter();
             }
             else
             {
+                // nur ein Tag soll angezeigt werden. Dazu wird der EventHandler ValueChanged des Pickers aufgerufen, so als ob man gerade ein
+                // anderes Datum ausgewählt hätte. Das ist zwar nicht der Fall, wenn er Picker aktiviert wird, aber im Endeffekt ändert sich das Datum
+                // auch von "disabled" auf Tag xxx
                 SchiessabendPicker_ValueChanged(this, e);
             }
         }
@@ -808,6 +841,11 @@ namespace schiessbuch
             databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
         }
 
+        
+
+        /// <summary>
+        /// Hier wird die Übersichtsseite aktualisiert, also neu gezeichnet.
+        /// </summary>
         private void updateOverview()
         {
             Pen pen = new Pen(Color.Red, 1f);
@@ -840,10 +878,10 @@ namespace schiessbuch
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
             request.Method = "GET";
             XDocument document = new XDocument();
-//            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            {
-                document = XDocument.Load(response.GetResponseStream());
+            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
+//            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+//            {
+//                document = XDocument.Load(response.GetResponseStream());
                 string str = "";
                 int iSchuetze = 0;
                 string strZielscheibe = "";
@@ -927,34 +965,49 @@ namespace schiessbuch
                         }
                     }
                 }
-            }
+            //}
         }
 
         private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand)
         {
             Pen pen = new Pen(Color.Red, 1f);
             Font font = new Font("Arial", 1f);
-            float num = 4.5f;
-            float num2 = 23.622f;
-            float num3 = num * num2;
-            float width = pictureBox.Image.Width;
-            float num5 = pictureBox.Width;
-            float num6 = width / num5;
+            float kaliber = 4.5f;
+            float millimeterToPixel = 23.622f;
+            float schusslochDurchmesser = kaliber * millimeterToPixel;
+            float imgWidth = pictureBox.Image.Width;
+            float pictureBoxWidth = pictureBox.Width;
+            float zoomFactor = imgWidth / pictureBoxWidth;
             int stand1 = stand + 1;
             int iSumme = 0;
             int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
             int anzeigenAb = this.aktuelleTreffer[stand].Count - AnzTreffer;
             int trefferZaehler = 0;
+            Bitmap scheibeBitmap = new Bitmap(StandZielscheiben[stand]);
+            Graphics graphics = Graphics.FromImage(scheibeBitmap);
             foreach (SchussInfo info in this.aktuelleTreffer[stand])
             {
                 trefferZaehler++;
+                float maxX = 0.0f, maxY = 0.0f;
                 if (trefferZaehler > anzeigenAb)
                 {
                     Brush brush;
-                    float num9;
-                    float height;
-                    float num7 = (info.xrahmeninmm - (num / 2f)) * num2;
-                    float num8 = (info.yrahmeninmm - (num / 2f)) * num2;
+                    float textWidth;
+                    float textHeight;
+                    float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    float AbstandVonMitteX, AbstandVonMitteY;
+                    if (schussPosLinks < 0)
+                        AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    else
+                        AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                    if (schussPosOben < 0)
+                        AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    else
+                        AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+
+                    if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
+                    if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
                     if (info == aktuelleTreffer[stand].Last<SchussInfo>())
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Red));
@@ -967,22 +1020,74 @@ namespace schiessbuch
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Green));
                     }
-                    Rectangle rect = new Rectangle(((int)(num7 / num6)) + (pictureBox.Width / 2), ((int)(num8 / num6)) + (pictureBox.Height / 2), (int)(num3 / num6), (int)(num3 / num6));
-                    e.Graphics.FillEllipse(brush, rect);
-                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    Rectangle rect = new Rectangle(((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), (int)(schusslochDurchmesser), (int)(schusslochDurchmesser));
+
+                    graphics.FillEllipse(brush, rect);
+                    graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
                     string text = info.schussnummer.ToString();
                     while (true)
                     {
-                        num9 = e.Graphics.MeasureString(text, font).Width;
-                        height = e.Graphics.MeasureString(text, font).Height;
-                        if ((height > (rect.Height * 0.8)) || (num9 > (rect.Width * 0.8)))
+                        textWidth = graphics.MeasureString(text, font).Width;
+                        textHeight = graphics.MeasureString(text, font).Height;
+                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
                         {
                             break;
                         }
                         font = new Font("Arial", font.Size + 1f);
                     }
-                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (num9 / 2f)), (float)((rect.Y + (rect.Height / 2)) - (height / 2f)));
+                    graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+
+//                    e.Graphics.FillEllipse(brush, rect);
+//                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+//                    string text = info.schussnummer.ToString();
+//                    while (true)
+//                    {
+//                        textWidth = e.Graphics.MeasureString(text, font).Width;
+//                        textHeight = e.Graphics.MeasureString(text, font).Height;
+//                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+//                        {
+//                            break;
+//                        }
+//                        font = new Font("Arial", font.Size + 1f);
+//                    }
+//                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
                 }
+                // So, jetzt kümmern wir uns mal um das Zoomen...
+                float maxAbstand;
+                if (maxX > maxY)
+                    maxAbstand = maxX;
+                else
+                    maxAbstand = maxY;
+
+                if (maxAbstand < 200)
+                    maxAbstand = 200;
+
+                //maxAbstand = 200;
+                //MessageBox.Show(pictureBox.Name);
+                //MessageBox.Show("Size: " + pictureBox.Image.Width + "," + pictureBox.Image.Height + ".");
+
+                // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
+                int seitenlaenge;
+                if (pictureBox.Width < pictureBox.Height)
+                    seitenlaenge = pictureBox.Width;
+                else
+                    seitenlaenge = pictureBox.Height;
+
+                                e.Graphics.DrawImage(
+                                    scheibeBitmap, 
+                                    new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge , seitenlaenge), 
+                                    new Rectangle(
+                                        (int)(StandZielscheiben[stand].Width / 2 - maxAbstand), 
+                                        (int)(StandZielscheiben[stand].Height / 2 - maxAbstand), 
+                                        (int)(2 * maxAbstand), (int)(2 * maxAbstand)), 
+                                    GraphicsUnit.Pixel);
+
+                //e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
+
+
+
+
+
                 int spalte = (info.schussnummer - 1) % 5;
                 int zeile = (info.schussnummer - 1) / 5;
                 string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
@@ -1170,8 +1275,18 @@ namespace schiessbuch
             gauliga.ShowDialog();
         }
 
+        /// <summary>
+        /// Wird aufgerufen wenn im tabControl im Hauptdialog ein neuer Tab ausgewählt wird
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // zuerst mal werden alle periodisch arbeitenden Aktualisierungen abgeschaltet.
+            // Sollte nämlich eine davon bis jetzt gelaufen sein (sollte also der entsprechende Tab aktiv gewesen sein),
+            // so ist das nach dem Wechsel des Tabs nicht mehr der Fall und die Aktualisierung ist nicht mehr notwendig.
+            // Sollte die Aktualisierung nicht aktiv gewesen sein, schadet eine Beendigung der sowieso schon beendeten
+            // Aktualisierung nichts.
             this.stopUebersicht();
             this.stopEinzelScheibe();
             if (tabControl1.SelectedTab.Text.Equals("König"))
@@ -1966,36 +2081,6 @@ namespace schiessbuch
             ErstelleAuswertung();
         }
 
-        private void Schiessabend_CellLeave(object sender, DataGridViewCellEventArgs e)
-        {
-            // stelle fest, ob eine Zelle in der Spalte "Kasse" verlassen wurde. Nur dann soll nämlich ein Update in der Datenbank durchgeführt werden.
-            if (Schiessabend.Columns[e.ColumnIndex].HeaderText.Equals("Kasse"))
-            {
-                try
-                {
-                    Schiessabend.CommitEdit(DataGridViewDataErrorContexts.Commit);
-                    string strDatum = dateTimePicker1.Value.ToString("yyyy-MM-dd"); // Datum, an dem bezahlt wurde (das Datum, für das die Tagesansicht erzeugt wird)
-                    int iSchuetze = int.Parse(Schiessabend["ID", e.RowIndex].Value.ToString()); // der Schütze, der bezahlt hat
-                    MySqlConnection conn = new MySqlConnection(connStr);
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO kasse (idSchuetze, DatumBezahlt, Betrag) VALUES (@id, @datum, @betrag) ON DUPLICATE KEY UPDATE Betrag=@betrag", conn);
-                    cmd.Prepare();
-                    cmd.Parameters.Add("@id", MySqlDbType.Int16).Value = iSchuetze;
-                    cmd.Parameters.Add("@datum", MySqlDbType.Date).Value = dateTimePicker1.Value;
-                    cmd.Parameters.Add("@betrag", MySqlDbType.Float).Value = Schiessabend[e.ColumnIndex, e.RowIndex].Value;
-                    cmd.ExecuteNonQuery();
-                    cmd.Dispose();
-                    conn.Close();
-                    conn.Dispose();
-                    MySqlConnection.ClearPool(conn);
-                }
-                catch (FormatException fe)
-                {
-                    MessageBox.Show("Es darf nur ein Betrag eingegeben werden. Soll eine Zahlung gelöscht werden, dann 0 eintragen.", "Falsches Format", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
         private void btnKassenbericht_Click(object sender, EventArgs e)
         {
             if (pdKasse == null)
@@ -2344,9 +2429,15 @@ namespace schiessbuch
             {
                 string strZielscheibeInXML = aktuelleTreffer[stand][0].strZielscheibe; // ich lese die Zielscheibe einfach aus dem ersten schuss aus und hoffe, dass diese dann auch bei allen anderen schüssen die selbe ist. Falls nicht, wird sowieso eine Fehlermeldung ausgegeben.
                 if (strZielscheibeInXML.Equals(strZielscheibeLuftgewehr) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftgewehrBlattlRot))
+                {
                     bScheibe = schiessbuch.Properties.Resources.Luftgewehr;
+                    StandZielscheiben[stand] = Properties.Resources.Luftgewehr;
+                }
                 if (strZielscheibeInXML.Equals(strZielscheibeLuftpistole) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattl) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleBlattlRot) || strZielscheibeInXML.Equals(strZielscheibeLuftpistoleRot))
+                {
                     bScheibe = schiessbuch.Properties.Resources.Luftpistole;
+                    StandZielscheiben[stand] = Properties.Resources.Luftpistole;
+                }
             }
             catch (ArgumentOutOfRangeException)
             { // Exception soll einfach ignoriert werden 
@@ -2610,6 +2701,37 @@ namespace schiessbuch
             // this.cleanSchussTable(0); nur benötigt, wenn eine Tabelle mit allen Schüssen angezeigt werden soll
             // setze die richtige Zielscheibe ein
             ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, e, standFuerEinzelScheibe - 1);
+        }
+
+        private void Schiessabend_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            // stelle fest, ob eine Zelle in der Spalte "Kasse" verlassen wurde. Nur dann soll nämlich ein Update in der Datenbank durchgeführt werden.
+            if (Schiessabend.Columns[e.ColumnIndex].HeaderText.Equals("Kasse"))
+            {
+                try
+                {
+                    Schiessabend.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                    string strDatum = dateTimePicker1.Value.ToString("yyyy-MM-dd"); // Datum, an dem bezahlt wurde (das Datum, für das die Tagesansicht erzeugt wird)
+                    int iSchuetze = int.Parse(Schiessabend["ID", e.RowIndex].Value.ToString()); // der Schütze, der bezahlt hat
+                    MySqlConnection conn = new MySqlConnection(connStr);
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand("INSERT INTO kasse (idSchuetze, DatumBezahlt, Betrag) VALUES (@id, @datum, @betrag) ON DUPLICATE KEY UPDATE Betrag=@betrag", conn);
+                    cmd.Prepare();
+                    cmd.Parameters.Add("@id", MySqlDbType.Int16).Value = iSchuetze;
+                    cmd.Parameters.Add("@datum", MySqlDbType.Date).Value = dateTimePicker1.Value;
+                    cmd.Parameters.Add("@betrag", MySqlDbType.Float).Value = Schiessabend[e.ColumnIndex, e.RowIndex].Value;
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                    conn.Close();
+                    conn.Dispose();
+                    MySqlConnection.ClearPool(conn);
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show("Es darf nur ein Betrag eingegeben werden. Soll eine Zahlung gelöscht werden, dann 0 eintragen.", "Falsches Format", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
         }
     }
 }
