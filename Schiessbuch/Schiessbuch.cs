@@ -985,10 +985,11 @@ namespace schiessbuch
             int trefferZaehler = 0;
             Bitmap scheibeBitmap = new Bitmap(StandZielscheiben[stand]);
             Graphics graphics = Graphics.FromImage(scheibeBitmap);
+            float maxX = 0.0f, maxY = 0.0f;
             foreach (SchussInfo info in this.aktuelleTreffer[stand])
             {
                 trefferZaehler++;
-                float maxX = 0.0f, maxY = 0.0f;
+                
                 if (trefferZaehler > anzeigenAb)
                 {
                     Brush brush;
@@ -1020,7 +1021,12 @@ namespace schiessbuch
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Green));
                     }
-                    Rectangle rect = new Rectangle(((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), (int)(schusslochDurchmesser), (int)(schusslochDurchmesser));
+                    //Rectangle rect = new Rectangle(((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), (int)(schusslochDurchmesser), (int)(schusslochDurchmesser));
+                    Rectangle rect = new Rectangle(
+                        ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
+                        (pictureBox.Image.Height / 2) - ((int)(schussPosOben)), 
+                        (int)(schusslochDurchmesser), 
+                        (int)(schusslochDurchmesser));
 
                     graphics.FillEllipse(brush, rect);
                     graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
@@ -1083,6 +1089,10 @@ namespace schiessbuch
                                     GraphicsUnit.Pixel);
 
                 //e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
+
+                // mal schauen, ob man das darf...
+                // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
+                scheibeBitmap.Dispose();
 
 
 
