@@ -203,6 +203,11 @@ namespace schiessbuch
             // und dieser Tab dann aus dem TabControl entfernt. Er wird wieder eingehängt, wenn jemand in der Übersicht auf eine
             // Scheibe mit der Maus doppelklickt.
             this.tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
+
+            //schiessbuchDataGridView.Sort(dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Ascending);
+            //schiessbuchDataGridView.Invalidate();
+            schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
+
         }
 
         /// <summary>
@@ -684,8 +689,8 @@ namespace schiessbuch
                     }
                 }
             }
-            Pen pen = new Pen(Color.Red, 1f);
-            Brush brush = new SolidBrush(Color.Red);
+            Pen pen = new Pen(Color.White, 1f);
+            Brush brush = new SolidBrush(Color.FromArgb(150, Color.Red));
             Brush bluebrush = new SolidBrush(Color.Blue);
             float kaliber_mm = 4.5f;
             float pt_per_mm = 23.622f;
@@ -695,17 +700,55 @@ namespace schiessbuch
             float render_points = pictureBox1.Width;
             float zoom_factor = real_pt_size / render_points;
 
-            foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+            List<SchussInfo>[] schussliste = new List<SchussInfo>[1];
+            schussliste[0] = new List<SchussInfo>();
+
+            if (trefferDataGridView.SelectedRows.Count > 0) // Es macht nur Sinn, etwas zu zeichnen, wenn auch mindestens ein Schuss ausgewählt ist
             {
-                float x_l_o = (float.Parse(row.Cells["xrahmeninmm"].Value.ToString()) - kaliber_mm / 2) * pt_per_mm;
-                float y_l_o = (float.Parse(row.Cells["yrahmeninmm"].Value.ToString()) - kaliber_mm / 2) * pt_per_mm;
+
+                foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+                {
+                    SchussInfo si = new SchussInfo(
+                        float.Parse(row.Cells["xrahmeninmm"].Value.ToString()),
+                        float.Parse(row.Cells["yrahmeninmm"].Value.ToString()),
+                        int.Parse(row.Cells["Ring"].Value.ToString()),
+                        int.Parse(row.Cells["schussnummer"].Value.ToString()),
+                        row.Cells["zielscheibe"].Value.ToString(),
+                        int.Parse(row.Cells["schuetze"].Value.ToString()),
+                        row.Cells["schuetze"].Value.ToString());
+                    schussliste[0].Add(si);
 
 
-                e.Graphics.FillEllipse(brush, new Rectangle((int)(x_l_o / zoom_factor + pictureBox1.Width / 2), (int)(y_l_o / zoom_factor + pictureBox1.Height / 2), (int)(kaliber_pt / zoom_factor), (int)(kaliber_pt / zoom_factor)));
-                //gr.FillEllipse(bluebrush, new Rectangle((int)((-kaliber_pt / 2) / zoom_factor), (int)((-kaliber_pt / 2) / zoom_factor), (int)(kaliber_pt / zoom_factor), (int)(kaliber_pt / zoom_factor)));
+                    //float x_l_o = (float.Parse(row.Cells["xrahmeninmm"].Value.ToString()) - kaliber_mm / 2) * pt_per_mm;
+                    //float y_l_o = (float.Parse(row.Cells["yrahmeninmm"].Value.ToString()) - kaliber_mm / 2) * pt_per_mm;
+                    //float y_l_u = (float.Parse(row.Cells["yrahmeninmm"].Value.ToString()) + kaliber_mm / 2) * pt_per_mm;
 
+
+                    //e.Graphics.FillEllipse(
+                    //    brush, 
+                    //    new Rectangle(
+                    //        (int)(x_l_o / zoom_factor + pictureBox1.Width / 2), 
+                    //        (int)(y_l_o / zoom_factor + pictureBox1.Height / 2), 
+                    //        (int)(kaliber_pt / zoom_factor), 
+                    //        (int)(kaliber_pt / zoom_factor)));
+                    //gr.FillEllipse(bluebrush, new Rectangle((int)((-kaliber_pt / 2) / zoom_factor), (int)((-kaliber_pt / 2) / zoom_factor), (int)(kaliber_pt / zoom_factor), (int)(kaliber_pt / zoom_factor)));
+
+                }
+                Bitmap[] zielscheibeStr = new Bitmap[1];
+                //zielscheibe[0] = new Bitmap;
+
+                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehr) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattlRot))
+                {
+                    zielscheibeStr[0] = Properties.Resources.Luftgewehr;
+                }
+                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistole) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattlRot) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleRot))
+                {
+                    zielscheibeStr[0] = Properties.Resources.Luftpistole;
+                }
+
+
+                ZeichneTrefferInZielscheibe(pictureBox1, e, 0, schussliste, zielscheibeStr, false);
             }
-
         }
 
         private void RefreshTimer_Tick(object sender, EventArgs e)
@@ -968,7 +1011,7 @@ namespace schiessbuch
             }
         }
 
-        private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand)
+        private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand, List<SchussInfo>[] trefferliste, Bitmap[] zielscheiben, bool FillMatrix)
         {
             Pen pen = new Pen(Color.Red, 1f);
             Font font = new Font("Arial", 1f);
@@ -981,15 +1024,17 @@ namespace schiessbuch
             int stand1 = stand + 1;
             int iSumme = 0;
             int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
-            int anzeigenAb = this.aktuelleTreffer[stand].Count - AnzTreffer;
+            int anzeigenAb = trefferliste[stand].Count - AnzTreffer;
             int trefferZaehler = 0;
-            Bitmap scheibeBitmap = new Bitmap(StandZielscheiben[stand]);
+            Bitmap scheibeBitmap = new Bitmap(zielscheiben[stand]);
             Graphics graphics = Graphics.FromImage(scheibeBitmap);
             float maxX = 0.0f, maxY = 0.0f;
-            foreach (SchussInfo info in this.aktuelleTreffer[stand])
+            foreach (SchussInfo info in trefferliste[stand])
             {
                 trefferZaehler++;
-                
+                //scheibeBitmap = new Bitmap(zielscheiben[stand]);
+                //graphics = Graphics.FromImage(scheibeBitmap);
+
                 if (trefferZaehler > anzeigenAb)
                 {
                     Brush brush;
@@ -997,6 +1042,7 @@ namespace schiessbuch
                     float textHeight;
                     float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
                     float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    float schussPosOben2 = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
                     float AbstandVonMitteX, AbstandVonMitteY;
                     if (schussPosLinks < 0)
                         AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
@@ -1009,7 +1055,7 @@ namespace schiessbuch
 
                     if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
                     if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
-                    if (info == aktuelleTreffer[stand].Last<SchussInfo>())
+                    if (info == trefferliste[stand].Last<SchussInfo>())
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Red));
                     }
@@ -1021,11 +1067,16 @@ namespace schiessbuch
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Green));
                     }
-                    //Rectangle rect = new Rectangle(((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), (int)(schusslochDurchmesser), (int)(schusslochDurchmesser));
+                    //Rectangle rect = new Rectangle(
+                    //    ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
+                    //    ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), 
+                    //    (int)(schusslochDurchmesser), 
+                    //    (int)(schusslochDurchmesser));
+
                     Rectangle rect = new Rectangle(
-                        ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
-                        (pictureBox.Image.Height / 2) - ((int)(schussPosOben)), 
-                        (int)(schusslochDurchmesser), 
+                        ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2),
+                        (pictureBox.Image.Height / 2) - ((int)(schussPosOben2)),
+                        (int)(schusslochDurchmesser),
                         (int)(schusslochDurchmesser));
 
                     graphics.FillEllipse(brush, rect);
@@ -1043,21 +1094,22 @@ namespace schiessbuch
                     }
                     graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
 
-//                    e.Graphics.FillEllipse(brush, rect);
-//                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
-//                    string text = info.schussnummer.ToString();
-//                    while (true)
-//                    {
-//                        textWidth = e.Graphics.MeasureString(text, font).Width;
-//                        textHeight = e.Graphics.MeasureString(text, font).Height;
-//                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
-//                        {
-//                            break;
-//                        }
-//                        font = new Font("Arial", font.Size + 1f);
-//                    }
-//                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+                    //                    e.Graphics.FillEllipse(brush, rect);
+                    //                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    //                    string text = info.schussnummer.ToString();
+                    //                    while (true)
+                    //                    {
+                    //                        textWidth = e.Graphics.MeasureString(text, font).Width;
+                    //                        textHeight = e.Graphics.MeasureString(text, font).Height;
+                    //                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                    //                        {
+                    //                            break;
+                    //                        }
+                    //                        font = new Font("Arial", font.Size + 1f);
+                    //                    }
+                    //                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
                 }
+
                 // So, jetzt kümmern wir uns mal um das Zoomen...
                 float maxAbstand;
                 if (maxX > maxY)
@@ -1079,12 +1131,17 @@ namespace schiessbuch
                 else
                     seitenlaenge = pictureBox.Height;
 
+                if (maxAbstand > pictureBox.Image.Width / 2)
+                    maxAbstand = pictureBox.Image.Width / 2;
+
+                //MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
+
                                 e.Graphics.DrawImage(
                                     scheibeBitmap, 
                                     new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge , seitenlaenge), 
                                     new Rectangle(
-                                        (int)(StandZielscheiben[stand].Width / 2 - maxAbstand), 
-                                        (int)(StandZielscheiben[stand].Height / 2 - maxAbstand), 
+                                        (int)(zielscheiben[stand].Width / 2 - maxAbstand), 
+                                        (int)(zielscheiben[stand].Height / 2 - maxAbstand), 
                                         (int)(2 * maxAbstand), (int)(2 * maxAbstand)), 
                                     GraphicsUnit.Pixel);
 
@@ -1092,20 +1149,27 @@ namespace schiessbuch
 
                 // mal schauen, ob man das darf...
                 // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
-                scheibeBitmap.Dispose();
+                //graphics.Dispose();
+                //scheibeBitmap.Dispose();
 
 
 
 
+                if (FillMatrix)
+                {
+                    int spalte = (info.schussnummer - 1) % 5;
+                    int zeile = (info.schussnummer - 1) / 5;
+                    string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
 
-                int spalte = (info.schussnummer - 1) % 5;
-                int zeile = (info.schussnummer - 1) / 5;
-                string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
-
-                ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
-                iSumme += info.ring;
+                    ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
+                    iSumme += info.ring;
+                }
             }
-            ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
+            graphics.Dispose();
+            scheibeBitmap.Dispose();
+
+            if (FillMatrix)
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
 
         /// <summary>
@@ -2428,7 +2492,7 @@ namespace schiessbuch
         {
             this.cleanSchussTable(0);
             // setze die richtige Zielscheibe ein
-            this.ZeichneTrefferInZielscheibe(this.stand1Zielscheibe, e, 0);
+            this.ZeichneTrefferInZielscheibe(this.stand1Zielscheibe, e, 0, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void setzeZielscheibeInUebersicht(int stand)
@@ -2489,31 +2553,31 @@ namespace schiessbuch
         private void stand2Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(1);
-            this.ZeichneTrefferInZielscheibe(this.stand2Zielscheibe, e, 1);
+            this.ZeichneTrefferInZielscheibe(this.stand2Zielscheibe, e, 1, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void stand3Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(2);
-            this.ZeichneTrefferInZielscheibe(this.stand3Zielscheibe, e, 2);
+            this.ZeichneTrefferInZielscheibe(this.stand3Zielscheibe, e, 2, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void stand4Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(3);
-            this.ZeichneTrefferInZielscheibe(this.stand4Zielscheibe, e, 3);
+            this.ZeichneTrefferInZielscheibe(this.stand4Zielscheibe, e, 3, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void stand5Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(4);
-            this.ZeichneTrefferInZielscheibe(this.stand5Zielscheibe, e, 4);
+            this.ZeichneTrefferInZielscheibe(this.stand5Zielscheibe, e, 4, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void stand6Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(5);
-            this.ZeichneTrefferInZielscheibe(this.stand6Zielscheibe, e, 5);
+            this.ZeichneTrefferInZielscheibe(this.stand6Zielscheibe, e, 5, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void geschlechtTextBox_TextChanged(object sender, EventArgs e)
@@ -2710,7 +2774,7 @@ namespace schiessbuch
         {
             // this.cleanSchussTable(0); nur benötigt, wenn eine Tabelle mit allen Schüssen angezeigt werden soll
             // setze die richtige Zielscheibe ein
-            ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, e, standFuerEinzelScheibe - 1);
+            ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, e, standFuerEinzelScheibe - 1, aktuelleTreffer, StandZielscheiben, true);
         }
 
         private void Schiessabend_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -2742,6 +2806,29 @@ namespace schiessbuch
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Wenn "Auswerten" im Schießbuch bei einer Serie ausgewählt wird
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void auswertenEntry_Click(object sender, EventArgs e)
+        {
+            // Auswertung einer Serie
+            // Dazu brauchen wir ein PrintDocument, weil die Auswertung ja (nur) gedruckt werden soll
+            PrintDocument pdSerienAuswertung = new PrintDocument();
+            pdSerienAuswertung.PrintPage += PdSerienAuswertung_PrintPage;
+        }
+
+        private void PdSerienAuswertung_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void sortierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            schiessbuchDataGridView.Sort(this.dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Descending);
         }
     }
 }
