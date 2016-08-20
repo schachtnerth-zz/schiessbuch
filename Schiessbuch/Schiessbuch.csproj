@@ -61,6 +61,14 @@
     <Compile Include="GauligaAuswertung.Designer.cs">
       <DependentUpon>GauligaAuswertung.cs</DependentUpon>
     </Compile>
+    <Compile Include="gemeindemeisterschaft.cs">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="gemeindemeisterschaft.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </Compile>
     <Compile Include="ManuellNachtragen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,6 +126,17 @@
     <EmbeddedResource Include="SchiesserieVerschieben.resx">
       <DependentUpon>SchiesserieVerschieben.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="gemeindemeisterschaft.xsc">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </None>
+    <None Include="gemeindemeisterschaft.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>gemeindemeisterschaft.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="gemeindemeisterschaft.xss">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -141,6 +160,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Logo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edelweiss.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

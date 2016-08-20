@@ -80,6 +80,14 @@ namespace schiessbuch
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.datumliste". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.vereinsliste". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
             // Festlegen des Connection Strings. Standardmäßig wird die Datenbank am Schießstand verwendet. Erst wenn die nicht verfügbar ist,
             // wird eine lokale Datenbank versucht. Das passiert automatisch über eine Exception
             connStr = connStrRemote;
@@ -107,6 +115,10 @@ namespace schiessbuch
             trefferTableAdapter.Connection.ConnectionString = connStr;
             vereineTableAdapter.Connection.ConnectionString = connStr;
             schuetzenlisteTableAdapter.Connection.ConnectionString = connStr;
+            uebersichtgemeindemeisterschaftTableAdapter.Connection.ConnectionString = connStr;
+            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
+            datumlisteTableAdapter.Connection.ConnectionString = connStr;
+            
 
             // Jetzt wird versucht, Werte aus der Datenbank zu lesen
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
@@ -984,7 +996,7 @@ namespace schiessbuch
                                 {
                                     if (!strZielscheibe.Equals(element2.Value))
                                     {
-                                        MessageBox.Show("verschiedene Zielscheiben auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
+                                        // nicht für Gemeindemeisterschaft MessageBox.Show("verschiedene Zielscheiben auf Stand vorhanden. Das sollte nicht vorkommen. Bitte genaue Umstände festhalten. Software muss angepasst werden.");
                                     }
                                 }
                             }
@@ -1369,6 +1381,8 @@ namespace schiessbuch
                 ErstelleAuswertung();
             if (tabControl1.SelectedTab.Text.Equals("Übersicht"))
                 startUebersicht();
+            if (tabControl1.SelectedTab.Text.Equals("Gemeindemeisterschaft"))
+                ErstelleAuswertungGemeindemeisterschaft();
             if (!tabControl1.SelectedTab.Name.Equals("tabEinzelscheibe"))
                 tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
             else
@@ -1435,9 +1449,9 @@ namespace schiessbuch
         private void saveToolStripButton_Click(object sender, EventArgs e)
         {
             InsertOrUpdateDatabaseWithNewSchuetze();
-            saveToolStripButton1.Enabled = false;
-            bearbeitungsmodusToolStripMenuItem.Checked = false;
-            SetEnableDisableEditControls(false);
+            //saveToolStripButton1.Enabled = false;
+            //bearbeitungsmodusToolStripMenuItem.Checked = false;
+            //SetEnableDisableEditControls(false);
             schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
         }
 
@@ -1446,7 +1460,7 @@ namespace schiessbuch
             string str;
             MySqlCommand command;
             MySqlConnection connection = new MySqlConnection(connStr);
-            if (this.idTextBox.Text == "-1")
+            if (Int16.Parse(this.idTextBox.Text) < 0)
             {
                 if ((((this.nameTextBox.Text.Length != 0) && (this.vornameTextBox.Text.Length != 0)) && (this.vereinComboBox.Text.Length != 0)) && (this.geschlechtTextBox.Text.Length > 0))
                 {
@@ -2829,6 +2843,277 @@ namespace schiessbuch
         private void sortierenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             schiessbuchDataGridView.Sort(this.dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Descending);
+        }
+
+        private void ErstelleAuswertungGemeindemeisterschaft()
+        {
+            this.SuspendLayout();
+            MySqlConnection connGMM = new MySqlConnection(connStr);
+            connGMM.Open();
+            MySqlCommand cmdGMM = new MySqlCommand("call siusclub.fillGemeindemeisterschaftTable();", connGMM);
+            cmdGMM.ExecuteNonQuery();
+            connGMM.Close();
+            connGMM.Dispose();
+            MySqlConnection.ClearAllPools();
+            uebersichtgemeindemeisterschaftTableAdapter.Fill(gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+            gmmDGV.Invalidate();
+            this.ResumeLayout();
+        }
+
+        private void cbVereineFiltern_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cbVereineFiltern.Checked)
+            {
+                comboVereineFiltern.Visible = true;
+                comboVereineFiltern.Enabled = true;
+            } else
+            {
+                comboVereineFiltern.Enabled = false;
+                comboVereineFiltern.Visible = false;
+            }
+            FilterGemeindemeisterschaft();
+        }
+
+        private void FilterGemeindemeisterschaft()
+        {
+            CultureInfo deutschesDatum = new CultureInfo("de-DE");
+            //MessageBox.Show(comboDatumFiltern.Text + " " + comboVereineFiltern.Text);
+            if (cbDatumFiltern.Checked && (!cbVereineFiltern.Checked))
+                if (comboDatumFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource1.Filter = "Datum='" + comboDatumFiltern.Text + "'";
+            if (cbVereineFiltern.Checked && (!cbDatumFiltern.Checked))
+                if (comboVereineFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource1.Filter = "Verein='" + comboVereineFiltern.Text + "'";
+            if (cbVereineFiltern.Checked && cbDatumFiltern.Checked)
+                if ((comboDatumFiltern.Text != "") && (comboVereineFiltern.Text != ""))  uebersichtgemeindemeisterschaftBindingSource1.Filter = "Verein='" + comboVereineFiltern.Text + "' AND " + String.Format("Datum='{0:yyyy-MM-dd}'", DateTime.Parse(comboDatumFiltern.Text, deutschesDatum));
+            if ((!cbVereineFiltern.Checked) && (!cbDatumFiltern.Checked))
+                uebersichtgemeindemeisterschaftBindingSource1.Filter = "";
+        }
+
+        private void cbDatumFiltern_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cbDatumFiltern.Checked)
+            {
+                comboDatumFiltern.Visible = true;
+                comboDatumFiltern.Enabled = true;
+            } else
+            {
+                comboDatumFiltern.Enabled = false;
+                comboDatumFiltern.Visible = false;
+            }
+            FilterGemeindemeisterschaft();
+        }
+
+        private void comboVereineFiltern_SelectedValueChanged(object sender, EventArgs e)
+        {
+            FilterGemeindemeisterschaft();
+        }
+
+        private void comboDatumFiltern_SelectedValueChanged(object sender, EventArgs e)
+        {
+            FilterGemeindemeisterschaft();
+        }
+
+        private void comboDatumFiltern_TextChanged(object sender, EventArgs e)
+        {
+            FilterGemeindemeisterschaft();
+        }
+
+        private void comboVereineFiltern_TextChanged(object sender, EventArgs e)
+        {
+            FilterGemeindemeisterschaft();
+        }
+
+        PrintDocument gmmAuswertung;
+        int gmmLinesCount;
+
+        private void btnGmmDrucken2_Click_1(object sender, EventArgs e)
+        {
+        }
+
+        int gmmPageNo;
+
+        private void pd_gmmPrintPage(object sender, PrintPageEventArgs ev)
+        {
+            //ev.Graphics.Clear(Color.White);
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            //string line = null;
+
+            // calculate the number of lines per page
+            linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+
+            string str = "Schützengesellschaft Edelweiß Eltheim e. V.";
+            Font headFont = new Font("Arial", 20f);
+            Font headFont2 = new Font("Arial", 14);
+            int strl = (int)ev.Graphics.MeasureString(str, headFont).Width;
+            int headHeight = (int)ev.Graphics.MeasureString(str, headFont).Height;
+            ev.Graphics.DrawString(str, headFont, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            str = String.Format("Auswertung Gemeindemeisterschaft", dateTimePicker1.Value.ToShortDateString());
+            strl = (int)ev.Graphics.MeasureString(str, headFont2).Width;
+            headHeight = (int)ev.Graphics.MeasureString(str, headFont2).Height;
+            ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+
+            int disc = 16; // 16 Disziplinen mit LP Auflage, ansonsten nur 12
+            int beginDisziplinen = 400;
+
+            // berechne maximale Textlänge der Disziplinen
+            int maxLen = 0;
+            for (int i = 0; i < disc; i++)
+            {
+                float l = ev.Graphics.MeasureString(gmmDGV.Columns[i + 5].HeaderText.Replace(" L", "\nL"), printFont).Width;
+                if ((int)l > maxLen)
+                    maxLen = (int)l;
+            }
+
+            yPos = topMargin + maxLen;
+            ev.Graphics.DrawString("Name", printFont, Brushes.Black, leftMargin, yPos-20, new StringFormat());
+            //ev.Graphics.DrawString("Name", printFont, Brushes.Black, leftMargin + 35, yPos-10, new StringFormat());
+
+            for (int i = 0; i < disc; i++)
+            {
+                ev.Graphics.TranslateTransform(leftMargin + beginDisziplinen + i * 40, yPos);
+                ev.Graphics.RotateTransform(-90);
+                ev.Graphics.DrawString(gmmDGV.Columns[i + 5].HeaderText.Replace(" L", "\nL"),
+                    printFont,
+                    Brushes.Black,
+                    0,
+                    0,
+                    new StringFormat());
+                ev.Graphics.RotateTransform(90);
+                ev.Graphics.TranslateTransform(-(leftMargin + beginDisziplinen + i * 40), -yPos);
+            }
+
+            // calculate the number of lines per page
+            // linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+            float tmpHoehe; // aktuell noch verfügbare Höhe ermitteln
+            tmpHoehe = ev.PageBounds.Height - yPos - ev.PageSettings.Margins.Bottom;
+            //linesPerPage = tmpHoehe / printFont.GetHeight(ev.Graphics);
+            linesPerPage = tmpHoehe / 20; // Pro Zeile springen wir um 20 nach unten!
+            linesPerPage--; // um ein bisschen Abstand zum Datum in der Fußzeile zu haben
+
+
+            while (count < linesPerPage && currentLinesPrinted < gmmLinesCount)
+            {
+                if (gmmDGV[0, currentLinesPrinted].Value != null)
+                {
+                    //string idstr = gmmDGV["ID", currentLinesPrinted].Value.ToString();
+                    //yPos = topMargin + maxLen + ((count + 1) * printFont.GetHeight(ev.Graphics));
+                    //ev.Graphics.DrawString(idstr, printFont, Brushes.Black, leftMargin, yPos, new StringFormat());
+                    ev.Graphics.DrawString(
+                        gmmDGV[1, currentLinesPrinted].Value.ToString() + ", " + gmmDGV[2, currentLinesPrinted].Value.ToString(),
+                        printFont,
+                        Brushes.Black,
+                        leftMargin,
+                        yPos,
+                        new StringFormat());
+                    ev.Graphics.DrawString(
+                        gmmDGV[0, currentLinesPrinted].Value.ToString(), 
+                        printFont, 
+                        Brushes.Black, 
+                        leftMargin + 200, 
+                        yPos, 
+                        new StringFormat());
+                    //int disziplinen = 16; // 16 Disziplinen
+                    for (int i = 0; i < disc; i++)
+                    {
+                        ev.Graphics.DrawString(gmmDGV[5 + i, currentLinesPrinted].Value.ToString(),
+                            printFont,
+                            Brushes.Black,
+                            leftMargin + beginDisziplinen + i * 40,
+                            yPos,
+                            new StringFormat());
+                    }
+                    count++;
+                    currentLinesPrinted++;
+                    yPos += 20;
+                }
+            }
+
+            string pageStr = "Seite " + gmmPageNo;
+            ev.Graphics.DrawString(
+                pageStr,
+                printFont,
+                Brushes.Black,
+                ev.PageBounds.Width - ev.PageSettings.Margins.Right - ev.Graphics.MeasureString(pageStr, printFont).Width,
+                ev.PageBounds.Height - ev.PageSettings.Margins.Bottom);
+
+            CultureInfo provider = new CultureInfo("de-DE");
+            pageStr = DateTime.Now.ToString(provider);
+            ev.Graphics.DrawString(
+                pageStr,
+                printFont,
+                Brushes.Black,
+                ev.PageSettings.Margins.Left,
+                ev.PageBounds.Height - ev.PageSettings.Margins.Bottom);
+
+            ev.Graphics.DrawImage(
+                Properties.Resources.edelweiss, 
+                new Rectangle(
+                    ev.PageSettings.Margins.Left, 
+                    ev.PageSettings.Margins.Top, 
+                    150, 
+                    150), 
+                new Rectangle(
+                    0,
+                    0,
+                    Properties.Resources.edelweiss.Width, 
+                    Properties.Resources.edelweiss.Height), 
+                GraphicsUnit.Pixel);
+
+            if (currentLinesPrinted < gmmDGV.Rows.Count)
+            {
+                ev.HasMorePages = true;
+                gmmPageNo++;
+            }
+            else
+            {
+                ev.HasMorePages = false;
+                currentLinesPrinted = 0;
+            }
+        }
+
+        private void btnGmmDruck_Click(object sender, EventArgs e)
+        {
+            gmmPageNo = 1;
+            if (gmmAuswertung == null)
+            {
+                gmmAuswertung = new PrintDocument();
+                PageSettings ps = new PageSettings();
+                ps = gmmAuswertung.DefaultPageSettings;
+                ps.Landscape = true;
+                ps.Margins.Left = 50;
+                ps.Margins.Right = 50;
+                ps.Margins.Top = 50;
+                ps.Margins.Bottom = 50;
+                gmmAuswertung.DefaultPageSettings = ps;
+                gmmAuswertung.PrintPage += new PrintPageEventHandler(pd_gmmPrintPage);
+            }
+            printFont = new Font("Arial", 10);
+            gmmLinesCount = gmmDGV.Rows.Count;
+            PrintPreviewDialog ppdlg = new PrintPreviewDialog();
+            ppdlg.Document = gmmAuswertung;
+            ppdlg.ShowDialog();
+        }
+
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            ErstelleAuswertungGemeindemeisterschaft();
+        }
+
+        private void comboDatumFiltern_DropDown(object sender, EventArgs e)
+        {
+            datumlisteTableAdapter.ClearBeforeFill = true;
+            datumlisteTableAdapter.Fill(gemeindemeisterschaft.datumliste);
+        }
+
+        private void comboVereineFiltern_DropDown(object sender, EventArgs e)
+        {
+            vereinslisteTableAdapter.ClearBeforeFill = true;
+            vereinslisteTableAdapter.Fill(gemeindemeisterschaft.vereinsliste);
         }
     }
 }
