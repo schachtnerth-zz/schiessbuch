@@ -739,14 +739,14 @@ namespace schiessbuch {
                 this.columnPreis_Luftpistole = base.Columns["Preis Luftpistole"];
                 this.columnPreis_Luftgewehr_Auflage = base.Columns["Preis Luftgewehr Auflage"];
                 this.columnPreis_Luftpistole_Auflage = base.Columns["Preis Luftpistole Auflage"];
-                this.columnBürgermeisterpokal_Luftgewehr = base.Columns["Bürgermeisterpokal Luftgewehr"];
-                this.columnBürgermeisterpokal_Luftpistole = base.Columns["Bürgermeisterpokal Luftpistole"];
-                this.columnBürgermeisterpokal_Luftgewehr_Auflage = base.Columns["Bürgermeisterpokal Luftgewehr Auflage"];
-                this.columnBürgermeisterpokal_Luftpistole_Auflage = base.Columns["Bürgermeisterpokal Luftpistole Auflage"];
-                this.columnGedächtnispokal_Luftgewehr = base.Columns["Gedächtnispokal Luftgewehr"];
-                this.columnGedächtnispokal_Luftpistole = base.Columns["Gedächtnispokal Luftpistole"];
-                this.columnGedächtnispokal_Luftgewehr_Auflage = base.Columns["Gedächtnispokal Luftgewehr Auflage"];
-                this.columnGedächtnispokal_Luftpistole_Auflage = base.Columns["Gedächtnispokal Luftpistole Auflage"];
+                this.columnBürgermeisterpokal_Luftgewehr = base.Columns["Buergermeisterpokal Luftgewehr"];
+                this.columnBürgermeisterpokal_Luftpistole = base.Columns["Buergermeisterpokal Luftpistole"];
+                this.columnBürgermeisterpokal_Luftgewehr_Auflage = base.Columns["Buergermeisterpokal Luftgewehr Auflage"];
+                this.columnBürgermeisterpokal_Luftpistole_Auflage = base.Columns["Buergermeisterpokal Luftpistole Auflage"];
+                this.columnGedächtnispokal_Luftgewehr = base.Columns["Gedaechtnispokal Luftgewehr"];
+                this.columnGedächtnispokal_Luftpistole = base.Columns["Gedaechtnispokal Luftpistole"];
+                this.columnGedächtnispokal_Luftgewehr_Auflage = base.Columns["Gedaechtnispokal Luftgewehr Auflage"];
+                this.columnGedächtnispokal_Luftpistole_Auflage = base.Columns["Gedaechtnispokal Luftpistole Auflage"];
                 this.columnschiessjahrId = base.Columns["schiessjahrId"];
                 this.columnSchuetzeID = base.Columns["SchuetzeID"];
             }
@@ -2404,19 +2404,19 @@ namespace schiessbuch.gemeindemeisterschaftTableAdapters {
             this._commandCollection[0].CommandType = global::System.Data.CommandType.Text;
         }
         
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-        [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(gemeindemeisterschaft.uebersichtgemeindemeisterschaftDataTable dataTable) {
-            this.Adapter.SelectCommand = this.CommandCollection[0];
-            if ((this.ClearBeforeFill == true)) {
-                dataTable.Clear();
-            }
-            dataTable.Constraints.Clear();
-            int returnValue = this.Adapter.Fill(dataTable);
-            return returnValue;
-        }
+//        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+//        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+//        [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
+//        [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
+//        public virtual int Fill(gemeindemeisterschaft.uebersichtgemeindemeisterschaftDataTable dataTable) {
+//            this.Adapter.SelectCommand = this.CommandCollection[0];
+//            if ((this.ClearBeforeFill == true)) {
+//                dataTable.Clear();
+//            }
+//            dataTable.Constraints.Clear();
+//            int returnValue = this.Adapter.Fill(dataTable);
+//            return returnValue;
+//        }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]

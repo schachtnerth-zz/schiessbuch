@@ -64,6 +64,9 @@ namespace schiessbuch
         const string strZielscheibeLuftpistoleBlattlRot = "DSB Luftpistole 10m Blattl rot";
         const string strZielscheibeLuftgewehrBlattl = "DSB Luftgewehr 10m Blattl schwarz";
         const string strZielscheibeLuftpistoleBlattl = "DSB Luftpistole 10m Blattl schwarz";
+        const string strZielscheibeLuftgewehrBlattlBlau = "DSB Luftgewehr 10m Blattl blau";
+        const string strZielscheibeLuftpistoleBlattlBlau = "DSB Luftpistole 10m Blattl blau";
+
 
         /// <summary>
         /// Konstruktor
@@ -80,14 +83,20 @@ namespace schiessbuch
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet11.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.uebersichtgemeindemeisterschaftTableAdapter2.Fill(this.siusclubDataSet11.uebersichtgemeindemeisterschaft);
+            // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
+            this.uebersichtgemeindemeisterschaftTableAdapter1.Fill(this.vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.datumliste". Sie können sie bei Bedarf verschieben oder entfernen.
             this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.vereinsliste". Sie können sie bei Bedarf verschieben oder entfernen.
             this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+//            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+//            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
             // Festlegen des Connection Strings. Standardmäßig wird die Datenbank am Schießstand verwendet. Erst wenn die nicht verfügbar ist,
             // wird eine lokale Datenbank versucht. Das passiert automatisch über eine Exception
             connStr = connStrRemote;
@@ -115,10 +124,10 @@ namespace schiessbuch
             trefferTableAdapter.Connection.ConnectionString = connStr;
             vereineTableAdapter.Connection.ConnectionString = connStr;
             schuetzenlisteTableAdapter.Connection.ConnectionString = connStr;
-            uebersichtgemeindemeisterschaftTableAdapter.Connection.ConnectionString = connStr;
+            // uebersichtgemeindemeisterschaftTableAdapter.Connection.ConnectionString = connStr;
             vereinslisteTableAdapter.Connection.ConnectionString = connStr;
             datumlisteTableAdapter.Connection.ConnectionString = connStr;
-            
+            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
 
             // Jetzt wird versucht, Werte aus der Datenbank zu lesen
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
@@ -749,11 +758,11 @@ namespace schiessbuch
                 Bitmap[] zielscheibeStr = new Bitmap[1];
                 //zielscheibe[0] = new Bitmap;
 
-                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehr) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattlRot))
+                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehr) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattlRot) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftgewehrBlattlBlau))
                 {
                     zielscheibeStr[0] = Properties.Resources.Luftgewehr;
                 }
-                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistole) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattlRot) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleRot))
+                if (schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistole) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattl) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattlRot) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleRot) || schussliste[0][0].strZielscheibe.Equals(strZielscheibeLuftpistoleBlattlBlau))
                 {
                     zielscheibeStr[0] = Properties.Resources.Luftpistole;
                 }
@@ -832,9 +841,9 @@ namespace schiessbuch
                     //schiessbuchBindingSource.ResetBindings(false);
                     //trefferBindingSource.ResetBindings(false);
 
-                    if (SchiessbuchScrollposition != -1)
+                    if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
                         schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
-                    if (TrefferScrollposition != -1)
+                    if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
                         trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
                     //siusclubDataSet.Reset();
                     //schiessbuchBindingSource.ResetBindings(false);
@@ -2552,6 +2561,9 @@ namespace schiessbuch
                 if (reader.Read())
                 {
                     ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = reader["fullname"].ToString();
+                } else
+                {
+                    ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "Gastschütze";
                 }
             }
             catch (ArgumentOutOfRangeException)
@@ -2718,14 +2730,14 @@ namespace schiessbuch
                 {
                     Process externalProcess = new Process();
                     externalProcess.StartInfo.FileName = Properties.Settings.Default.BackupFileName;
-                    externalProcess.StartInfo.Arguments = "--add-drop-database --add-drop-table --add-drop-trigger --add-locks --complete-insert --create-options --extended-insert --single-transaction  --dump-date -u siusclub --host=" + backupDestination + " --password=\"siusclub\" siusclub";
+                    externalProcess.StartInfo.Arguments = "--add-drop-database --add-drop-table --add-drop-trigger --add-locks --complete-insert --create-options --extended-insert --single-transaction --dump-date -u siusclub --host=" + backupDestination + " --password=\"siusclub\" siusclub -r " + Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sql";
                     externalProcess.StartInfo.UseShellExecute = false;
                     externalProcess.StartInfo.RedirectStandardOutput = true;
                     externalProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     externalProcess.StartInfo.CreateNoWindow = true;
                     externalProcess.Start();
                     string output = externalProcess.StandardOutput.ReadToEnd();
-                    File.WriteAllText(Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sql", output);
+                    File.WriteAllText(Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sqltxt", output);
                     //MessageBox.Show(output);
                     externalProcess.WaitForExit();
                     MessageBox.Show("Backup erstellt.");
@@ -2855,7 +2867,8 @@ namespace schiessbuch
             connGMM.Close();
             connGMM.Dispose();
             MySqlConnection.ClearAllPools();
-            uebersichtgemeindemeisterschaftTableAdapter.Fill(gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+            //            uebersichtgemeindemeisterschaftTableAdapter.Fill(gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
+            this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
             gmmDGV.Invalidate();
             this.ResumeLayout();
         }
@@ -2879,13 +2892,13 @@ namespace schiessbuch
             CultureInfo deutschesDatum = new CultureInfo("de-DE");
             //MessageBox.Show(comboDatumFiltern.Text + " " + comboVereineFiltern.Text);
             if (cbDatumFiltern.Checked && (!cbVereineFiltern.Checked))
-                if (comboDatumFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource1.Filter = "Datum='" + comboDatumFiltern.Text + "'";
+                if (comboDatumFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource4.Filter = "Datum='" + comboDatumFiltern.Text + "'";
             if (cbVereineFiltern.Checked && (!cbDatumFiltern.Checked))
-                if (comboVereineFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource1.Filter = "Verein='" + comboVereineFiltern.Text + "'";
+                if (comboVereineFiltern.Text != "") uebersichtgemeindemeisterschaftBindingSource4.Filter = "Verein='" + comboVereineFiltern.Text + "'";
             if (cbVereineFiltern.Checked && cbDatumFiltern.Checked)
-                if ((comboDatumFiltern.Text != "") && (comboVereineFiltern.Text != ""))  uebersichtgemeindemeisterschaftBindingSource1.Filter = "Verein='" + comboVereineFiltern.Text + "' AND " + String.Format("Datum='{0:yyyy-MM-dd}'", DateTime.Parse(comboDatumFiltern.Text, deutschesDatum));
+                if ((comboDatumFiltern.Text != "") && (comboVereineFiltern.Text != ""))  uebersichtgemeindemeisterschaftBindingSource4.Filter = "Verein='" + comboVereineFiltern.Text + "' AND " + String.Format("Datum='{0:yyyy-MM-dd}'", DateTime.Parse(comboDatumFiltern.Text, deutschesDatum));
             if ((!cbVereineFiltern.Checked) && (!cbDatumFiltern.Checked))
-                uebersichtgemeindemeisterschaftBindingSource1.Filter = "";
+                uebersichtgemeindemeisterschaftBindingSource4.Filter = "";
         }
 
         private void cbDatumFiltern_CheckedChanged(object sender, EventArgs e)

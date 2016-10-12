@@ -104,6 +104,26 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>siusclubDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="siusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="TestSiusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="VereinsheimSiusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="VereinsheimSiusclubDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Einstellungen.resx">
       <DependentUpon>Einstellungen.cs</DependentUpon>
     </EmbeddedResource>
@@ -156,6 +176,50 @@
     </None>
     <None Include="siusclubDataSet.xss">
       <DependentUpon>siusclubDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="siusclubDataSet1.xsc">
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="siusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>siusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="siusclubDataSet1.xss">
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="TestSiusclubDataSet1.xsc">
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="TestSiusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>TestSiusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="TestSiusclubDataSet1.xss">
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xsc">
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>VereinsheimSiusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xss">
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xsc">
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>VereinsheimSiusclubDataSet2.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xss">
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>

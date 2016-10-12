@@ -148,7 +148,7 @@ namespace schiessbuch
             reader.Close();
 
             // jetzt lese alle Schützen der Heimmannschaft und prüfe, ob es mehr als 5 sind.
-            string strHeimschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
+            string strHeimschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
             //reader.Dispose();
             cmd.CommandText = strHeimschuetzen;
             reader = cmd.ExecuteReader();
@@ -164,7 +164,7 @@ namespace schiessbuch
             }
             reader.Close();
             reader.Dispose();
-            string strHeimSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
+            string strHeimSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
             cmd.CommandText = strHeimSumme;
             reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -175,7 +175,7 @@ namespace schiessbuch
             }
 
             // jetzt lese alle Schützen der Gastmannschaft und prüfe, ob es mehr als 5 sind.
-            string strGastschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
+            string strGastschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
             reader.Dispose();
             cmd.CommandText = strGastschuetzen;
             reader = cmd.ExecuteReader();
@@ -191,7 +191,7 @@ namespace schiessbuch
             }
             reader.Close();
             reader.Dispose();
-            string strGastSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
+            string strGastSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
             cmd.CommandText = strGastSumme;
             reader = cmd.ExecuteReader();
             while (reader.Read())
