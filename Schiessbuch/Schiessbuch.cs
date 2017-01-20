@@ -83,16 +83,22 @@ namespace schiessbuch
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
+            lblProbe1.ForeColor = Color.Blue; lblProbe1.Text = ""; 
+            lblProbe2.ForeColor = Color.Blue; lblProbe2.Text = "";
+            lblProbe3.ForeColor = Color.Blue; lblProbe3.Text = "";
+            lblProbe4.ForeColor = Color.Blue; lblProbe4.Text = "";
+            lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
+            lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
             // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
+            //this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet11.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.uebersichtgemeindemeisterschaftTableAdapter2.Fill(this.siusclubDataSet11.uebersichtgemeindemeisterschaft);
+            // this.uebersichtgemeindemeisterschaftTableAdapter2.Fill(this.siusclubDataSet11.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.uebersichtgemeindemeisterschaftTableAdapter1.Fill(this.vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft);
+            // this.uebersichtgemeindemeisterschaftTableAdapter1.Fill(this.vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.datumliste". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
+            // this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.vereinsliste". Sie können sie bei Bedarf verschieben oder entfernen.
-            this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
+            //this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
 //            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
@@ -128,11 +134,16 @@ namespace schiessbuch
             vereinslisteTableAdapter.Connection.ConnectionString = connStr;
             datumlisteTableAdapter.Connection.ConnectionString = connStr;
             uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
-
+            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
+            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
             // Jetzt wird versucht, Werte aus der Datenbank zu lesen
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
             try
             {
+                this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
+                this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
+                this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
+
                 // alle in der Datenbank abgespeicherten Vereine werden eingelesen
                 numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
                 // alle in der Datenbank abgespeicherten Treffer werden eingelesen
@@ -599,33 +610,44 @@ namespace schiessbuch
             // Erzeuge Auswertungen
             MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15", conn);
-            MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
-            textbox.Text = Zeile1 + Environment.NewLine;
-            textbox.Text += Zeile2 + Environment.NewLine;
-            textbox.Text += "----------------";
-            textbox.Text += Environment.NewLine;
-            textbox.Text += "Datum       Ring" + Environment.NewLine;
-            textbox.Text += "----------------";
-            textbox.Text += Environment.NewLine;
-            while (reader.Read())
+            MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T;", conn);
+            int Wertungen;
+            //Object o = cmd.ExecuteScalar();
+            int.TryParse(cmd.ExecuteScalar().ToString(), out Wertungen);
+            if (Wertungen >= 15)
             {
-                string line = String.Format("{0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine);
-                textbox.Text += line;
-            }
-            textbox.Text += "----------------";
-            textbox.Text += Environment.NewLine;
-            reader.Close();
-            cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
-            //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
-            reader = cmd.ExecuteReader(CommandBehavior.Default);
-            while (reader.Read())
+                cmd.CommandText = "SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15";
+                MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+                textbox.Text = Zeile1 + Environment.NewLine;
+                textbox.Text += Zeile2 + Environment.NewLine;
+                textbox.Text += "----------------";
+                textbox.Text += Environment.NewLine;
+                textbox.Text += "Datum       Ring" + Environment.NewLine;
+                textbox.Text += "----------------";
+                textbox.Text += Environment.NewLine;
+                while (reader.Read())
+                {
+                    string line = String.Format("{0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine);
+                    textbox.Text += line;
+                }
+                textbox.Text += "----------------";
+                textbox.Text += Environment.NewLine;
+                reader.Close();
+                cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
+                //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
+                reader = cmd.ExecuteReader(CommandBehavior.Default);
+                while (reader.Read())
+                {
+                    if (reader["summe"] != System.DBNull.Value)
+                        textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
+                }
+                reader.Close();
+                conn.Close();
+            } else
             {
-                if (reader["summe"] != System.DBNull.Value)
-                    textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
+                textbox.Text = "Zu wenige Wertungen." + Environment.NewLine + "Anzahl Wertungen: " + Wertungen;
             }
-            reader.Close();
-            conn.Close();
+
         }
 
         /// <summary>
@@ -736,7 +758,7 @@ namespace schiessbuch
                         int.Parse(row.Cells["schussnummer"].Value.ToString()),
                         row.Cells["zielscheibe"].Value.ToString(),
                         int.Parse(row.Cells["schuetze"].Value.ToString()),
-                        row.Cells["schuetze"].Value.ToString());
+                        row.Cells["schuetze"].Value.ToString(), false);
                     schussliste[0].Add(si);
 
 
@@ -950,6 +972,7 @@ namespace schiessbuch
                 int iSchuetze = 0;
                 string strZielscheibe = "";
                 string strDisziplin = "";
+                int schritt = -1;
                 foreach (XElement element in document.Root.Elements())
                 {
                     if (element.Name.ToString().Equals("treffer"))
@@ -1022,14 +1045,44 @@ namespace schiessbuch
                                 schussnummer = int.Parse(element2.Value);
                                 if (schussnummer == 1) aktuelleTreffer[stand - 1].Clear();
                             }
+                            if (element2.Name.ToString().Equals("schritt"))
+                            {
+                                schritt = int.Parse(element2.Value);
+                            }
                         }
                         if ((str.Length == 0) || str.Equals(str2))
                         {
-                            this.aktuelleTreffer[stand - 1].Add(new SchussInfo(xrahmeninmm, yrahmeninmm, ring, schussnummer, strZielscheibe, iSchuetze, strDisziplin));
+                            bool bProbe = false;
+                            // MessageBox.Show(strDisziplin);
+                            if (
+                                (schritt == 0) && (
+                                    strDisziplin.Equals("LG Gemeindemeisterschaft")
+                                    || strDisziplin.Equals("LP Gemeindemeisterschaft")
+                                    || strDisziplin.Equals("LG 20 Schuss")
+                                    || strDisziplin.Equals("LG 20 Schuss Auflage")
+                                    || strDisziplin.Equals("LG 30 Schuss Auflage")
+                                    || strDisziplin.Equals("LG 40 Schuss")
+                                    || strDisziplin.Equals("LP 20 Schuss")
+                                    || strDisziplin.Equals("LP 40 Schuss")
+                                    || strDisziplin.Equals("Gauliga")
+                                    || strDisziplin.Equals("LG Auflage Gemeindemeisterschaft")
+                                    || strDisziplin.Equals("LP Auflage Gemeindemeisterschaft")
+                                    || strDisziplin.Equals("LG GMM 20 Schuss")
+                                    || strDisziplin.Equals("LP GMM 20 Schuss")
+                                    || strDisziplin.Equals("LG Auflage GMM 20 Schuss")
+                                    || strDisziplin.Equals("LP Auflage GMM 20 Schuss")
+                                    )
+                                ) bProbe = true;
+                            this.aktuelleTreffer[stand - 1].Add(new SchussInfo(xrahmeninmm, yrahmeninmm, ring, schussnummer, strZielscheibe, iSchuetze, strDisziplin, bProbe));
                         }
                     }
                 }
             }
+        }
+
+        public void TestZielscheibe()
+        {
+
         }
 
         private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand, List<SchussInfo>[] trefferliste, Bitmap[] zielscheiben, bool FillMatrix)
@@ -1074,6 +1127,8 @@ namespace schiessbuch
                     else
                         AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
 
+                    //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "";
+                    ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
                     if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
                     if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
                     if (info == trefferliste[stand].Last<SchussInfo>())
@@ -1087,6 +1142,12 @@ namespace schiessbuch
                     else
                     {
                         brush = new SolidBrush(Color.FromArgb(120, Color.Green));
+                    }
+                    if (info.probe)
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
+                        //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "Probe";
+                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
                     }
                     //Rectangle rect = new Rectangle(
                     //    ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
@@ -2730,7 +2791,7 @@ namespace schiessbuch
                 {
                     Process externalProcess = new Process();
                     externalProcess.StartInfo.FileName = Properties.Settings.Default.BackupFileName;
-                    externalProcess.StartInfo.Arguments = "--add-drop-database --add-drop-table --add-drop-trigger --add-locks --complete-insert --create-options --extended-insert --single-transaction --dump-date -u siusclub --host=" + backupDestination + " --password=\"siusclub\" siusclub -r " + Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sql";
+                    externalProcess.StartInfo.Arguments = "--add-drop-database --add-drop-table --add-drop-trigger --add-locks --complete-insert --create-options --extended-insert --single-transaction --dump-date -u siusclub --host=" + backupDestination + " --password=\"siusclub\" siusclub -r \"" + Properties.Settings.Default.BackupDirectory + "\\backup-" + DateTime.Now.ToShortDateString() + ".sql\"";
                     externalProcess.StartInfo.UseShellExecute = false;
                     externalProcess.StartInfo.RedirectStandardOutput = true;
                     externalProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -2862,7 +2923,10 @@ namespace schiessbuch
             this.SuspendLayout();
             MySqlConnection connGMM = new MySqlConnection(connStr);
             connGMM.Open();
+            MySqlCommand cmdGMM0 = new MySqlCommand("SET autocommit=1;", connGMM);
+            cmdGMM0.ExecuteNonQuery();
             MySqlCommand cmdGMM = new MySqlCommand("call siusclub.fillGemeindemeisterschaftTable();", connGMM);
+            cmdGMM.CommandTimeout = 100;
             cmdGMM.ExecuteNonQuery();
             connGMM.Close();
             connGMM.Dispose();
@@ -2943,6 +3007,7 @@ namespace schiessbuch
         }
 
         int gmmPageNo;
+        private List<SchussInfo>[] testLGTreffer;
 
         private void pd_gmmPrintPage(object sender, PrintPageEventArgs ev)
         {
@@ -3127,6 +3192,133 @@ namespace schiessbuch
         {
             vereinslisteTableAdapter.ClearBeforeFill = true;
             vereinslisteTableAdapter.Fill(gemeindemeisterschaft.vereinsliste);
+        }
+
+        private void TestPictureLG_Paint(object sender, PaintEventArgs e)
+        {
+            if (testLGTreffer == null)
+                testLGTreffer = new List<SchussInfo>[1];
+            if (testLGTreffer[0] == null)
+                testLGTreffer[0] = new List<SchussInfo>();
+            if (testLGTreffer[0].Count > 0)
+            ZeichneTrefferInZielscheibe(TestPictureLG, e, 0, testLGTreffer, StandZielscheiben, false);
+        }
+        
+        int iTestLGSchussNummer = 0;
+        private void button6_Click(object sender, EventArgs e)
+        {
+            SchussInfo si;
+            float alpha, r;
+            switch (iTestLGSchussNummer)
+            {
+                case 0: si = new SchussInfo(0, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 1: si = new SchussInfo(2.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 2: si = new SchussInfo(0, 2.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 3: si = new SchussInfo(-2.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 4: si = new SchussInfo(0, -2.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 5: si = new SchussInfo(5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 6: si = new SchussInfo(0, 5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 7: si = new SchussInfo(-5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 8: si = new SchussInfo(0, -5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 9: si = new SchussInfo(7.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 10: si = new SchussInfo(0, 7.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 11: si = new SchussInfo(-7.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 12: si = new SchussInfo(0, -7.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 13: si = new SchussInfo(10f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 14: si = new SchussInfo(0, 10f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 15: si = new SchussInfo(-10f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 16: si = new SchussInfo(0, -10f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 17: si = new SchussInfo(0, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 18: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 19: alpha = 60; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 20: alpha = 90; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 21: alpha = 120; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 22: alpha = 150; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 23: alpha = 180; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 24: alpha = 210; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 25: alpha = 240; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 26: alpha = 270; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 27: alpha = 300; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                case 28: alpha = 60; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 29: alpha = 90; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 30: alpha = 120; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 31: alpha = 150; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 32: alpha = 180; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 33: alpha = 210; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 34: alpha = 240; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 35: alpha = 270; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 36: alpha = 300; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 37: alpha = 330; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                case 38: alpha = 90; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 39: alpha = 120; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 40: alpha = 150; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 41: alpha = 180; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 42: alpha = 210; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 43: alpha = 240; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 44: alpha = 270; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 45: alpha = 300; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 46: alpha = 330; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 47: alpha = 360; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                case 48: alpha = 120; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 49: alpha = 150; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 50: alpha = 180; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 51: alpha = 210; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 52: alpha = 240; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 53: alpha = 270; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 54: alpha = 300; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 55: alpha = 330; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 56: alpha = 0; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 57: alpha = 30; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                case 68: alpha = 150; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 69: alpha = 180; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 70: alpha = 210; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 71: alpha = 240; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 72: alpha = 270; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 73: alpha = 300; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 74: alpha = 330; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 75: alpha = 0; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 76: alpha = 30; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 77: alpha = 60; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                
+                case 78: alpha = 180; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 79: alpha = 210; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 80: alpha = 240; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 81: alpha = 270; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 82: alpha = 300; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 83: alpha = 330; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 84: alpha = 0; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 85: alpha = 30; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 86: alpha = 60; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 87: alpha = 90; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                case 88: alpha = 210; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 89: alpha = 240; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 90: alpha = 270; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 91: alpha = 300; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 92: alpha = 330; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 93: alpha = 0; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 94: alpha = 30; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 95: alpha = 60; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 96: alpha = 90; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 97: alpha = 120; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+
+                /* case 28: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            case 29: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            case 30: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            case 31: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            case 32: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            case 33: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+           */
+                default: si = new SchussInfo(0, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+            }
+
+            if (iTestLGSchussNummer == 18) testLGTreffer[0].Clear();
+            testLGTreffer[0].Add(si);
+            TestPictureLG.Invalidate();
         }
     }
 }
