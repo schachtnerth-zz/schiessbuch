@@ -1215,8 +1215,7 @@ namespace schiessbuch
 
                 if (maxAbstand > pictureBox.Image.Width / 2)
                     maxAbstand = pictureBox.Image.Width / 2;
-
-                //MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
+                // MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
 
                                 e.Graphics.DrawImage(
                                     scheibeBitmap, 
@@ -1226,8 +1225,8 @@ namespace schiessbuch
                                         (int)(zielscheiben[stand].Height / 2 - maxAbstand), 
                                         (int)(2 * maxAbstand), (int)(2 * maxAbstand)), 
                                     GraphicsUnit.Pixel);
-
-                //e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
+                                    
+                // e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
 
                 // mal schauen, ob man das darf...
                 // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
@@ -1706,7 +1705,7 @@ namespace schiessbuch
                     {
 
                         //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
-                        string cmdstr = "select MAX(ergebnis) AS ergebnis FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' AND (status='beendet' OR status='manuell') HAVING Date='" + filterDateStr + "') T";
+                        string cmdstr = "select MAX(CONVERT(ergebnis, UNSIGNED INTEGER)) AS ergebnis FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' AND (status='beendet' OR status='manuell') HAVING Date='" + filterDateStr + "') T";
                         MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
                         reader2 = cmd2.ExecuteReader();
                         int count = 0;
