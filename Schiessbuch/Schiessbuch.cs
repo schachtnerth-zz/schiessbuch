@@ -1155,6 +1155,44 @@ namespace schiessbuch
                     //    (int)(schusslochDurchmesser), 
                     //    (int)(schusslochDurchmesser));
 
+                    Rectangle r10, r9, r8, r7, r6, r5, r4, r3, r2, r1;
+
+                    r10 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(0.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(0.25 * millimeterToPixel),
+                        (int)(0.5 * millimeterToPixel),
+                        (int)(0.5 * millimeterToPixel));
+                    Pen ringPen = new Pen(Color.Blue);
+                    graphics.DrawEllipse(ringPen, r10);
+
+                    r9 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(2.75 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(2.75 * millimeterToPixel),
+                        (int)(5.5 * millimeterToPixel),
+                        (int)(5.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r9);
+
+                    r8 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(5.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(5.25 * millimeterToPixel),
+                        (int)(10.5 * millimeterToPixel),
+                        (int)(10.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r8);
+
+                    r7 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(7.75 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(7.75 * millimeterToPixel),
+                        (int)(15.5 * millimeterToPixel),
+                        (int)(15.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r7);
+
+                    r6 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(10.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(10.25 * millimeterToPixel),
+                        (int)(20.5 * millimeterToPixel),
+                        (int)(20.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r10);
+
                     Rectangle rect = new Rectangle(
                         ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2),
                         (pictureBox.Image.Height / 2) - ((int)(schussPosOben2)),
@@ -3210,100 +3248,10 @@ namespace schiessbuch
             float alpha, r;
             switch (iTestLGSchussNummer)
             {
-                case 0: si = new SchussInfo(0, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 1: si = new SchussInfo(2.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 2: si = new SchussInfo(0, 2.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 3: si = new SchussInfo(-2.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 4: si = new SchussInfo(0, -2.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 5: si = new SchussInfo(5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 6: si = new SchussInfo(0, 5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 7: si = new SchussInfo(-5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 8: si = new SchussInfo(0, -5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 9: si = new SchussInfo(7.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 10: si = new SchussInfo(0, 7.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 11: si = new SchussInfo(-7.5f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 12: si = new SchussInfo(0, -7.5f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 13: si = new SchussInfo(10f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 14: si = new SchussInfo(0, 10f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 15: si = new SchussInfo(-10f, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 16: si = new SchussInfo(0, -10f, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 17: si = new SchussInfo(0, 0, 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 18: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 19: alpha = 60; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 20: alpha = 90; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 21: alpha = 120; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 22: alpha = 150; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 23: alpha = 180; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 24: alpha = 210; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 25: alpha = 240; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 26: alpha = 270; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 27: alpha = 300; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-
-                case 28: alpha = 60; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 29: alpha = 90; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 30: alpha = 120; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 31: alpha = 150; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 32: alpha = 180; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 33: alpha = 210; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 34: alpha = 240; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 35: alpha = 270; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 36: alpha = 300; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 37: alpha = 330; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-
-                case 38: alpha = 90; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 39: alpha = 120; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 40: alpha = 150; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 41: alpha = 180; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 42: alpha = 210; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 43: alpha = 240; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 44: alpha = 270; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 45: alpha = 300; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 46: alpha = 330; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 47: alpha = 360; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-
-                case 48: alpha = 120; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 49: alpha = 150; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 50: alpha = 180; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 51: alpha = 210; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 52: alpha = 240; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 53: alpha = 270; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 54: alpha = 300; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 55: alpha = 330; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 56: alpha = 0; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 57: alpha = 30; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-
-                case 68: alpha = 150; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 69: alpha = 180; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 70: alpha = 210; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 71: alpha = 240; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 72: alpha = 270; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 73: alpha = 300; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 74: alpha = 330; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 75: alpha = 0; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 76: alpha = 30; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 77: alpha = 60; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                
-                case 78: alpha = 180; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 79: alpha = 210; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 80: alpha = 240; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 81: alpha = 270; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 82: alpha = 300; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 83: alpha = 330; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 84: alpha = 0; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 85: alpha = 30; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 86: alpha = 60; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 87: alpha = 90; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-
-                case 88: alpha = 210; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 89: alpha = 240; r = 5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 90: alpha = 270; r = 7.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 91: alpha = 300; r = 10f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 92: alpha = 330; r = 12.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 93: alpha = 0; r = 15f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 94: alpha = 30; r = 17.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 95: alpha = 60; r = 20f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 96: alpha = 90; r = 22.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
-                case 97: alpha = 120; r = 25f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 0: alpha = 75; r = 4.6634f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 1: alpha = 0; r = 0.0f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 2: alpha = 20; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
+                case 3: alpha = 40; r = 4.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
 
                 /* case 28: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
             case 29: alpha = 30; r = 2.5f; si = new SchussInfo((float)(r * Math.Cos(2 * Math.PI / 360 * alpha)), (float)(r * Math.Sin(2 * Math.PI / 360 * alpha)), 10, iTestLGSchussNummer++, strZielscheibeLuftgewehr, -1, "Test", false); break;
