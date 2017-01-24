@@ -62,6 +62,12 @@
     <Compile Include="GauligaAuswertung.Designer.cs">
       <DependentUpon>GauligaAuswertung.cs</DependentUpon>
     </Compile>
+    <Compile Include="GauligaZusatzInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GauligaZusatzInfo.Designer.cs">
+      <DependentUpon>GauligaZusatzInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="gemeindemeisterschaft.cs">
       <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
     </Compile>

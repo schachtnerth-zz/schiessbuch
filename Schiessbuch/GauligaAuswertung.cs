@@ -100,8 +100,9 @@ namespace schiessbuch
             ev.Graphics.DrawString("LG - Luftgewehr", schrift, Brushes.Blue, 135, 50);
             ev.Graphics.DrawString("Eltheim", schrift, Brushes.Blue, 135, 70);
             ev.Graphics.DrawString(dateTimePicker1.Value.ToShortDateString(), schrift, Brushes.Blue, 135, 80);
-
-            MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            
+            //MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionString);
+            MySqlConnection conn = new MySqlConnection(Properties.Settings.Default.siusclubConnectionStringTEST);
             conn.Open();
             string anzVereineSQL = String.Format("select distinct verein, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day);
             MySqlCommand cmd = new MySqlCommand(anzVereineSQL, conn);
@@ -153,18 +154,21 @@ namespace schiessbuch
             cmd.CommandText = strHeimschuetzen;
             reader = cmd.ExecuteReader();
             int countSchuetzen=0;
+            string[] strHeimSchuetzen;
+            strHeimSchuetzen = new string[5];
             while (reader.Read())
             {
                 countSchuetzen++;
                 if (countSchuetzen > 5) { MessageBox.Show("Mehr als 5 Schützen angetreten."); return; }
-                ev.Graphics.DrawString(reader["fullname"].ToString(), schrift, Brushes.Blue, 27, heim_oben + 8 + (countSchuetzen - 1) * 9);
+                strHeimSchuetzen[countSchuetzen - 1] = reader["fullname"].ToString();
+                ev.Graphics.DrawString(strHeimSchuetzen[countSchuetzen - 1], schrift, Brushes.Blue, 27, heim_oben + 8 + (countSchuetzen - 1) * 9);
                 string strErgebnis = reader["ergebnis"].ToString();
                 float ergWidth = ev.Graphics.MeasureString(strErgebnis, schrift).Width;
                 ev.Graphics.DrawString(strErgebnis, schrift, Brushes.Blue, 181 - ergWidth, heim_oben + 8 + (countSchuetzen - 1) * 9);
             }
             reader.Close();
             reader.Dispose();
-            string strHeimSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
+            string strHeimSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' group by Date having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
             cmd.CommandText = strHeimSumme;
             reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -191,7 +195,7 @@ namespace schiessbuch
             }
             reader.Close();
             reader.Dispose();
-            string strGastSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
+            string strGastSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' group by Date having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
             cmd.CommandText = strGastSumme;
             reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -200,6 +204,8 @@ namespace schiessbuch
                 float sumWidth = ev.Graphics.MeasureString(strSumme, schrift).Width;
                 ev.Graphics.DrawString(strSumme, schrift, Brushes.Blue, 181 - sumWidth, gast_oben + 8 + 5 * 9);
             }
+
+
 
             // Fusszeile:
             Font arial10 = new Font("Arial", 10, FontStyle.Bold);
