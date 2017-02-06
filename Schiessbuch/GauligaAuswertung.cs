@@ -148,73 +148,249 @@ namespace schiessbuch
             ev.Graphics.DrawString(gastverein, schrift, Brushes.Blue, 50, 174);
             reader.Close();
 
+            string strMetaDaten = string.Format("SELECT RundeNr, Gruppe FROM gauligameta WHERE YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day);
+            cmd.CommandText = strMetaDaten;
+            reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                ev.Graphics.DrawString(reader["RundeNr"].ToString(), schrift, Brushes.Blue, 135, 60);
+                ev.Graphics.DrawString(reader["Gruppe"].ToString(), schrift, Brushes.Blue, 135, 40);
+            }
+            reader.Close();
+
             // jetzt lese alle Schützen der Heimmannschaft und prüfe, ob es mehr als 5 sind.
-            string strHeimschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
+            string strHeimschuetzen = string.Format("SELECT schuetzen.id AS id, CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date, session from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
             //reader.Dispose();
             cmd.CommandText = strHeimschuetzen;
             reader = cmd.ExecuteReader();
             int countSchuetzen=0;
             string[] strHeimSchuetzen;
             strHeimSchuetzen = new string[5];
+            GauligaAuswahlDlg gaAuswahlDialog = new GauligaAuswahlDlg();
+            gaAuswahlDialog.labelHeimVerein.Text = heimverein;
+            gaAuswahlDialog.labelGastVerein.Text = gastverein;
             while (reader.Read())
             {
-                countSchuetzen++;
-                if (countSchuetzen > 5) { MessageBox.Show("Mehr als 5 Schützen angetreten."); return; }
-                strHeimSchuetzen[countSchuetzen - 1] = reader["fullname"].ToString();
-                ev.Graphics.DrawString(strHeimSchuetzen[countSchuetzen - 1], schrift, Brushes.Blue, 27, heim_oben + 8 + (countSchuetzen - 1) * 9);
-                string strErgebnis = reader["ergebnis"].ToString();
-                float ergWidth = ev.Graphics.MeasureString(strErgebnis, schrift).Width;
-                ev.Graphics.DrawString(strErgebnis, schrift, Brushes.Blue, 181 - ergWidth, heim_oben + 8 + (countSchuetzen - 1) * 9);
-            }
-            reader.Close();
-            reader.Dispose();
-            string strHeimSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' group by Date having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
-            cmd.CommandText = strHeimSumme;
-            reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                string strSumme = reader["Summe"].ToString();
-                float sumWidth = ev.Graphics.MeasureString(strSumme, schrift).Width;
-                ev.Graphics.DrawString(strSumme, schrift, Brushes.Blue, 181 - sumWidth, heim_oben + 8 + 5 * 9);
-            }
+                // Hier werden alle Schützen ausgelesen und dann in einem Dialog angezeigt. In diesem Dialog werden dann die Schützen ausgewählt,
+                // die gewertet werden sollen und ob sie Stamm- oder Ersatzschützen sind. Irgendwann kann auch noch die Nummer den Schützenausweises
+                // ausgelesen und in den Wertungsbogen eingetragen werden
+                DataGridViewRow dgvr = new DataGridViewRow();
 
+                DataGridViewCell dgvc_Name = new DataGridViewTextBoxCell();
+                dgvc_Name.Value = reader["fullname"];
+
+                DataGridViewCell dgvc_Ergebnis = new DataGridViewTextBoxCell();
+                dgvc_Ergebnis.Value = reader["ergebnis"];
+
+                DataGridViewCell dgvc_Datum = new DataGridViewTextBoxCell();
+                dgvc_Datum.ValueType = typeof(DateTime);
+                dgvc_Datum.Value = ((DateTime)reader["Date"]).ToShortDateString();
+
+                DataGridViewCell dgvc_ID = new DataGridViewTextBoxCell();
+                dgvc_ID.Value = reader["id"];
+
+                DataGridViewCell dgvc_Session = new DataGridViewTextBoxCell();
+                dgvc_Session.Value = reader["session"];
+
+                DataGridViewCell dgvc_Wertung = new DataGridViewCheckBoxCell();
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).TrueValue = "T";
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).FalseValue = "F";
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).ValueType = typeof(string);
+
+                DataGridViewCell dgvc_SE = new DataGridViewComboBoxCell();
+                ((DataGridViewComboBoxCell)dgvc_SE).Items.Add("Stammschütze");
+                ((DataGridViewComboBoxCell)dgvc_SE).Items.Add("Ersatzschütze");
+
+                dgvr.Cells.Add(dgvc_Name);
+                dgvr.Cells.Add(dgvc_Ergebnis);
+                dgvr.Cells.Add(dgvc_Datum);
+                dgvr.Cells.Add(dgvc_Wertung);
+                dgvr.Cells.Add(dgvc_SE);
+                dgvr.Cells.Add(dgvc_ID);
+                dgvr.Cells.Add(dgvc_Session);
+
+                gaAuswahlDialog.GauligaDGVHeimverein.Rows.Add(dgvr);
+
+            }
             // jetzt lese alle Schützen der Gastmannschaft und prüfe, ob es mehr als 5 sind.
-            string strGastschuetzen = string.Format("SELECT CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
+            string strGastschuetzen = string.Format("SELECT schuetzen.id AS id, CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date, session from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
             reader.Dispose();
             cmd.CommandText = strGastschuetzen;
             reader = cmd.ExecuteReader();
             countSchuetzen = 0;
             while (reader.Read())
             {
-                countSchuetzen++;
-                if (countSchuetzen > 5) { MessageBox.Show("Gast: Mehr als 5 Schützen angetreten."); return; }
-                ev.Graphics.DrawString(reader["fullname"].ToString(), schrift, Brushes.Blue, 27, gast_oben + 8 + (countSchuetzen - 1) * 9);
-                string strErgebnis = reader["ergebnis"].ToString();
-                float ergWidth = ev.Graphics.MeasureString(strErgebnis, schrift).Width;
-                ev.Graphics.DrawString(strErgebnis, schrift, Brushes.Blue, 181 - ergWidth, gast_oben + 8 + (countSchuetzen - 1) * 9);
+                // Hier werden alle Schützen ausgelesen und dann in einem Dialog angezeigt. In diesem Dialog werden dann die Schützen ausgewählt,
+                // die gewertet werden sollen und ob sie Stamm- oder Ersatzschützen sind. Irgendwann kann auch noch die Nummer den Schützenausweises
+                // ausgelesen und in den Wertungsbogen eingetragen werden
+                DataGridViewRow dgvr = new DataGridViewRow();
+
+                DataGridViewCell dgvc_Name = new DataGridViewTextBoxCell();
+                dgvc_Name.Value = reader["fullname"];
+
+                DataGridViewCell dgvc_Ergebnis = new DataGridViewTextBoxCell();
+                dgvc_Ergebnis.Value = reader["ergebnis"];
+
+                DataGridViewCell dgvc_Datum = new DataGridViewTextBoxCell();
+                dgvc_Datum.ValueType = typeof(DateTime);
+                dgvc_Datum.Value = ((DateTime)reader["Date"]).ToShortDateString();
+
+                DataGridViewCell dgvc_ID = new DataGridViewTextBoxCell();
+                dgvc_ID.Value = reader["id"];
+
+                DataGridViewCell dgvc_Session = new DataGridViewTextBoxCell();
+                dgvc_Session.Value = reader["session"];
+
+                DataGridViewCell dgvc_Wertung = new DataGridViewCheckBoxCell();
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).TrueValue = "T";
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).FalseValue = "F";
+                ((DataGridViewCheckBoxCell)dgvc_Wertung).ValueType = typeof(string);
+
+                DataGridViewCell dgvc_SE = new DataGridViewComboBoxCell();
+                ((DataGridViewComboBoxCell)dgvc_SE).Items.Add("Stammschütze");
+                ((DataGridViewComboBoxCell)dgvc_SE).Items.Add("Ersatzschütze");
+
+                dgvr.Cells.Add(dgvc_Name);
+                dgvr.Cells.Add(dgvc_Ergebnis);
+                dgvr.Cells.Add(dgvc_Datum);
+                dgvr.Cells.Add(dgvc_Wertung);
+                dgvr.Cells.Add(dgvc_SE);
+                dgvr.Cells.Add(dgvc_ID);
+                dgvr.Cells.Add(dgvc_Session);
+
+                gaAuswahlDialog.GauligaDGVGastverein.Rows.Add(dgvr);
+
             }
             reader.Close();
             reader.Dispose();
-            string strGastSumme = string.Format("SELECT SUM(ergebnis) AS Summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' group by Date having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, gastverein);
-            cmd.CommandText = strGastSumme;
-            reader = cmd.ExecuteReader();
-            while (reader.Read())
+
+
+
+
+            int yHeimBegin = gaAuswahlDialog.lblHeimVerein.Location.Y + 16;
+            int xGauligaDGVHeimVerein = gaAuswahlDialog.GauligaDGVHeimverein.Location.X;
+            gaAuswahlDialog.GauligaDGVHeimverein.Location = new Point(xGauligaDGVHeimVerein, yHeimBegin);
+            int formWidth = gaAuswahlDialog.Size.Width;
+            int sumOfRowHeightsHeim;
+            if (gaAuswahlDialog.GauligaDGVHeimverein.Rows.Count > 0)
+                sumOfRowHeightsHeim = gaAuswahlDialog.GauligaDGVHeimverein.RowCount * gaAuswahlDialog.GauligaDGVHeimverein.Rows[0].Height; // Ich gehe davon aus, dass alle Zeilen genau gleich hoch sind
+            else
+                sumOfRowHeightsHeim = 0;
+
+            int DGVWidth = gaAuswahlDialog.GauligaDGVHeimverein.Width;
+            gaAuswahlDialog.GauligaDGVHeimverein.Size = new Size(DGVWidth, gaAuswahlDialog.GauligaDGVHeimverein.ColumnHeadersHeight + sumOfRowHeightsHeim);
+            int yHeimEnd = yHeimBegin + gaAuswahlDialog.GauligaDGVHeimverein.ColumnHeadersHeight + sumOfRowHeightsHeim;
+            int yAbstand_HeimVerein_lblGastVerein = 24;
+            int xLblGastVerein = gaAuswahlDialog.lblGastVerein.Location.X;
+            Point newloc_lblGastVerein = new Point(xLblGastVerein, yHeimEnd + yAbstand_HeimVerein_lblGastVerein);
+            Point newloc_labelGastVerein = new Point(gaAuswahlDialog.labelGastVerein.Location.X, yHeimEnd + yAbstand_HeimVerein_lblGastVerein);
+            gaAuswahlDialog.lblGastVerein.Location = newloc_lblGastVerein;
+            gaAuswahlDialog.labelGastVerein.Location = newloc_labelGastVerein;
+            int yLabelHeight = 16;
+            Point newloc_GauligaDGVGastVerein = new Point(xGauligaDGVHeimVerein, yHeimEnd + yAbstand_HeimVerein_lblGastVerein+yLabelHeight);// + yLabelHeight);
+            gaAuswahlDialog.GauligaDGVGastverein.Location = newloc_GauligaDGVGastVerein;
+            // Label-Höhe = 16
+            int sumOfRowHeightsGast;
+            if (gaAuswahlDialog.GauligaDGVHeimverein.Rows.Count > 0)
+                sumOfRowHeightsGast = gaAuswahlDialog.GauligaDGVHeimverein.RowCount * gaAuswahlDialog.GauligaDGVHeimverein.Rows[0].Height; // Ich gehe davon aus, dass alle Zeilen genau gleich hoch sind
+            else
+                sumOfRowHeightsGast = 0;
+
+            gaAuswahlDialog.GauligaDGVGastverein.Size = new Size(DGVWidth, gaAuswahlDialog.GauligaDGVGastverein.ColumnHeadersHeight + sumOfRowHeightsGast);
+            gaAuswahlDialog.lblGruppe.Location = new Point(gaAuswahlDialog.lblGruppe.Location.X, gaAuswahlDialog.GauligaDGVGastverein.Location.Y + gaAuswahlDialog.GauligaDGVGastverein.Size.Height + 9);
+            gaAuswahlDialog.tbGruppe.Location = new Point(gaAuswahlDialog.tbGruppe.Location.X, gaAuswahlDialog.lblGruppe.Location.Y - 3);
+            gaAuswahlDialog.lblRunde.Location = new Point(gaAuswahlDialog.lblRunde.Location.X, gaAuswahlDialog.lblGruppe.Location.Y + 27);
+            gaAuswahlDialog.tbRunde.Location = new Point(gaAuswahlDialog.tbRunde.Location.X, gaAuswahlDialog.lblRunde.Location.Y - 3);
+            Size gauligaFormSize = new Size(formWidth, 
+                97 + 24 + 16 + 16 + 50 // 50 für die beiden Textboxen unten im Dialog
+                + gaAuswahlDialog.GauligaDGVHeimverein.ColumnHeadersHeight + sumOfRowHeightsHeim
+                + gaAuswahlDialog.GauligaDGVGastverein.ColumnHeadersHeight + sumOfRowHeightsGast);
+            gaAuswahlDialog.Size = gauligaFormSize;
+            DialogResult ret = gaAuswahlDialog.ShowDialog();
+            if (ret == DialogResult.OK)
             {
-                string strSumme = reader["Summe"].ToString();
-                float sumWidth = ev.Graphics.MeasureString(strSumme, schrift).Width;
-                ev.Graphics.DrawString(strSumme, schrift, Brushes.Blue, 181 - sumWidth, gast_oben + 8 + 5 * 9);
+                cmd.CommandText = string.Format(
+                    "SELECT idschuetze, fullname, verein, ergebnis, datum, SE, session from gauliga where verein='{3}' and YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2}", 
+                    dateTimePicker1.Value.Year, 
+                    dateTimePicker1.Value.Month, 
+                    dateTimePicker1.Value.Day, 
+                    heimverein);
+                reader = cmd.ExecuteReader();
+                countSchuetzen = 0;
+                while (reader.Read())
+                {
+                    countSchuetzen++;
+                    //strHeimSchuetzen[countSchuetzen - 1] = reader["fullname"].ToString();
+                    ev.Graphics.DrawString(reader["fullname"].ToString(), schrift, Brushes.Blue, 27, heim_oben + 8 + (countSchuetzen - 1) * 9);
+                    string strErgebnis = reader["ergebnis"].ToString();
+                    float ergWidth = ev.Graphics.MeasureString(strErgebnis, schrift).Width;
+                    ev.Graphics.DrawString(strErgebnis, schrift, Brushes.Blue, 181 - ergWidth, heim_oben + 8 + (countSchuetzen - 1) * 9);
+                    // 17 S, 22 E
+                    if (reader["SE"].ToString().Equals("S"))
+                        ev.Graphics.DrawString("X", schrift, Brushes.Blue, 16, heim_oben + 8 + (countSchuetzen - 1) * 9);
+                    if (reader["SE"].ToString().Equals("E"))
+                        ev.Graphics.DrawString("X", schrift, Brushes.Blue, 21, heim_oben + 8 + (countSchuetzen - 1) * 9);
+
+                }
+                reader.Close();
+                reader.Dispose();
+                string strHeimSum = string.Format("SELECT SUM(ergebnis) AS Summe, datum from gauliga where verein='{3}' and YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2} GROUP BY datum", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
+                cmd.CommandText = strHeimSum;
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string strSumme = reader["Summe"].ToString();
+                    float sumWidth = ev.Graphics.MeasureString(strSumme, schrift).Width;
+                    ev.Graphics.DrawString(strSumme, schrift, Brushes.Blue, 181 - sumWidth, heim_oben + 8 + 5 * 9);
+                }
+                reader.Close();
+                reader.Dispose();
+
+                cmd.CommandText = string.Format(
+                    "SELECT idschuetze, fullname, verein, ergebnis, datum, SE, session from gauliga where verein='{3}' and YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2}",
+                    dateTimePicker1.Value.Year,
+                    dateTimePicker1.Value.Month,
+                    dateTimePicker1.Value.Day,
+                    gastverein);
+                reader = cmd.ExecuteReader();
+                countSchuetzen = 0;
+                while (reader.Read())
+                {
+                    countSchuetzen++;
+                    ev.Graphics.DrawString(reader["fullname"].ToString(), schrift, Brushes.Blue, 27, gast_oben + 8 + (countSchuetzen - 1) * 9);
+                    string strErgebnis = reader["ergebnis"].ToString();
+                    float ergWidth = ev.Graphics.MeasureString(strErgebnis, schrift).Width;
+                    ev.Graphics.DrawString(strErgebnis, schrift, Brushes.Blue, 181 - ergWidth, gast_oben + 8 + (countSchuetzen - 1) * 9);
+                    if (reader["SE"].ToString().Equals("S"))
+                        ev.Graphics.DrawString("X", schrift, Brushes.Blue, 16, gast_oben + 8 + (countSchuetzen - 1) * 9);
+                    if (reader["SE"].ToString().Equals("E"))
+                        ev.Graphics.DrawString("X", schrift, Brushes.Blue, 21, gast_oben + 8 + (countSchuetzen - 1) * 9);
+                }
+                reader.Close();
+                reader.Dispose();
+                string strGastSumme = string.Format(
+                    "SELECT SUM(ergebnis) AS Summe, datum from gauliga where verein='{3}' and YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2} GROUP BY datum", 
+                    dateTimePicker1.Value.Year, 
+                    dateTimePicker1.Value.Month, 
+                    dateTimePicker1.Value.Day, 
+                    gastverein);
+                cmd.CommandText = strGastSumme;
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    string strSumme = reader["Summe"].ToString();
+                    float sumWidth = ev.Graphics.MeasureString(strSumme, schrift).Width;
+                    ev.Graphics.DrawString(strSumme, schrift, Brushes.Blue, 181 - sumWidth, gast_oben + 8 + 5 * 9);
+                }
+                // Fusszeile:
+                Font arial10 = new Font("Arial", 10, FontStyle.Bold);
+                ev.Graphics.DrawString("Ergebnisliste an:", arial10, Brushes.Black, 10, 272);
+                string strFusszeile = "Heinz Breu Hauptstr. 15 - 93080 Pentling";
+                float wdthFusszeile = ev.Graphics.MeasureString(strFusszeile, arial10).Height;
+                ev.Graphics.DrawString(strFusszeile, arial10, Brushes.Black, 48, 272);
+                ev.Graphics.DrawString("Mobil 0151 6244 28 39 E-mail: rwkl@ksv-donaugau.de", arial10, Brushes.Black, 48, 272 + wdthFusszeile);
+                ev.Graphics.DrawString("Fax 032 21 - 119 112 5", arial10, Brushes.Black, 48, 272 + 2 * wdthFusszeile);
             }
-
-
-
-            // Fusszeile:
-            Font arial10 = new Font("Arial", 10, FontStyle.Bold);
-            ev.Graphics.DrawString("Ergebnisliste an:", arial10, Brushes.Black, 10, 272);
-            string strFusszeile = "Heinz Breu Hauptstr. 15 - 93080 Pentling";
-            float wdthFusszeile = ev.Graphics.MeasureString(strFusszeile, arial10).Height;
-            ev.Graphics.DrawString(strFusszeile, arial10, Brushes.Black, 48, 272);
-            ev.Graphics.DrawString("Mobil 0151 6244 28 39 E-mail: rwkl@ksv-donaugau.de", arial10, Brushes.Black, 48, 272 + wdthFusszeile);
-            ev.Graphics.DrawString("Fax 032 21 - 119 112 5", arial10, Brushes.Black, 48, 272 + 2 * wdthFusszeile);
         }
 
         private void DrawTable(PrintPageEventArgs ev, Font arial12, int heim_links, int heim_oben)
