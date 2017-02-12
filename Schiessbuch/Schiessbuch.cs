@@ -89,6 +89,7 @@ namespace schiessbuch
             lblProbe4.ForeColor = Color.Blue; lblProbe4.Text = "";
             lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
             lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
+            //schiessbuchDataGridView.ContextMenu = SchiessbuchContexMenu;
             // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
             //this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
             // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet11.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
@@ -570,17 +571,19 @@ namespace schiessbuch
             MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
             textbox.Text = Zeile1 + Environment.NewLine;
             textbox.Text += Zeile2 + Environment.NewLine;
-            textbox.Text += "----------------";
+            textbox.Text += "--------------------";
             textbox.Text += Environment.NewLine;
-            textbox.Text += "Datum       Ring" + Environment.NewLine;
-            textbox.Text += "----------------";
+            textbox.Text += "    Datum       Ring" + Environment.NewLine;
+            textbox.Text += "--------------------";
             textbox.Text += Environment.NewLine;
+            int zaehler = 0;
             while (reader.Read())
             {
-                string line = String.Format("{0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine);
+                zaehler++;
+                string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine, zaehler);
                 textbox.Text += line;
             }
-            textbox.Text += "----------------";
+            textbox.Text += "--------------------";
             textbox.Text += Environment.NewLine;
             reader.Close();
             cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter; // + " GROUP BY id";
@@ -620,17 +623,19 @@ namespace schiessbuch
                 MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
                 textbox.Text = Zeile1 + Environment.NewLine;
                 textbox.Text += Zeile2 + Environment.NewLine;
-                textbox.Text += "----------------";
+                textbox.Text += "--------------------";
                 textbox.Text += Environment.NewLine;
-                textbox.Text += "Datum       Ring" + Environment.NewLine;
-                textbox.Text += "----------------";
+                textbox.Text += "    Datum       Ring" + Environment.NewLine;
+                textbox.Text += "--------------------";
                 textbox.Text += Environment.NewLine;
+                int zaehler = 0;
                 while (reader.Read())
                 {
-                    string line = String.Format("{0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine);
+                    zaehler++;
+                    string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine, zaehler);
                     textbox.Text += line;
                 }
-                textbox.Text += "----------------";
+                textbox.Text += "--------------------";
                 textbox.Text += Environment.NewLine;
                 reader.Close();
                 cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
@@ -1166,10 +1171,10 @@ namespace schiessbuch
                     graphics.DrawEllipse(ringPen, r10);
 
                     r9 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(2.75 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(2.75 * millimeterToPixel),
-                        (int)(5.5 * millimeterToPixel),
-                        (int)(5.5 * millimeterToPixel));
+                        pictureBox.Image.Width / 2 - (int)(2.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(2.25 * millimeterToPixel),
+                        (int)(4.5 * millimeterToPixel),
+                        (int)(4.5 * millimeterToPixel));
                     graphics.DrawEllipse(ringPen, r9);
 
                     r8 = new Rectangle(
@@ -1556,10 +1561,12 @@ namespace schiessbuch
         private void saveToolStripButton_Click(object sender, EventArgs e)
         {
             InsertOrUpdateDatabaseWithNewSchuetze();
-            //saveToolStripButton1.Enabled = false;
+            //bindingNavigatorAddNewItem.Enabled = true;
+            //saveToolStripButton1.Enabled = true;
             //bearbeitungsmodusToolStripMenuItem.Checked = false;
             //SetEnableDisableEditControls(false);
             schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
+            bindingNavigatorAddNewItem.Enabled = true;
         }
 
         private void InsertOrUpdateDatabaseWithNewSchuetze()
@@ -1629,7 +1636,10 @@ namespace schiessbuch
         private void bindingNavigatorDeleteItem1_Click(object sender, EventArgs e)
         {
             if (siusclubDataSet.HasChanges())
-                saveToolStripButton1.Enabled = true;
+                {
+                    saveToolStripButton1.Enabled = true;
+                    bindingNavigatorAddNewItem.Enabled = false;
+                }
         }
 
         private void fillByToolStripButton_Click(object sender, EventArgs e)
@@ -1648,12 +1658,16 @@ namespace schiessbuch
         private void bindingNavigatorAddNewItem_Click(object sender, EventArgs e)
         {
             saveToolStripButton1.Enabled = true;
+            bindingNavigatorAddNewItem.Enabled = false;
         }
 
         private void nameTextBox_TextChanged(object sender, EventArgs e)
         {
             if (((ToolStripMenuItem)bearbeitungsmodusToolStripMenuItem).Checked == true)
+            {
                 saveToolStripButton1.Enabled = true;
+                bindingNavigatorAddNewItem.Enabled = false;
+            }
         }
 
         private void ErstelleAuswertung()
@@ -2605,7 +2619,8 @@ namespace schiessbuch
         {
             if (this.bearbeitungsmodusToolStripMenuItem.Checked)
             {
-                this.saveToolStripButton1.Enabled = true;
+                saveToolStripButton1.Enabled = true;
+                bindingNavigatorAddNewItem.Enabled = false;
             }
         }
 
@@ -2708,7 +2723,8 @@ namespace schiessbuch
         {
             if (this.bearbeitungsmodusToolStripMenuItem.Checked)
             {
-                this.saveToolStripButton1.Enabled = true;
+                saveToolStripButton1.Enabled = true;
+                bindingNavigatorAddNewItem.Enabled = false;
             }
         }
 
@@ -2932,6 +2948,8 @@ namespace schiessbuch
 
         }
 
+        EinzelAuswertungDaten einzelauswertung;
+
         /// <summary>
         /// Wenn "Auswerten" im Schießbuch bei einer Serie ausgewählt wird
         /// </summary>
@@ -2942,12 +2960,338 @@ namespace schiessbuch
             // Auswertung einer Serie
             // Dazu brauchen wir ein PrintDocument, weil die Auswertung ja (nur) gedruckt werden soll
             PrintDocument pdSerienAuswertung = new PrintDocument();
-            pdSerienAuswertung.PrintPage += PdSerienAuswertung_PrintPage;
+            pdSerienAuswertung.PrintPage += new PrintPageEventHandler(PdSerienAuswertung_PrintPage);
+            printFont = new Font("Arial", 10);
+
+            // Die Mausposition wird durch das Event CellMouseEnter bei Hovern über jede Zelle neu festgelegt und in der Variable MousePosition gespeichert
+            //mouseLocation.ColumnIndex;
+
+            // xx Name:
+            // xx Vorname:
+            // Disziplin:
+            // Ergebnis:
+            // xx Verein:
+            // Datum:
+            // Uhrzeit:
+            // Stand:
+            string strName = nameTextBox.Text;
+            string strVorname = vornameTextBox.Text;
+            string strVerein = vereinTextBox.Text;
+            string strDisziplin = schiessbuchDataGridView[0, mouseLocation.RowIndex].Value.ToString();
+            string strStand = schiessbuchDataGridView[1, mouseLocation.RowIndex].Value.ToString();
+            string strErgebnis = schiessbuchDataGridView[3, mouseLocation.RowIndex].Value.ToString();
+            string strSession = schiessbuchDataGridView[2, mouseLocation.RowIndex].Value.ToString();
+            string strDatum = ((DateTime)schiessbuchDataGridView[5, mouseLocation.RowIndex].Value).ToShortDateString();
+            string strUhrzeit = ((DateTime)schiessbuchDataGridView[6, mouseLocation.RowIndex].Value).ToShortTimeString();
+
+            string strTest = "Name:      " + strName + "\n";
+            strTest += "Vorname:   " + strVorname + "\n";
+            strTest += "Verein:    " + strVerein + "\n";
+            strTest += "Disziplin: " + strDisziplin + "\n";
+            strTest += "Stand:     " + strStand + "\n";
+            strTest += "Ergebnis:  " + strErgebnis + "\n";
+            strTest += "Session:   " + strSession + "\n";
+            strTest += "Datum:     " + strDatum + "\n";
+            strTest += "Uhrzeit:   " + strUhrzeit + "\n";
+            MessageBox.Show(strTest);
+
+            int anzSchuss = 0;
+            einzelauswertung = new EinzelAuswertungDaten();
+            MySqlConnection conn = new MySqlConnection(connStr);
+            if (strDisziplin.Equals("LG 20 Schuss"))
+            {
+                anzSchuss = 20;
+
+                conn.Open();
+                // Auslesen der Ring- und der Zehntelwertung
+                MySqlCommand cmd = new MySqlCommand("select sum(ring) AS Ringwertung, round(sum(zehntel),1) AS Zehntelwertung from treffer where session='" + strSession + "' and schritt=1;", conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    einzelauswertung.iErgebnisRing = Int16.Parse(reader["Ringwertung"].ToString());
+                    einzelauswertung.fErgebnisZehntel = float.Parse(reader["Zehntelwertung"].ToString());
+                }
+                reader.Close();
+                einzelauswertung.strDatum = strDatum;
+                einzelauswertung.strDisziplin = strDisziplin;
+                einzelauswertung.strName = strName;
+                einzelauswertung.strUhrzeit = strUhrzeit;
+                einzelauswertung.strVerein = strVerein;
+                einzelauswertung.strVorname = strVorname;
+                einzelauswertung.iStandNummer = Int16.Parse(strStand);
+
+                cmd.CommandText = @"SELECT 10 AS Ring, COUNT(ring) AS Anzahl from treffer where session='" + strSession + @"' and ring=10 UNION ALL 
+SELECT 9, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 9 UNION ALL
+SELECT 8, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 8 UNION ALL
+SELECT 7, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 7 UNION ALL
+SELECT 6, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 6 UNION ALL
+SELECT 5, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 5 UNION ALL
+SELECT 4, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 4 UNION ALL
+SELECT 3, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 3 UNION ALL
+SELECT 2, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 2 UNION ALL
+SELECT 1, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 1 UNION ALL
+SELECT 0, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 0 UNION ALL
+SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schritt = 1 and zehntel>= 10.2;";
+                einzelauswertung.schussverteilung = new EinzelAuswertungDaten.Schussverteilung();
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    switch (Int16.Parse(reader["Ring"].ToString()))
+                    {
+                        case 10: einzelauswertung.schussverteilung.iAnzZehner = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 9: einzelauswertung.schussverteilung.iAnzNeuner = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 8: einzelauswertung.schussverteilung.iAnzAchter = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 7: einzelauswertung.schussverteilung.iAnzSiebener = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 6: einzelauswertung.schussverteilung.iAnzSechser = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 5: einzelauswertung.schussverteilung.iAnzFuenfer = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 4: einzelauswertung.schussverteilung.iAnzVierer = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 3: einzelauswertung.schussverteilung.iAnzDreier = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 2: einzelauswertung.schussverteilung.iAnzZweier = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 1: einzelauswertung.schussverteilung.iAnzEinser = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 0: einzelauswertung.schussverteilung.iAnzNuller = Int16.Parse(reader["Anzahl"].ToString()); break;
+                        case 11: einzelauswertung.schussverteilung.iInnenzehner = Int16.Parse(reader["Anzahl"].ToString()); break;
+                    }
+                }
+                reader.Close();
+
+                einzelauswertung.beste = new EinzelAuswertungDaten.SchussWert[3];
+                cmd.CommandText = "SELECT schussnummer, teiler from treffer where session='" + strSession + "' and schritt=1 order by teiler asc limit 3;";
+                reader = cmd.ExecuteReader();
+                int iIndex = 0;
+                while (reader.Read())
+                {
+                    einzelauswertung.beste[iIndex] = new EinzelAuswertungDaten.SchussWert();
+                    einzelauswertung.beste[iIndex].iSchussNummer = Int16.Parse(reader["schussnummer"].ToString());
+                    einzelauswertung.beste[iIndex].iSchussWert = Int16.Parse(reader["teiler"].ToString());
+                    iIndex++;
+                }
+                reader.Close();
+
+                einzelauswertung.schlechteste = new EinzelAuswertungDaten.SchussWert[3];
+                cmd.CommandText = "SELECT schussnummer, teiler from treffer where session='" + strSession + "' and schritt=1 order by teiler desc limit 3;";
+                reader = cmd.ExecuteReader();
+                iIndex = 0;
+                while (reader.Read())
+                {
+                    einzelauswertung.schlechteste[iIndex] = new EinzelAuswertungDaten.SchussWert();
+                    einzelauswertung.schlechteste[iIndex].iSchussNummer = Int16.Parse(reader["schussnummer"].ToString());
+                    einzelauswertung.schlechteste[iIndex].iSchussWert = Int16.Parse(reader["teiler"].ToString());
+                    iIndex++;
+                }
+                reader.Close();
+
+                cmd.CommandText = "SELECT ROUND(AVG(xrahmeninmm), 2) AS TrefferlageHoriz, ROUND(AVG(yrahmeninmm), 2) AS TrefferlageVert, ROUND(AVG(radiusziel), 2) AS AbstandDurchschnitt from treffer where session='" + strSession + "' and schritt = 1; ";
+                reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    einzelauswertung.fTrefferlage_r = float.Parse(reader["AbstandDurchschnitt"].ToString());
+                    einzelauswertung.fTrefferlage_x = float.Parse(reader["TrefferlageHoriz"].ToString());
+                    einzelauswertung.fTrefferlage_y = float.Parse(reader["TrefferlageVert"].ToString());
+                }
+                reader.Close();
+
+                cmd.CommandText = "SELECT ROUND(SQRT(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm)), 2) AS xStreuungSTABW, ROUND(SQRT(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm)), 2) AS yStreuungSTABW, ROUND(SQRT(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel)), 2) AS rStreuungSTABW, ROUND(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm), 2) AS xStreuungVar, ROUND(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm), 2) AS yStreuungVar, ROUND(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel), 2) AS rStreuungVar from treffer where session='" + strSession + "' and schritt = 1; ";
+                reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    einzelauswertung.fVarianz_r = float.Parse(reader["rStreuungVar"].ToString());
+                    einzelauswertung.fVarianz_x = float.Parse(reader["xStreuungVar"].ToString());
+                    einzelauswertung.fVarianz_y = float.Parse(reader["yStreuungVar"].ToString());
+                    einzelauswertung.fStabw_r = float.Parse(reader["rStreuungSTABW"].ToString());
+                    einzelauswertung.fStabw_x = float.Parse(reader["xStreuungSTABW"].ToString());
+                    einzelauswertung.fStabw_y = float.Parse(reader["yStreuungSTABW"].ToString());
+                }
+                reader.Close();
+                einzelauswertung.serien = new List<EinzelAuswertungDaten.SerienAuswertung>();
+                for (int i=0; i < anzSchuss / 10; i++) // Ermittle die Wertungen für die einzelnen Serien
+                {
+                    EinzelAuswertungDaten.SerienAuswertung serie = new EinzelAuswertungDaten.SerienAuswertung();
+                    serie.iSerienNr = i + 1;
+                    cmd.CommandText = "select sum(ring)AS Serie FROM(SELECT * from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10) T;";
+                    serie.iSerienSumme = Int16.Parse(cmd.ExecuteScalar().ToString());
+                    cmd.CommandText = "select zehntel, winkelmassrahmen, schussnummer, xrahmeninmm, yrahmeninmm FROM treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10;";
+                    reader = cmd.ExecuteReader();
+                    serie.treffer = new List<EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie>();
+                    while (reader.Read())
+                    {
+                        EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie trf = new EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie();
+                        trf.iSchussNummer = Int16.Parse(reader["schussnummer"].ToString());
+                        trf.fWinkel = float.Parse(reader["winkelmassrahmen"].ToString());
+                        trf.fWertung = float.Parse(reader["zehntel"].ToString());
+                        trf.xrahmeninmm = float.Parse(reader["xrahmeninmm"].ToString());
+                        trf.yrahmeninmm = float.Parse(reader["yrahmeninmm"].ToString());
+                        if (trf.fWertung > 10.2)
+                            trf.bInnenZehner = true;
+                        else
+                            trf.bInnenZehner = false;
+                        serie.treffer.Add(trf);
+                    }
+                    reader.Close();
+
+                    // TODO: Hier muss noch ein Bitmap eingefügt werden, in das alle Schüsse eingetragen werden.
+
+                    serie.beste = new EinzelAuswertungDaten.SchussWert[3];
+                    cmd.CommandText = "select teiler, schussnummer FROM (SELECT teiler, schussnummer FROM treffer where session='" + strSession + "' and schritt=1 limit " + i * 10 + ", 10) T order by teiler asc limit 3;";
+                    reader = cmd.ExecuteReader();
+                    iIndex = 0;
+                    while (reader.Read())
+                    {
+                        serie.beste[iIndex] = new EinzelAuswertungDaten.SchussWert();
+                        serie.beste[iIndex].iSchussNummer = Int16.Parse(reader["schussnummer"].ToString());
+                        serie.beste[iIndex].iSchussWert = Int16.Parse(reader["teiler"].ToString());
+                        iIndex++;
+                    }
+                    reader.Close();
+
+                    cmd.CommandText = "SELECT ROUND(AVG(xrahmeninmm), 2) AS TrefferlageHoriz, ROUND(AVG(yrahmeninmm), 2) AS TrefferlageVert, ROUND(AVG(radiusziel), 2) AS AbstandDurchschnitt from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10; ";
+                    reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        serie.fTrefferlage_r = float.Parse(reader["AbstandDurchschnitt"].ToString());
+                        serie.fTrefferlage_x = float.Parse(reader["TrefferlageHoriz"].ToString());
+                        serie.fTrefferlage_y = float.Parse(reader["TrefferlageVert"].ToString());
+                    }
+                    reader.Close();
+
+                    cmd.CommandText = "SELECT ROUND(SQRT(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm)), 2) AS xStreuungSTABW, ROUND(SQRT(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm)), 2) AS yStreuungSTABW, ROUND(SQRT(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel)), 2) AS rStreuungSTABW, ROUND(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm), 2) AS xStreuungVar, ROUND(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm), 2) AS yStreuungVar, ROUND(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel), 2) AS rStreuungVar from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10; ";
+                    reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        serie.fVarianz_r = float.Parse(reader["rStreuungVar"].ToString());
+                        serie.fVarianz_x = float.Parse(reader["xStreuungVar"].ToString());
+                        serie.fVarianz_y = float.Parse(reader["yStreuungVar"].ToString());
+                        serie.fStabw_r = float.Parse(reader["rStreuungSTABW"].ToString());
+                        serie.fStabw_x = float.Parse(reader["xStreuungSTABW"].ToString());
+                        serie.fStabw_y = float.Parse(reader["yStreuungSTABW"].ToString());
+                    }
+                    reader.Close();
+                    einzelauswertung.serien.Add(serie);
+                }
+            }
+            conn.Close();
+            PrintPreviewDialog ppdlg = new PrintPreviewDialog();
+            ppdlg.Document = pdSerienAuswertung;
+            ppdlg.ShowDialog();
         }
 
-        private void PdSerienAuswertung_PrintPage(object sender, PrintPageEventArgs e)
+        private void PdSerienAuswertung_PrintPage(object sender, PrintPageEventArgs ev)
         {
-            throw new NotImplementedException();
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            //string line = null;
+
+            // calculate the number of lines per page
+            linesPerPage = ev.MarginBounds.Height / printFont.GetHeight(ev.Graphics);
+
+            string str = "Schützengesellschaft Edelweiß Eltheim e. V.";
+            Font headFont = new Font("Arial", 20f);
+            Font headFont2 = new Font("Arial", 14);
+            int strl = (int)ev.Graphics.MeasureString(str, headFont).Width;
+            int headHeight = (int)ev.Graphics.MeasureString(str, headFont).Height;
+            ev.Graphics.DrawString(str, headFont, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+            topMargin += headHeight;
+            str = String.Format("Einzelauswertung", dateTimePicker1.Value.ToShortDateString());
+            strl = (int)ev.Graphics.MeasureString(str, headFont2).Width;
+            headHeight = (int)ev.Graphics.MeasureString(str, headFont2).Height;
+            ev.Graphics.DrawString(str, headFont2, Brushes.Black, ev.PageBounds.Width / 2 - strl / 2, topMargin);
+
+            topMargin += headHeight;
+
+            ev.Graphics.DrawString("Name: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            ev.Graphics.DrawString(einzelauswertung.strName + ", " + einzelauswertung.strVorname, printFont, Brushes.Black, ev.MarginBounds.Left + 50, topMargin);
+
+            ev.Graphics.DrawString("Datum / Zeit: ", printFont, Brushes.Black, ev.PageBounds.Width / 2 + 100, topMargin);
+            ev.Graphics.DrawString(einzelauswertung.strDatum + ", " + einzelauswertung.strUhrzeit, printFont, Brushes.Black, ev.PageBounds.Width / 2 + 200, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Verein: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            ev.Graphics.DrawString(einzelauswertung.strVerein, printFont, Brushes.Black, ev.MarginBounds.Left + 50, topMargin);
+
+            ev.Graphics.DrawString("Disziplin: ", printFont, Brushes.Black, ev.PageBounds.Width / 2 + 100, topMargin);
+            ev.Graphics.DrawString(einzelauswertung.strDisziplin, printFont, Brushes.Black, ev.PageBounds.Width / 2 + 200, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Stand: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            ev.Graphics.DrawString("Stand " + einzelauswertung.iStandNummer.ToString(), printFont, Brushes.Black, ev.MarginBounds.Left + 50, topMargin);
+
+            topMargin += 25;
+            Pen pen = new Pen(Brushes.Black, 3.0f);
+            ev.Graphics.DrawLine(pen, new Point(ev.MarginBounds.X, (int)topMargin), new Point(ev.MarginBounds.X + ev.MarginBounds.Width, (int)topMargin));
+            topMargin += 10;
+
+            ev.Graphics.DrawString("Ergebnis: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            string tmpStr = String.Format("{0} ({1:0.0})", einzelauswertung.iErgebnisRing, einzelauswertung.fErgebnisZehntel);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Serien: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = "";
+            foreach (EinzelAuswertungDaten.SerienAuswertung serie in einzelauswertung.serien)
+                tmpStr += string.Format("{0}: {1}   ", serie.iSerienNr, serie.iSerienSumme);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Zähler: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0}x10, {1}x9, {0}x8, {2}x7, {3}x6, {4}x5, {5}x4, {6}x3, {7}x2, {8}x1, {9}x0", 
+                einzelauswertung.schussverteilung.iAnzZehner, 
+                einzelauswertung.schussverteilung.iAnzNeuner, 
+                einzelauswertung.schussverteilung.iAnzAchter, 
+                einzelauswertung.schussverteilung.iAnzSiebener, 
+                einzelauswertung.schussverteilung.iAnzSechser, 
+                einzelauswertung.schussverteilung.iAnzFuenfer, 
+                einzelauswertung.schussverteilung.iAnzVierer, 
+                einzelauswertung.schussverteilung.iAnzDreier, 
+                einzelauswertung.schussverteilung.iAnzZweier, 
+                einzelauswertung.schussverteilung.iAnzEinser, 
+                einzelauswertung.schussverteilung.iAnzNuller);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Innenzehner: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            ev.Graphics.DrawString(einzelauswertung.schussverteilung.iInnenzehner.ToString(), printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("weiteste: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0} ({1}.), {2} ({3}.), {4} ({5}.)",
+                einzelauswertung.schlechteste[0].iSchussWert, einzelauswertung.schlechteste[0].iSchussNummer,
+                einzelauswertung.schlechteste[1].iSchussWert, einzelauswertung.schlechteste[1].iSchussNummer,
+                einzelauswertung.schlechteste[2].iSchussWert, einzelauswertung.schlechteste[2].iSchussNummer);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("beste Teiler: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0} ({1}.), {2} ({3}.), {4} ({5}.)",
+                einzelauswertung.beste[0].iSchussWert, einzelauswertung.beste[0].iSchussNummer,
+                einzelauswertung.beste[1].iSchussWert, einzelauswertung.beste[1].iSchussNummer,
+                einzelauswertung.beste[2].iSchussWert, einzelauswertung.beste[2].iSchussNummer);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Trefferlage: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0} mm {1}, {2} mm {3}, Abst: {4}",
+                Math.Abs(einzelauswertung.fTrefferlage_x).ToString(), (einzelauswertung.fTrefferlage_x > 0 ? "rechts" : "links"),
+                Math.Abs(einzelauswertung.fTrefferlage_y).ToString(), (einzelauswertung.fTrefferlage_y > 0 ? "hoch" : "tief"),
+                einzelauswertung.fTrefferlage_r);
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Standardabw.: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0} mm hor., {1} mm vert., {2} mm Abst.",
+                einzelauswertung.fStabw_x.ToString(), einzelauswertung.fStabw_y.ToString(), einzelauswertung.fStabw_r.ToString());
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            topMargin += 15;
+            ev.Graphics.DrawString("Varianz: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
+            tmpStr = String.Format("{0} mm² hor., {1} mm² vert., {2} mm² Abst.",
+                einzelauswertung.fVarianz_x.ToString(), einzelauswertung.fVarianz_y.ToString(), einzelauswertung.fVarianz_r.ToString());
+            ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
+
+            // Links oben Namen hinschreiben
+            ev.HasMorePages = false;
+            //throw new NotImplementedException();
         }
 
         private void sortierenToolStripMenuItem_Click(object sender, EventArgs e)

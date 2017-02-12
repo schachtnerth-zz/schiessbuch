@@ -30,6 +30,7 @@ namespace schiessbuch
 
         private void GauligaAuswahl_Load(object sender, EventArgs e)
         {
+            //connStr = "server = localhost; user id = siusclub; password = siusclub; database = siusclub; persistsecurityinfo = True; Allow User Variables = true";
             connStr = "server = localhost; user id = siusclub; password = siusclub; database = siusclub; persistsecurityinfo = True; Allow User Variables = true";
             MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
