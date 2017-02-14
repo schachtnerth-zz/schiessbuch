@@ -3519,9 +3519,100 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                 einzelauswertung.fVarianz_x.ToString(), einzelauswertung.fVarianz_y.ToString(), einzelauswertung.fVarianz_r.ToString());
             ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
 
+            iRectangleLinks = ev.MarginBounds.Left;
+            iRectangleOben = iRectangleOben + 200;
+            /**************************************************************************/
+            foreach (EinzelAuswertungDaten.SerienAuswertung serie in einzelauswertung.serien)
+            {
+                //Bitmap[] b = new Bitmap[1];
+                b[0] = Properties.Resources.Luftgewehr;
+                pb = new PictureBox();
+                pb.Image = b[0];
+                //List<SchussInfo>[] trefferliste = new List<SchussInfo>[1];
+                trefferliste[0].Clear();
+                //trefferliste[0] = new List<SchussInfo>();
+                foreach (EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie treffer in serie.treffer)
+                {
+                    SchussInfo si = new SchussInfo(treffer.xrahmeninmm, treffer.yrahmeninmm, treffer.iRing, treffer.iSchussNummer, "", 0, "", false);
+                    trefferliste[0].Add(si);
+                }
+
+                ZeichneTrefferInZielscheibe2(pb, ev, 0, trefferliste, b, false, new Rectangle(new Point(iRectangleLinks, iRectangleOben), new Size(150, 150)));
+
+                string strSerie = string.Format("Serie {0}:", serie.iSerienNr);
+                topMargin = iRectangleOben;
+                int iSerienBeschreibungLinks = iRectangleLinks + 150 + 20;
+                ev.Graphics.DrawString(strSerie, printFont, Brushes.Black, iSerienBeschreibungLinks, iRectangleOben);
+                topMargin += 20;
+                int iZaehler = 0;
+                int iAnfang = iSerienBeschreibungLinks;
+                foreach (EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie trf in serie.treffer)
+                {
+                    iZaehler++;
+                    string strWertung = trf.fWertung.ToString();
+                    float fWertungWidth = ev.Graphics.MeasureString(strWertung, printFont).Width;
+                    ev.Graphics.DrawString(strWertung, printFont, Brushes.Black, iAnfang, topMargin);
+                    Graphics g = Graphics.FromImage(Properties.Resources.Pfeil);
+                    g.RotateTransform(trf.fWinkel);
+                    ev.Graphics.DrawImage(RotateImage(Properties.Resources.Pfeil3, new Point(Properties.Resources.Pfeil3.Width / 2, Properties.Resources.Pfeil3.Height / 2), trf.fWinkel), iAnfang + fWertungWidth, topMargin);
+                    if (iZaehler % 5 != 0)
+                    {
+                        iAnfang += 50;
+                    } else
+                    {
+                        topMargin += 20;
+                        iAnfang = iSerienBeschreibungLinks;
+                    }
+
+                }
+                iRectangleOben += 160;
+//                MessageBox.Show(g.MeasureString("100", printFont).Height.ToString());
+
+            }
+
+
+
+            /**************************************************************************/
+
             // Links oben Namen hinschreiben
             ev.HasMorePages = false;
             //throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a new Image containing the same image only rotated
+        /// </summary>
+        /// <param name=""image"">The <see cref=""System.Drawing.Image"/"> to rotate
+        /// <param name=""offset"">The position to rotate from.
+        /// <param name=""angle"">The amount to rotate the image, clockwise, in degrees
+        /// <returns>A new <see cref=""System.Drawing.Bitmap"/"> of the same size rotated.</see>
+        /// <exception cref=""System.ArgumentNullException"">Thrown if <see cref=""image"/"> 
+        /// is null.</see>
+        public static Bitmap RotateImage(Image image, PointF offset, float angle)
+        {
+            if (image == null)
+                throw new ArgumentNullException("image");
+
+            //create a new empty bitmap to hold rotated image
+            Bitmap rotatedBmp = new Bitmap(image.Width, image.Height);
+            rotatedBmp.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            //make a graphics object from the empty bitmap
+            Graphics g = Graphics.FromImage(rotatedBmp);
+
+            //Put the rotation point in the center of the image
+            g.TranslateTransform(offset.X, offset.Y);
+
+            //rotate the image
+            g.RotateTransform(angle);
+
+            //move the image back
+            g.TranslateTransform(-offset.X, -offset.Y);
+
+            //draw passed in image onto graphics object
+            g.DrawImage(image, new PointF(0, 0));
+
+            return rotatedBmp;
         }
 
         private void sortierenToolStripMenuItem_Click(object sender, EventArgs e)
