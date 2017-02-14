@@ -37,6 +37,7 @@ namespace schiessbuch
                 public int iSchussNummer;
                 public float fWertung;
                 public float fWinkel;
+                public int iRing;
                 public bool bInnenZehner;
                 public float xrahmeninmm;
                 public float yrahmeninmm;
@@ -79,5 +80,6 @@ namespace schiessbuch
         public int iErgebnisRing; //
         public float fErgebnisZehntel;//
         public List<SerienAuswertung> serien;
+        public List<SerienAuswertung.TrefferInSerie> alleSchuss;
     }
 }

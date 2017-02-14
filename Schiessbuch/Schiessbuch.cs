@@ -1296,6 +1296,214 @@ namespace schiessbuch
                 ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
 
+        private void ZeichneTrefferInZielscheibe2(PictureBox pictureBox, PrintPageEventArgs e, int stand, List<SchussInfo>[] trefferliste, Bitmap[] zielscheiben, bool FillMatrix, Rectangle ziel)
+        {
+            Pen pen = new Pen(Color.Red, 1f);
+            Font font = new Font("Arial", 1f);
+            float kaliber = 4.5f;
+            float millimeterToPixel = 23.622f;
+            float schusslochDurchmesser = kaliber * millimeterToPixel;
+            float imgWidth = pictureBox.Image.Width;
+            float pictureBoxWidth = pictureBox.Width;
+            float zoomFactor = imgWidth / pictureBoxWidth;
+            int stand1 = stand + 1;
+            int iSumme = 0;
+            int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
+            int anzeigenAb = trefferliste[stand].Count - AnzTreffer;
+            int trefferZaehler = 0;
+            Bitmap scheibeBitmap = new Bitmap(zielscheiben[stand]);
+            Graphics graphics = Graphics.FromImage(scheibeBitmap);
+            float maxX = 0.0f, maxY = 0.0f;
+            foreach (SchussInfo info in trefferliste[stand])
+            {
+                trefferZaehler++;
+                //scheibeBitmap = new Bitmap(zielscheiben[stand]);
+                //graphics = Graphics.FromImage(scheibeBitmap);
+
+                if (trefferZaehler > anzeigenAb)
+                {
+                    Brush brush;
+                    float textWidth;
+                    float textHeight;
+                    float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    float schussPosOben2 = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                    float AbstandVonMitteX, AbstandVonMitteY;
+                    if (schussPosLinks < 0)
+                        AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    else
+                        AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                    if (schussPosOben < 0)
+                        AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                    else
+                        AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+
+                    //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "";
+                    ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
+                    if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
+                    if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
+                    if (info == trefferliste[stand].Last<SchussInfo>())
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Red));
+                    }
+                    else if (info.ring < 10)
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
+                    }
+                    else
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Green));
+                    }
+                    if (info.probe)
+                    {
+                        brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
+                        //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "Probe";
+                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
+                    }
+                    //Rectangle rect = new Rectangle(
+                    //    ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
+                    //    ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), 
+                    //    (int)(schusslochDurchmesser), 
+                    //    (int)(schusslochDurchmesser));
+
+                    Rectangle r10, r9, r8, r7, r6, r5, r4, r3, r2, r1;
+
+                    r10 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(0.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(0.25 * millimeterToPixel),
+                        (int)(0.5 * millimeterToPixel),
+                        (int)(0.5 * millimeterToPixel));
+                    Pen ringPen = new Pen(Color.Blue);
+                    graphics.DrawEllipse(ringPen, r10);
+
+                    r9 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(2.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(2.25 * millimeterToPixel),
+                        (int)(4.5 * millimeterToPixel),
+                        (int)(4.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r9);
+
+                    r8 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(5.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(5.25 * millimeterToPixel),
+                        (int)(10.5 * millimeterToPixel),
+                        (int)(10.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r8);
+
+                    r7 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(7.75 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(7.75 * millimeterToPixel),
+                        (int)(15.5 * millimeterToPixel),
+                        (int)(15.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r7);
+
+                    r6 = new Rectangle(
+                        pictureBox.Image.Width / 2 - (int)(10.25 * millimeterToPixel),
+                        pictureBox.Image.Height / 2 - (int)(10.25 * millimeterToPixel),
+                        (int)(20.5 * millimeterToPixel),
+                        (int)(20.5 * millimeterToPixel));
+                    graphics.DrawEllipse(ringPen, r10);
+
+                    Rectangle rect = new Rectangle(
+                        ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2),
+                        (pictureBox.Image.Height / 2) - ((int)(schussPosOben2)),
+                        (int)(schusslochDurchmesser),
+                        (int)(schusslochDurchmesser));
+
+                    graphics.FillEllipse(brush, rect);
+                    graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    string text = info.schussnummer.ToString();
+                    while (true)
+                    {
+                        textWidth = graphics.MeasureString(text, font).Width;
+                        textHeight = graphics.MeasureString(text, font).Height;
+                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                        {
+                            break;
+                        }
+                        font = new Font("Arial", font.Size + 1f);
+                    }
+                    graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+
+                    //                    e.Graphics.FillEllipse(brush, rect);
+                    //                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                    //                    string text = info.schussnummer.ToString();
+                    //                    while (true)
+                    //                    {
+                    //                        textWidth = e.Graphics.MeasureString(text, font).Width;
+                    //                        textHeight = e.Graphics.MeasureString(text, font).Height;
+                    //                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                    //                        {
+                    //                            break;
+                    //                        }
+                    //                        font = new Font("Arial", font.Size + 1f);
+                    //                    }
+                    //                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+                }
+
+                // So, jetzt kümmern wir uns mal um das Zoomen...
+                float maxAbstand;
+                if (maxX > maxY)
+                    maxAbstand = maxX;
+                else
+                    maxAbstand = maxY;
+
+                if (maxAbstand < 200)
+                    maxAbstand = 200;
+
+                //maxAbstand = 200;
+                //MessageBox.Show(pictureBox.Name);
+                //MessageBox.Show("Size: " + pictureBox.Image.Width + "," + pictureBox.Image.Height + ".");
+
+                // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
+                int seitenlaenge;
+                if (pictureBox.Width < pictureBox.Height)
+                    seitenlaenge = pictureBox.Width;
+                else
+                    seitenlaenge = pictureBox.Height;
+
+                if (maxAbstand > pictureBox.Image.Width / 2)
+                    maxAbstand = pictureBox.Image.Width / 2;
+                // MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
+
+                e.Graphics.DrawImage(
+                    scheibeBitmap,
+                    ziel,
+                    //new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge, seitenlaenge),
+                    new Rectangle(
+                        (int)(zielscheiben[stand].Width / 2 - maxAbstand),
+                        (int)(zielscheiben[stand].Height / 2 - maxAbstand),
+                        (int)(2 * maxAbstand), (int)(2 * maxAbstand)),
+                    GraphicsUnit.Pixel);
+
+                // e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
+
+                // mal schauen, ob man das darf...
+                // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
+                //graphics.Dispose();
+                //scheibeBitmap.Dispose();
+
+
+
+
+                if (FillMatrix)
+                {
+                    int spalte = (info.schussnummer - 1) % 5;
+                    int zeile = (info.schussnummer - 1) / 5;
+                    string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
+
+                    ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
+                    iSumme += info.ring;
+                }
+            }
+            graphics.Dispose();
+            scheibeBitmap.Dispose();
+
+            if (FillMatrix)
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
+        }
+
+        
         /// <summary>
         /// Berechnung und Anzeige des Schützenkönigs
         /// </summary>
@@ -3103,13 +3311,14 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                 }
                 reader.Close();
                 einzelauswertung.serien = new List<EinzelAuswertungDaten.SerienAuswertung>();
+                einzelauswertung.alleSchuss = new List<EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie>();
                 for (int i=0; i < anzSchuss / 10; i++) // Ermittle die Wertungen für die einzelnen Serien
                 {
                     EinzelAuswertungDaten.SerienAuswertung serie = new EinzelAuswertungDaten.SerienAuswertung();
                     serie.iSerienNr = i + 1;
                     cmd.CommandText = "select sum(ring)AS Serie FROM(SELECT * from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10) T;";
                     serie.iSerienSumme = Int16.Parse(cmd.ExecuteScalar().ToString());
-                    cmd.CommandText = "select zehntel, winkelmassrahmen, schussnummer, xrahmeninmm, yrahmeninmm FROM treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10;";
+                    cmd.CommandText = "select ring, zehntel, winkelmassrahmen, schussnummer, xrahmeninmm, yrahmeninmm FROM treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10;";
                     reader = cmd.ExecuteReader();
                     serie.treffer = new List<EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie>();
                     while (reader.Read())
@@ -3118,6 +3327,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                         trf.iSchussNummer = Int16.Parse(reader["schussnummer"].ToString());
                         trf.fWinkel = float.Parse(reader["winkelmassrahmen"].ToString());
                         trf.fWertung = float.Parse(reader["zehntel"].ToString());
+                        trf.iRing = Int16.Parse(reader["ring"].ToString());
                         trf.xrahmeninmm = float.Parse(reader["xrahmeninmm"].ToString());
                         trf.yrahmeninmm = float.Parse(reader["yrahmeninmm"].ToString());
                         if (trf.fWertung > 10.2)
@@ -3125,6 +3335,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                         else
                             trf.bInnenZehner = false;
                         serie.treffer.Add(trf);
+                        einzelauswertung.alleSchuss.Add(trf);
                     }
                     reader.Close();
 
@@ -3222,6 +3433,25 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             ev.Graphics.DrawLine(pen, new Point(ev.MarginBounds.X, (int)topMargin), new Point(ev.MarginBounds.X + ev.MarginBounds.Width, (int)topMargin));
             topMargin += 10;
 
+            int iRectangleLinks = ev.MarginBounds.Right - 200;
+            int iRectangleOben = (int)topMargin;
+            Bitmap[] b = new Bitmap[1];
+            b[0] = Properties.Resources.Luftgewehr;
+            PictureBox pb = new PictureBox();
+            pb.Image = b[0];
+            List<SchussInfo>[] trefferliste = new List<SchussInfo>[1];
+            trefferliste[0] = new List<SchussInfo>();
+            foreach (EinzelAuswertungDaten.SerienAuswertung.TrefferInSerie treffer in einzelauswertung.alleSchuss)
+            {
+                SchussInfo si = new SchussInfo(treffer.xrahmeninmm, treffer.yrahmeninmm, treffer.iRing, treffer.iSchussNummer, "", 0, "", false);
+                trefferliste[0].Add(si);
+            }
+
+            ZeichneTrefferInZielscheibe2(pb, ev, 0, trefferliste, b, false, new Rectangle(new Point(iRectangleLinks, iRectangleOben), new Size(200, 200)));
+            //ev.Graphics.DrawImage(pb.Image, new Rectangle(new Point(iRectangleLinks, iRectangleOben), new Size(200, 200)));
+            //ev.Graphics.DrawImage(pb.Image, new Point(iRectangleLinks, iRectangleOben));
+            //ev.Graphics.DrawRectangle(pen, new Rectangle(new Point(iRectangleLinks, iRectangleOben), new Size(200, 200)));
+
             ev.Graphics.DrawString("Ergebnis: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
             string tmpStr = String.Format("{0} ({1:0.0})", einzelauswertung.iErgebnisRing, einzelauswertung.fErgebnisZehntel);
             ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, ev.MarginBounds.Left + 100, topMargin);
@@ -3235,7 +3465,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
             topMargin += 15;
             ev.Graphics.DrawString("Zähler: ", printFont, Brushes.Black, ev.MarginBounds.Left, topMargin);
-            tmpStr = String.Format("{0}x10, {1}x9, {0}x8, {2}x7, {3}x6, {4}x5, {5}x4, {6}x3, {7}x2, {8}x1, {9}x0", 
+            tmpStr = String.Format("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}  {9}  ({10})", 
                 einzelauswertung.schussverteilung.iAnzZehner, 
                 einzelauswertung.schussverteilung.iAnzNeuner, 
                 einzelauswertung.schussverteilung.iAnzAchter, 
