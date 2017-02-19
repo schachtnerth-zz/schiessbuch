@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -53,8 +54,8 @@ namespace schiessbuch
         /// <summary>
         /// Konstanten
         /// </summary>
-        string connStrLocal = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
-        string connStrRemote = "server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+        // string connStrLocal = "server=localhost;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
+        // string connStrRemote = "server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true";
         string backupDestination = "192.168.178.202";
         //string backupDestination = "localhost";
         const string strZielscheibeLuftgewehr = "DSB Luftgewehr 10m";
@@ -83,164 +84,12 @@ namespace schiessbuch
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            lblProbe1.ForeColor = Color.Blue; lblProbe1.Text = ""; 
-            lblProbe2.ForeColor = Color.Blue; lblProbe2.Text = "";
-            lblProbe3.ForeColor = Color.Blue; lblProbe3.Text = "";
-            lblProbe4.ForeColor = Color.Blue; lblProbe4.Text = "";
-            lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
-            lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
-            //schiessbuchDataGridView.ContextMenu = SchiessbuchContexMenu;
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            //this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "siusclubDataSet11.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            // this.uebersichtgemeindemeisterschaftTableAdapter2.Fill(this.siusclubDataSet11.uebersichtgemeindemeisterschaft);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-            // this.uebersichtgemeindemeisterschaftTableAdapter1.Fill(this.vereinsheimSiusclubDataSet1.uebersichtgemeindemeisterschaft);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.datumliste". Sie können sie bei Bedarf verschieben oder entfernen.
-            // this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.vereinsliste". Sie können sie bei Bedarf verschieben oder entfernen.
-            //this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-//            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
-            // TODO: Diese Codezeile lädt Daten in die Tabelle "gemeindemeisterschaft.uebersichtgemeindemeisterschaft". Sie können sie bei Bedarf verschieben oder entfernen.
-//            this.uebersichtgemeindemeisterschaftTableAdapter.Fill(this.gemeindemeisterschaft.uebersichtgemeindemeisterschaft);
-            // Festlegen des Connection Strings. Standardmäßig wird die Datenbank am Schießstand verwendet. Erst wenn die nicht verfügbar ist,
-            // wird eine lokale Datenbank versucht. Das passiert automatisch über eine Exception
-            connStr = connStrRemote;
+            DoubleBuffered = true;
+        }
 
-            // Zum Aktualisieren der Ergebnisse aller gerade schießenden Schützen wird ein Timer verwendet, der alle x Sekunden
-            // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
-            // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
-            RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
-
-            StandZielscheiben = new Bitmap[6];
-            for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
-
-        retry:
-            // Die Connection Strings in den Properties werden aktualisiert und die Properties dann abgespeichert
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            config.ConnectionStrings.ConnectionStrings[0].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
-            config.ConnectionStrings.ConnectionStrings[1].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
-            config.ConnectionStrings.ConnectionStrings[2].ConnectionString = connStr; // Properties.Settings.Default.siusclubConnectionString;
-            config.Save(ConfigurationSaveMode.Modified, true);
-            ConfigurationManager.RefreshSection("connectionStrings");
-
-            // Die Zugriffe aller TableAdapters sollen auf die richtige Datenbank erfolgen. Deshalb wird hier der Connection String entsprechend gesetzt.
-            schiessbuchTableAdapter.Connection.ConnectionString = connStr;
-            schuetzenTableAdapter.Connection.ConnectionString = connStr;
-            trefferTableAdapter.Connection.ConnectionString = connStr;
-            vereineTableAdapter.Connection.ConnectionString = connStr;
-            schuetzenlisteTableAdapter.Connection.ConnectionString = connStr;
-            // uebersichtgemeindemeisterschaftTableAdapter.Connection.ConnectionString = connStr;
-            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
-            datumlisteTableAdapter.Connection.ConnectionString = connStr;
-            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
-            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
-            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
-            // Jetzt wird versucht, Werte aus der Datenbank zu lesen
-            int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
-            try
-            {
-                this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
-                this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
-                this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
-
-                // alle in der Datenbank abgespeicherten Vereine werden eingelesen
-                numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
-                // alle in der Datenbank abgespeicherten Treffer werden eingelesen
-                numAllRead += this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
-                // außerdem wird der TableAdapter für die Tabelle schuetzenliste gefüllt
-                this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
-                if (numAllRead == 0)
-                {
-                    // sollte nichts gelesen worden sein, wird eine Warnung ausgegeben, das Programm läuft aber weiter.
-                    MessageBox.Show("Keine Datensätze aus der Datenbank gelesen. Möglicherweise keine Datenbankverbindung.");
-                }
-
-                // Hier werden standardmäßig die periodischen Aktualisierungen der Schießergebnisse aktiviert
-                DoUpdates.Checked = true;
-
-                // Die Anzahl an Übungsschießen/Wettkämpfen wird in eine Variable gelesen
-                // Diese Variable wird später dazu verwenden, herauszufinden, ob in der Zwischenzeit 
-                // ein neuer Schütze an den Stand gegangen ist bzw. ein bereits schießender Schütze eine weitere Disziplin schießt.
-                ereignisse_count = GetEreignisseCount();
-
-                // Hier wird die Anzahl an Schüssen in eine Variable gelesen.
-                // Mithilfe dieser Variable soll ermittelt werden, ob seit dem letzten Aktualisieren ein Schuss abgegeben wurde
-                // ist dem nicht so, kann man sich das Auslesen der Schüsse sparen. Ein erneutes Auslesen wird keine neuen Erkenntnisse geben...
-                treffer_count = GetTrefferCount();
-
-                // Dieser Bereich sollte überarbeitet werden.
-                // Leider muss die Methode Aktualisiere SchiessjahrMenu() zweimal aufgerufen werden.
-                AktualisiereSchiessjahrMenu();
-                // Die Liste der Schützen wird aktualisiert. Je nach ausgewähltem Schießjahr kann ein Schütze noch oder schon
-                // nicht mehr zur Jugendklasse zählen
-                UpdateSchuetzenListe();
-
-                //AktualisiereSchiessjahrMenu();
-
-                // Die Termine, zu denen für den Jahrespokal geschossen werden darf, werden in der Datenbank hinterlegt.
-                // Hier soll geprüft werden, ob heute ein solcher Termin ist. Wenn ja, wird eine Meldung angezeigt.
-                PruefeJahrespokalAbend();
-
-                // Alle Termine für den Jahrespokal werden aus der Datenbank gelesen und im Hauptformular angezeigt
-                FillWanderPokalTermine();
-
-                // Für die Auswertung des Königsschießens soll das Hauptformular in vier gleiche Teile geteilt werden.
-                // Das wird mittels SplitContainern bewerkstelligt.
-                splitContainerKoenig1.SplitterDistance = splitContainerKoenig1.Width / 2;
-                splitContainerKoenig2.SplitterDistance = splitContainerKoenig2.Height / 2;
-                splitContainerKoenig3.SplitterDistance = splitContainerKoenig3.Height / 2;
-
-                // TODO: Was wird hier genau gemacht?
-                // Diese Methoden werden zur Berechnung des Schützenkönigs verwendet.
-                // Sie werden aber nicht mehr gebraucht.
-                ResizeAllKoenigGridViews();
-
-                // Hier werden die Ergebnisse aus dem Königsschießen ausgewertet und angezeigt.
-                UpdateKoenig();
-
-                // Dieser Teil könnte wahrscheinlich verschoben werden in die Methode, die aufgerufen wird, wenn der Tab "Übersicht" angeklickt wird.
-                for (int stand = 1; stand <= 6; stand++)
-                    for (int schuss = 0; schuss < 40; schuss++)
-                        setSchussValue(stand, schuss, schuss.ToString());
-            }
-            catch (MySqlException) // Wenn beim Lesen aus der Datenbank was schief läuft
-            {
-                if (connStr.Equals(connStrRemote))
-                {
-                    // sollte der aktuelle Connection String noch immer auf die Schießstand-Datenbank zeigen, ändere das und
-                    // versuche, die lokale Datenbank zu kontaktieren
-                    MessageBox.Show("SIUSCLUB-Datenbank auf dem Schießstand-Rechner nicht erreichbar. Versuche lokale Verbindung.");
-                    this.connStr = this.connStrLocal;
-                    goto retry;
-                }
-
-                // Hierher kommen wir, wenn bereits die lokale Datenbank verwendet wurde und diese auch nicht erreichbar war.
-                // Dann macht es keinen Sinn, mit dem Programm weiterzumachen. Wir schließen es deshalb.
-                MessageBox.Show("Konnte Datenbank nicht öffnen.");
-                Application.Exit();
-            }
-
-            // Die Struktur "aktuelleTreffer" wird initialisiert
-            // Sie wird später gebraucht, wenn über den REST Webservice die Daten der aktuell schießenden Schützen ausgelesen werden
-            // Diese Daten werden dann in "aktuelleTreffer" geschrieben und aus dieser Struktur werden die Daten aus dem Übersicht-Tab befüllt.
-            aktuelleTreffer = new List<SchussInfo>[6];
-            for (int i = 0; i < 6; i++)
-            {
-                aktuelleTreffer[i] = new List<SchussInfo>();
-            }
-
-            // Hier wird ein Handle auf den Tab "tabEinzelscheibe" geholt...
-            EinzelScheibe = tabControl1.TabPages["tabEinzelscheibe"];
-            // und dieser Tab dann aus dem TabControl entfernt. Er wird wieder eingehängt, wenn jemand in der Übersicht auf eine
-            // Scheibe mit der Maus doppelklickt.
-            this.tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
-
-            //schiessbuchDataGridView.Sort(dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Ascending);
-            //schiessbuchDataGridView.Invalidate();
-            schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
-
+        private bool IsMySQLServerReachable(string strMySQLServer)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -360,13 +209,9 @@ namespace schiessbuch
             schießjahrAuswählenToolStripMenuItem.DropDownItems.Clear();
 
             // Verbindung zur Datenbank aufbauen
-            MySqlConnection conn;
-            MySqlCommand cmdJahre;
-            conn = new MySqlConnection(connStr);
+            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             // Alle Schießjahre auswählen
-            cmdJahre = new MySqlCommand("SELECT * FROM schiessjahr", conn);
-            conn.Open();
-            MySqlDataReader reader = cmdJahre.ExecuteReader();
+            MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT * FROM schiessjahr");
             while (reader.Read())
             {
                 // Liste der Schiessjahre aktualisieren
@@ -379,12 +224,11 @@ namespace schiessbuch
                 schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
             }
             // Datenbankverbindung aufräumen
-            reader.Close();
-            reader.Dispose();
+            mysql.closeMySqlReaderQuery(reader);
 
             // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
-            cmdJahre.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
-            int activeID = int.Parse(cmdJahre.ExecuteScalar().ToString());
+            int activeID = int.Parse(mysql.doMySqlScalarQuery("SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1").ToString());
+
             // Gehe durch alle Schießjahre im Menü und schau, welcher Eintrag dem aktuellen Schießjahr entspricht. Dieser Eintrag soll dann ausgewählt werden.
             foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
             {
@@ -394,10 +238,6 @@ namespace schiessbuch
                     tsi.PerformClick();
                 }
             }
-            // Datenbank aufräumen
-            conn.Close();
-            conn.Dispose();
-            MySqlConnection.ClearPool(conn);
         }
 
         /// <summary>
@@ -471,35 +311,54 @@ namespace schiessbuch
             this.siusclubDataSet.schuetzenliste.Clear();
             //this.siusclubDataSet.EnforceConstraints = false;
             this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
-        }        
+        }
+
+        private Thread Tsi_Click_WorkerThread = null;
+        private bool stop_Tsi_Click_WorkerThread = false;
+        public class Tsi_Click_Parameter
+        {
+            public object sender;
+            public EventArgs e;
+        };
+
+        private void Tsi_Click(object sender, EventArgs e)
+        {
+            this.stop_Tsi_Click_WorkerThread = false;
+            // Initialize and start worker thread
+            Tsi_Click_Parameter parameter = new Tsi_Click_Parameter();
+            parameter.e = e;
+            parameter.sender = sender;
+            ParameterizedThreadStart pts = new ParameterizedThreadStart(this.Tsi_ClickWorker);
+            this.Tsi_Click_WorkerThread = new Thread(pts);
+            this.Tsi_Click_WorkerThread.Start(parameter);
+        }
 
         /// <summary>
         /// Eventhandler, der beim Auswählen eines Eintrags aus der Schießjahrauswahl aufgerufen wird (ToolStripMenuItem)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Tsi_Click(object sender, EventArgs e)
+        public void Tsi_ClickWorker(object parameter)
         {
+            Tsi_Click_Parameter tsi_parameter = (Tsi_Click_Parameter)parameter;
+            int aktuellerSchuetze = -1;
             // Zwischenspeichern des aktuell ausgewählten Schützen, da dieser nach Ändern des Schießjahres wieder ausgewählt werden soll
-            int aktuellerSchuetze = int.Parse(((DataRowView)schuetzenListeBindingSource.Current)["id"].ToString());
+            if (int.Parse(schuetzenListeBindingSource.Count.ToString())!=0)
+                aktuellerSchuetze = int.Parse(((DataRowView)schuetzenListeBindingSource.Current)["id"].ToString());
             //int aktuellerSchuetze = schuetzenListeBindingSource.Position;
 
             // Befülle oder aktualisiere die globale Variable aktuellesSchiessjahrID, in der die ID des aktuellen Schießjahrs gespeichert wird.
-            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)sender).Tag.ToString());
+            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)tsi_parameter.sender).Tag.ToString());
 
             // Öffne die Datenbank und lese die einzelnen Anfangsdaten der Schießjahre
-            MySqlConnection conn = new MySqlConnection(connStr);
-            conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'", conn);
-            dtJahrBeginn = (DateTime)cmd.ExecuteScalar();
+            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            dtJahrBeginn = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'");
+
             // Das Ende wird bestimmt, indem der Eintrag gesucht wird, in dem das nächsthöhere Datum abgespeichert ist
-            cmd.CommandText = "SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1";
             try
             {
                 // Wenn es keinen Eintrag in der Datenbank mit einem höheren Datum gibt, dann ist dieses Schießjahr das aktuelle.
                 // In diesem Fall wird eine Exception ausgelöst und wir setzen Anfangsdatum und Enddatum gleich, um auszudrücken, dass
                 // es sich um das aktuelle Schiessjahr handelt.
-                dtJahrEnde = (DateTime)cmd.ExecuteScalar();
+                dtJahrEnde = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1");
             }
             catch (NullReferenceException)
             {
@@ -512,7 +371,7 @@ namespace schiessbuch
                 tsi.Checked = false;
             }
             // Setze einen Haken beim aktuell ausgewählten Schießjahr
-            ((ToolStripMenuItem)sender).Checked = true;
+            ((ToolStripMenuItem)tsi_parameter.sender).Checked = true;
 
             // Einige zusätzliche Aufgaben müssen erledigt werden, wenn ein neues Schießjahr ausgewählt wird.
             
@@ -522,6 +381,7 @@ namespace schiessbuch
             // Da sich das aktuelle Schießjahr geändert hat, sollen auch für den ausgewählten Schützen
             // die Statistiken des ausgewählten Schießjahres angezeigt werden. Das soll hier angestoßen werden.
             AktuellerSchuetzeStatistikAktualisieren();
+            //TODO: schauen, warum das so lange dauert
 
             // Die Jahrespokaltermine für dieses Jahr müssen ebenfalls aus der Datenbank gelesen werden und
             // ins Hauptformular eingetragen werden:
@@ -533,6 +393,7 @@ namespace schiessbuch
             // Da sich durch die Änderung des Schießjahres auch die Zugehörigkeit von Schützen zu Schützenklassen ändern kann,
             // soll die Schützenliste neu eingelesen werden.
             UpdateSchuetzenListe();
+            //TODO: Schauen, warum das so lange dauert
 
             // Die Änderungen sollen im DataGridView des Schießbuches reflektiert werden,
             // deshalb wird die entsprechende Tabelle neu befüllt.
@@ -564,11 +425,15 @@ namespace schiessbuch
         /// <param name="Zeile2">Zweite Zeile der Überschrift/Beschreibung dieser Auswertung</param>
         private void printSchiessAuswertung(string strDisziplin, TextBox textbox, string Zeile1, string Zeile2)
         {
+            string strSelectedSchiessjahr="";
+            this.Invoke((MethodInvoker)delegate ()
+            {
+                if (fullnameComboBox.SelectedValue != null)
+                    strSelectedSchiessjahr = fullnameComboBox.SelectedValue.ToString();
+            });
             // Erzeuge Auswertungen
-            MySqlConnection conn = new MySqlConnection(connStr);
-            conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC", conn);
-            MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC");
             textbox.Text = Zeile1 + Environment.NewLine;
             textbox.Text += Zeile2 + Environment.NewLine;
             textbox.Text += "--------------------";
@@ -585,9 +450,16 @@ namespace schiessbuch
             }
             textbox.Text += "--------------------";
             textbox.Text += Environment.NewLine;
-            reader.Close();
-            cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter; // + " GROUP BY id";
-            reader = cmd.ExecuteReader(CommandBehavior.Default);
+            mysql.closeMySqlReaderQuery(reader);
+
+            string strFullNameComboBoxValue="";
+            this.Invoke((MethodInvoker)delegate ()
+            {
+                if (fullnameComboBox.SelectedValue != null)
+                    strFullNameComboBoxValue = fullnameComboBox.SelectedValue.ToString();
+            });
+
+            reader = mysql.doMySqlReaderQuery("SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter);
             while (reader.Read())
             {
                 if (Int16.Parse(reader["summe"].ToString()) > 0)
@@ -596,8 +468,7 @@ namespace schiessbuch
                     textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
                 }
             }
-            reader.Close();
-            conn.Close();
+            mysql.closeMySqlReaderQuery(reader);
         }
 
         /// <summary>
@@ -610,17 +481,30 @@ namespace schiessbuch
         /// <param name="Zeile2">Zweite Zeile der Überschrift/Beschreibung dieser Auswertung</param>
         private void printSchiessAuswertungBest15(string strDisziplin, TextBox textbox, string Zeile1, string Zeile2)
         {
+            string strFullNameComboBoxValue = "";
+            this.Invoke((MethodInvoker)delegate ()
+            {
+                if (fullnameComboBox.SelectedValue != null)
+                    strFullNameComboBoxValue = fullnameComboBox.SelectedValue.ToString();
+            });
+
+            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+
             // Erzeuge Auswertungen
-            MySqlConnection conn = new MySqlConnection(connStr);
-            conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T;", conn);
             int Wertungen;
             //Object o = cmd.ExecuteScalar();
-            int.TryParse(cmd.ExecuteScalar().ToString(), out Wertungen);
+            int.TryParse(
+                mysql.doMySqlScalarQuery("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + 
+                    strDisziplin + 
+                    "' AND id='" + 
+                    strFullNameComboBoxValue + 
+                    "' AND status='beendet'" + 
+                    strSchiessjahrFilter + 
+                    ") T;").ToString(), 
+                out Wertungen);
             if (Wertungen >= 15)
             {
-                cmd.CommandText = "SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15";
-                MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+                MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15");
                 textbox.Text = Zeile1 + Environment.NewLine;
                 textbox.Text += Zeile2 + Environment.NewLine;
                 textbox.Text += "--------------------";
@@ -638,16 +522,14 @@ namespace schiessbuch
                 textbox.Text += "--------------------";
                 textbox.Text += Environment.NewLine;
                 reader.Close();
-                cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
                 //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
-                reader = cmd.ExecuteReader(CommandBehavior.Default);
+                reader = mysql.doMySqlReaderQuery("SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2");
                 while (reader.Read())
                 {
                     if (reader["summe"] != System.DBNull.Value)
                         textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
                 }
-                reader.Close();
-                conn.Close();
+                mysql.closeMySqlReaderQuery(reader);
             } else
             {
                 textbox.Text = "Zu wenige Wertungen." + Environment.NewLine + "Anzahl Wertungen: " + Wertungen;
@@ -799,117 +681,78 @@ namespace schiessbuch
             }
         }
 
+        private Thread RefreshTimerWorkerThread = null;
+        private delegate void RefreshTimerTickDelegate();
+        private RefreshTimerTickDelegate refreshTimerTickDelegate = null;
+        private bool bTimerUpdateStillRunning=false;
+
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (generateEinzelScheibe)
-            {
-                setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
-                UpdateStandTrefferDaten(standFuerEinzelScheibe);
-            }
-            if (generateOverview)
-            {
-                updateOverview();
-                stand1Zielscheibe.Invalidate();
-                stand2Zielscheibe.Invalidate();
-                stand3Zielscheibe.Invalidate();
-                stand4Zielscheibe.Invalidate();
-                stand5Zielscheibe.Invalidate();
-                stand6Zielscheibe.Invalidate();
-            }
-            if (databaseRequestCounter == 0)
-            {
+            this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
+            this.RefreshTimerWorkerThread.Start();
 
+            //this.refreshTimerTickDelegate = new RefreshTimerTickDelegate(RefreshTimerWorker);
+            //RefreshTimerWorker();
+        }
 
-                // trefferBindingSource.ResetBindings(false);
-                // schuetzenBindingSource.ResetBindings(false);
-                // schiessbuchBindingSource.ResetBindings(false);
-                if (GetEreignisseCount() != ereignisse_count)
+        private void RefreshTimerWorker()
+        {
+            if (!bTimerUpdateStillRunning)
+            {
+                bTimerUpdateStillRunning = true;
+                if (generateEinzelScheibe)
                 {
-                    ereignisse_count = GetEreignisseCount();
-                    treffer_count = GetTrefferCount();
-                    int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
-                    int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
-                    List<string> eventsSelected = new List<string>();
-                    List<long> trefferSelected = new List<long>();
-                    foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
-                    {
-                        eventsSelected.Add(row.Cells["session"].Value.ToString());
-                    }
-                    foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
-                    {
-                        trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
-                    }
-                    //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                    schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                    trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                    foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
-                    {
-                        //row.Selected = false;
-                        foreach (string selItem in eventsSelected)
-                        {
-                            if (row.Cells["session"].Value.ToString() == selItem)
-                            {
-                                row.Selected = true;
-                                schiessbuchBindingSource.Position = row.Index;
-                            }
-                        }
-                    }
-                    foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                    {
-                        row.Selected = false;
-                        foreach (long selId in trefferSelected)
-                        {
-                            if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                            {
-                                row.Selected = true;
-                            }
-                        }
-                    }
-                    //schiessbuchBindingSource.ResetBindings(false);
-                    //trefferBindingSource.ResetBindings(false);
-
-                    if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
-                        schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
-                    if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
-                        trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                    //siusclubDataSet.Reset();
-                    //schiessbuchBindingSource.ResetBindings(false);
-
-                    //schiessbuchDataGridView.DataSource = null;
-                    //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
-
-                    //MessageBox.Show("Tick");
-                    //schiessbuchBindingSource.ResetBindings(false);
-                    //trefferBindingSource.ResetBindings(false);
-                    //schuetzenBindingSource.ResetBindings(false);
-
-                    //schiessbuchDataGridView.Refresh();
-                    //schiessbuchDataGridView.Invalidate();
-
-                    //siusclubDataSet.Reset();
-                    //trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                    //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                    //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                    //schiessbuchDataGridView.Invalidate();
-                    // SELECT für König:
-                    // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
-                    // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
-                    // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
-                    //UpdateKoenig();
+                    setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
+                    UpdateStandTrefferDaten(standFuerEinzelScheibe);
                 }
-                else
+                if (generateOverview)
                 {
-                    if (GetTrefferCount() != treffer_count)
+                    updateOverview();
+                    stand1Zielscheibe.Invalidate();
+                    stand2Zielscheibe.Invalidate();
+                    stand3Zielscheibe.Invalidate();
+                    stand4Zielscheibe.Invalidate();
+                    stand5Zielscheibe.Invalidate();
+                    stand6Zielscheibe.Invalidate();
+                }
+                if (databaseRequestCounter == 0)
+                {
+
+
+                    // trefferBindingSource.ResetBindings(false);
+                    // schuetzenBindingSource.ResetBindings(false);
+                    // schiessbuchBindingSource.ResetBindings(false);
+                    if (GetEreignisseCount() != ereignisse_count)
                     {
+                        ereignisse_count = GetEreignisseCount();
                         treffer_count = GetTrefferCount();
+                        int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
                         int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                        List<string> eventsSelected = new List<string>();
                         List<long> trefferSelected = new List<long>();
+                        foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
+                        {
+                            eventsSelected.Add(row.Cells["session"].Value.ToString());
+                        }
                         foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
                         {
                             trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                         }
-
+                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                        schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
                         trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
+                        {
+                            //row.Selected = false;
+                            foreach (string selItem in eventsSelected)
+                            {
+                                if (row.Cells["session"].Value.ToString() == selItem)
+                                {
+                                    row.Selected = true;
+                                    schiessbuchBindingSource.Position = row.Index;
+                                }
+                            }
+                        }
                         foreach (DataGridViewRow row in trefferDataGridView.Rows)
                         {
                             row.Selected = false;
@@ -923,16 +766,74 @@ namespace schiessbuch
                         }
                         //schiessbuchBindingSource.ResetBindings(false);
                         //trefferBindingSource.ResetBindings(false);
-                        if (TrefferScrollposition != -1)
+
+                        if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
+                            schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
+                        if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
                             trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                        UpdateKoenig();
+                        //siusclubDataSet.Reset();
+                        //schiessbuchBindingSource.ResetBindings(false);
+
+                        //schiessbuchDataGridView.DataSource = null;
+                        //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
+
+                        //MessageBox.Show("Tick");
+                        //schiessbuchBindingSource.ResetBindings(false);
+                        //trefferBindingSource.ResetBindings(false);
+                        //schuetzenBindingSource.ResetBindings(false);
+
+                        //schiessbuchDataGridView.Refresh();
+                        //schiessbuchDataGridView.Invalidate();
+
+                        //siusclubDataSet.Reset();
+                        //trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                        //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                        //schiessbuchDataGridView.Invalidate();
+                        // SELECT für König:
+                        // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
+                        // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
+                        // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
+                        //UpdateKoenig();
+                    }
+                    else
+                    {
+                        if (GetTrefferCount() != treffer_count)
+                        {
+                            treffer_count = GetTrefferCount();
+                            int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                            List<long> trefferSelected = new List<long>();
+                            foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+                            {
+                                trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
+                            }
+
+                            trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
+                            {
+                                row.Selected = false;
+                                foreach (long selId in trefferSelected)
+                                {
+                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                                    {
+                                        row.Selected = true;
+                                    }
+                                }
+                            }
+                            //schiessbuchBindingSource.ResetBindings(false);
+                            //trefferBindingSource.ResetBindings(false);
+                            if (TrefferScrollposition != -1)
+                                trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                            UpdateKoenig();
+                        }
                     }
                 }
+                databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
+                bTimerUpdateStillRunning = false;
             }
-            databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
         }
 
-        
+
 
         /// <summary>
         /// Hier wird die Übersichtsseite aktualisiert, also neu gezeichnet.
@@ -1103,195 +1004,198 @@ namespace schiessbuch
             int stand1 = stand + 1;
             int iSumme = 0;
             int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
-            int anzeigenAb = trefferliste[stand].Count - AnzTreffer;
-            int trefferZaehler = 0;
-            Bitmap scheibeBitmap = new Bitmap(zielscheiben[stand]);
-            Graphics graphics = Graphics.FromImage(scheibeBitmap);
-            float maxX = 0.0f, maxY = 0.0f;
-            foreach (SchussInfo info in trefferliste[stand])
+            int anzeigenAb = 0;
+            if (trefferliste != null)
             {
-                trefferZaehler++;
-                //scheibeBitmap = new Bitmap(zielscheiben[stand]);
-                //graphics = Graphics.FromImage(scheibeBitmap);
-
-                if (trefferZaehler > anzeigenAb)
+                anzeigenAb = trefferliste[stand].Count - AnzTreffer;
+                int trefferZaehler = 0;
+                Bitmap scheibeBitmap = new Bitmap(zielscheiben[stand]);
+                Graphics graphics = Graphics.FromImage(scheibeBitmap);
+                float maxX = 0.0f, maxY = 0.0f;
+                foreach (SchussInfo info in trefferliste[stand])
                 {
-                    Brush brush;
-                    float textWidth;
-                    float textHeight;
-                    float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    float schussPosOben2 = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
-                    float AbstandVonMitteX, AbstandVonMitteY;
-                    if (schussPosLinks < 0)
-                        AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    else
-                        AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
-                    if (schussPosOben < 0)
-                        AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
-                    else
-                        AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                    trefferZaehler++;
+                    //scheibeBitmap = new Bitmap(zielscheiben[stand]);
+                    //graphics = Graphics.FromImage(scheibeBitmap);
 
-                    //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "";
-                    ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
-                    if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
-                    if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
-                    if (info == trefferliste[stand].Last<SchussInfo>())
+                    if (trefferZaehler > anzeigenAb)
                     {
-                        brush = new SolidBrush(Color.FromArgb(120, Color.Red));
-                    }
-                    else if (info.ring < 10)
-                    {
-                        brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
-                    }
-                    else
-                    {
-                        brush = new SolidBrush(Color.FromArgb(120, Color.Green));
-                    }
-                    if (info.probe)
-                    {
-                        brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
-                        //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "Probe";
-                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
-                    }
-                    //Rectangle rect = new Rectangle(
-                    //    ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
-                    //    ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), 
-                    //    (int)(schusslochDurchmesser), 
-                    //    (int)(schusslochDurchmesser));
+                        Brush brush;
+                        float textWidth;
+                        float textHeight;
+                        float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        float schussPosOben2 = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                        float AbstandVonMitteX, AbstandVonMitteY;
+                        if (schussPosLinks < 0)
+                            AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        else
+                            AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                        if (schussPosOben < 0)
+                            AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        else
+                            AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
 
-                    Rectangle r10, r9, r8, r7, r6, r5, r4, r3, r2, r1;
-
-                    r10 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(0.25 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(0.25 * millimeterToPixel),
-                        (int)(0.5 * millimeterToPixel),
-                        (int)(0.5 * millimeterToPixel));
-                    Pen ringPen = new Pen(Color.Blue);
-                    graphics.DrawEllipse(ringPen, r10);
-
-                    r9 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(2.25 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(2.25 * millimeterToPixel),
-                        (int)(4.5 * millimeterToPixel),
-                        (int)(4.5 * millimeterToPixel));
-                    graphics.DrawEllipse(ringPen, r9);
-
-                    r8 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(5.25 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(5.25 * millimeterToPixel),
-                        (int)(10.5 * millimeterToPixel),
-                        (int)(10.5 * millimeterToPixel));
-                    graphics.DrawEllipse(ringPen, r8);
-
-                    r7 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(7.75 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(7.75 * millimeterToPixel),
-                        (int)(15.5 * millimeterToPixel),
-                        (int)(15.5 * millimeterToPixel));
-                    graphics.DrawEllipse(ringPen, r7);
-
-                    r6 = new Rectangle(
-                        pictureBox.Image.Width / 2 - (int)(10.25 * millimeterToPixel),
-                        pictureBox.Image.Height / 2 - (int)(10.25 * millimeterToPixel),
-                        (int)(20.5 * millimeterToPixel),
-                        (int)(20.5 * millimeterToPixel));
-                    graphics.DrawEllipse(ringPen, r10);
-
-                    Rectangle rect = new Rectangle(
-                        ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2),
-                        (pictureBox.Image.Height / 2) - ((int)(schussPosOben2)),
-                        (int)(schusslochDurchmesser),
-                        (int)(schusslochDurchmesser));
-
-                    graphics.FillEllipse(brush, rect);
-                    graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
-                    string text = info.schussnummer.ToString();
-                    while (true)
-                    {
-                        textWidth = graphics.MeasureString(text, font).Width;
-                        textHeight = graphics.MeasureString(text, font).Height;
-                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                        //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "";
+                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
+                        if (Math.Abs(AbstandVonMitteX) > maxX) maxX = Math.Abs(AbstandVonMitteX);
+                        if (Math.Abs(AbstandVonMitteY) > maxY) maxY = Math.Abs(AbstandVonMitteY);
+                        if (info == trefferliste[stand].Last<SchussInfo>())
                         {
-                            break;
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Red));
                         }
-                        font = new Font("Arial", font.Size + 1f);
+                        else if (info.ring < 10)
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
+                        }
+                        else
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Green));
+                        }
+                        if (info.probe)
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
+                            //UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1) + "SplitContainer"].Controls["lblProbe" + (stand + 1)].Text = "Probe";
+                            ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
+                        }
+                        //Rectangle rect = new Rectangle(
+                        //    ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2), 
+                        //    ((int)(schussPosOben)) + (pictureBox.Image.Height / 2), 
+                        //    (int)(schusslochDurchmesser), 
+                        //    (int)(schusslochDurchmesser));
+
+                        Rectangle r10, r9, r8, r7, r6, r5, r4, r3, r2, r1;
+
+                        r10 = new Rectangle(
+                            pictureBox.Image.Width / 2 - (int)(0.25 * millimeterToPixel),
+                            pictureBox.Image.Height / 2 - (int)(0.25 * millimeterToPixel),
+                            (int)(0.5 * millimeterToPixel),
+                            (int)(0.5 * millimeterToPixel));
+                        Pen ringPen = new Pen(Color.Blue);
+                        graphics.DrawEllipse(ringPen, r10);
+
+                        r9 = new Rectangle(
+                            pictureBox.Image.Width / 2 - (int)(2.25 * millimeterToPixel),
+                            pictureBox.Image.Height / 2 - (int)(2.25 * millimeterToPixel),
+                            (int)(4.5 * millimeterToPixel),
+                            (int)(4.5 * millimeterToPixel));
+                        graphics.DrawEllipse(ringPen, r9);
+
+                        r8 = new Rectangle(
+                            pictureBox.Image.Width / 2 - (int)(5.25 * millimeterToPixel),
+                            pictureBox.Image.Height / 2 - (int)(5.25 * millimeterToPixel),
+                            (int)(10.5 * millimeterToPixel),
+                            (int)(10.5 * millimeterToPixel));
+                        graphics.DrawEllipse(ringPen, r8);
+
+                        r7 = new Rectangle(
+                            pictureBox.Image.Width / 2 - (int)(7.75 * millimeterToPixel),
+                            pictureBox.Image.Height / 2 - (int)(7.75 * millimeterToPixel),
+                            (int)(15.5 * millimeterToPixel),
+                            (int)(15.5 * millimeterToPixel));
+                        graphics.DrawEllipse(ringPen, r7);
+
+                        r6 = new Rectangle(
+                            pictureBox.Image.Width / 2 - (int)(10.25 * millimeterToPixel),
+                            pictureBox.Image.Height / 2 - (int)(10.25 * millimeterToPixel),
+                            (int)(20.5 * millimeterToPixel),
+                            (int)(20.5 * millimeterToPixel));
+                        graphics.DrawEllipse(ringPen, r10);
+
+                        Rectangle rect = new Rectangle(
+                            ((int)(schussPosLinks)) + (pictureBox.Image.Width / 2),
+                            (pictureBox.Image.Height / 2) - ((int)(schussPosOben2)),
+                            (int)(schusslochDurchmesser),
+                            (int)(schusslochDurchmesser));
+
+                        graphics.FillEllipse(brush, rect);
+                        graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                        string text = info.schussnummer.ToString();
+                        while (true)
+                        {
+                            textWidth = graphics.MeasureString(text, font).Width;
+                            textHeight = graphics.MeasureString(text, font).Height;
+                            if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                            {
+                                break;
+                            }
+                            font = new Font("Arial", font.Size + 1f);
+                        }
+                        graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+
+                        //                    e.Graphics.FillEllipse(brush, rect);
+                        //                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                        //                    string text = info.schussnummer.ToString();
+                        //                    while (true)
+                        //                    {
+                        //                        textWidth = e.Graphics.MeasureString(text, font).Width;
+                        //                        textHeight = e.Graphics.MeasureString(text, font).Height;
+                        //                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                        //                        {
+                        //                            break;
+                        //                        }
+                        //                        font = new Font("Arial", font.Size + 1f);
+                        //                    }
+                        //                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
                     }
-                    graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
 
-                    //                    e.Graphics.FillEllipse(brush, rect);
-                    //                    e.Graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
-                    //                    string text = info.schussnummer.ToString();
-                    //                    while (true)
-                    //                    {
-                    //                        textWidth = e.Graphics.MeasureString(text, font).Width;
-                    //                        textHeight = e.Graphics.MeasureString(text, font).Height;
-                    //                        if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
-                    //                        {
-                    //                            break;
-                    //                        }
-                    //                        font = new Font("Arial", font.Size + 1f);
-                    //                    }
-                    //                    e.Graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+                    // So, jetzt kümmern wir uns mal um das Zoomen...
+                    float maxAbstand;
+                    if (maxX > maxY)
+                        maxAbstand = maxX;
+                    else
+                        maxAbstand = maxY;
+
+                    if (maxAbstand < 200)
+                        maxAbstand = 200;
+
+                    //maxAbstand = 200;
+                    //MessageBox.Show(pictureBox.Name);
+                    //MessageBox.Show("Size: " + pictureBox.Image.Width + "," + pictureBox.Image.Height + ".");
+
+                    // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
+                    int seitenlaenge;
+                    if (pictureBox.Width < pictureBox.Height)
+                        seitenlaenge = pictureBox.Width;
+                    else
+                        seitenlaenge = pictureBox.Height;
+
+                    if (maxAbstand > pictureBox.Image.Width / 2)
+                        maxAbstand = pictureBox.Image.Width / 2;
+                    // MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
+
+                    e.Graphics.DrawImage(
+                        scheibeBitmap,
+                        new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge, seitenlaenge),
+                        new Rectangle(
+                            (int)(zielscheiben[stand].Width / 2 - maxAbstand),
+                            (int)(zielscheiben[stand].Height / 2 - maxAbstand),
+                            (int)(2 * maxAbstand), (int)(2 * maxAbstand)),
+                        GraphicsUnit.Pixel);
+
+                    // e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
+
+                    // mal schauen, ob man das darf...
+                    // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
+                    //graphics.Dispose();
+                    //scheibeBitmap.Dispose();
+
+
+
+
+                    if (FillMatrix)
+                    {
+                        int spalte = (info.schussnummer - 1) % 5;
+                        int zeile = (info.schussnummer - 1) / 5;
+                        string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
+
+                        ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
+                        iSumme += info.ring;
+                    }
                 }
-
-                // So, jetzt kümmern wir uns mal um das Zoomen...
-                float maxAbstand;
-                if (maxX > maxY)
-                    maxAbstand = maxX;
-                else
-                    maxAbstand = maxY;
-
-                if (maxAbstand < 200)
-                    maxAbstand = 200;
-
-                //maxAbstand = 200;
-                //MessageBox.Show(pictureBox.Name);
-                //MessageBox.Show("Size: " + pictureBox.Image.Width + "," + pictureBox.Image.Height + ".");
-
-                // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
-                int seitenlaenge;
-                if (pictureBox.Width < pictureBox.Height)
-                    seitenlaenge = pictureBox.Width;
-                else
-                    seitenlaenge = pictureBox.Height;
-
-                if (maxAbstand > pictureBox.Image.Width / 2)
-                    maxAbstand = pictureBox.Image.Width / 2;
-                // MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
-
-                                e.Graphics.DrawImage(
-                                    scheibeBitmap, 
-                                    new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge , seitenlaenge), 
-                                    new Rectangle(
-                                        (int)(zielscheiben[stand].Width / 2 - maxAbstand), 
-                                        (int)(zielscheiben[stand].Height / 2 - maxAbstand), 
-                                        (int)(2 * maxAbstand), (int)(2 * maxAbstand)), 
-                                    GraphicsUnit.Pixel);
-                                    
-                // e.Graphics.DrawImage(scheibeBitmap, pictureBox.ClientRectangle);
-
-                // mal schauen, ob man das darf...
-                // ansonsten muss ich das wieder rausnehmen und aber dann schauen, wieso der Speicher voll läuft
-                //graphics.Dispose();
-                //scheibeBitmap.Dispose();
-
-
-
-
-                if (FillMatrix)
-                {
-                    int spalte = (info.schussnummer - 1) % 5;
-                    int zeile = (info.schussnummer - 1) / 5;
-                    string str2 = "txtSchuss" + stand1.ToString() + spalte.ToString() + zeile.ToString();
-
-                    ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["Stand" + stand1.ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
-                    iSumme += info.ring;
-                }
+                graphics.Dispose();
+                scheibeBitmap.Dispose();
             }
-            graphics.Dispose();
-            scheibeBitmap.Dispose();
-
             if (FillMatrix)
                 ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
@@ -1657,10 +1561,6 @@ namespace schiessbuch
                 DoUpdates.Image = Properties.Resources.refresh40bw;
                 RefreshTimer.Stop();
             }
-        }
-
-        private void schiessbuchDataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
@@ -3228,17 +3128,17 @@ namespace schiessbuch
                 einzelauswertung.strVorname = strVorname;
                 einzelauswertung.iStandNummer = Int16.Parse(strStand);
 
-                cmd.CommandText = @"SELECT 10 AS Ring, COUNT(ring) AS Anzahl from treffer where session='" + strSession + @"' and ring=10 UNION ALL 
-SELECT 9, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 9 UNION ALL
-SELECT 8, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 8 UNION ALL
-SELECT 7, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 7 UNION ALL
-SELECT 6, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 6 UNION ALL
-SELECT 5, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 5 UNION ALL
-SELECT 4, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 4 UNION ALL
-SELECT 3, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 3 UNION ALL
-SELECT 2, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 2 UNION ALL
-SELECT 1, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 1 UNION ALL
-SELECT 0, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 0 UNION ALL
+                cmd.CommandText = @"SELECT 10 AS Ring, COUNT(ring) AS Anzahl from treffer where session='" + strSession + @"' and ring=10 and schritt = 1 UNION ALL 
+SELECT 9, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 9 and schritt = 1 UNION ALL
+SELECT 8, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 8 and schritt = 1 UNION ALL
+SELECT 7, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 7 and schritt = 1 UNION ALL
+SELECT 6, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 6 and schritt = 1 UNION ALL
+SELECT 5, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 5 and schritt = 1 UNION ALL
+SELECT 4, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 4 and schritt = 1 UNION ALL
+SELECT 3, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 3 and schritt = 1 UNION ALL
+SELECT 2, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 2 and schritt = 1 UNION ALL
+SELECT 1, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 1 and schritt = 1 UNION ALL
+SELECT 0, COUNT(ring) from treffer where session='" + strSession + @"' and ring = 0 and schritt = 1 UNION ALL
 SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schritt = 1 and zehntel>= 10.2;";
                 einzelauswertung.schussverteilung = new EinzelAuswertungDaten.Schussverteilung();
                 reader = cmd.ExecuteReader();
@@ -3354,7 +3254,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     }
                     reader.Close();
 
-                    cmd.CommandText = "SELECT ROUND(AVG(xrahmeninmm), 2) AS TrefferlageHoriz, ROUND(AVG(yrahmeninmm), 2) AS TrefferlageVert, ROUND(AVG(radiusziel), 2) AS AbstandDurchschnitt from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10; ";
+                    cmd.CommandText = "SELECT ROUND(AVG(xrahmeninmm), 2) AS TrefferlageHoriz, ROUND(AVG(yrahmeninmm), 2) AS TrefferlageVert, ROUND(AVG(radiusziel), 2) AS AbstandDurchschnitt from (select * from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10) T; ";
                     reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
@@ -3364,7 +3264,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     }
                     reader.Close();
 
-                    cmd.CommandText = "SELECT ROUND(SQRT(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm)), 2) AS xStreuungSTABW, ROUND(SQRT(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm)), 2) AS yStreuungSTABW, ROUND(SQRT(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel)), 2) AS rStreuungSTABW, ROUND(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm), 2) AS xStreuungVar, ROUND(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm), 2) AS yStreuungVar, ROUND(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel), 2) AS rStreuungVar from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10; ";
+                    cmd.CommandText = "SELECT ROUND(SQRT(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm)), 2) AS xStreuungSTABW, ROUND(SQRT(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm)), 2) AS yStreuungSTABW, ROUND(SQRT(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel)), 2) AS rStreuungSTABW, ROUND(SUM(xrahmeninmm * xrahmeninmm) / COUNT(xrahmeninmm) - AVG(xrahmeninmm) * AVG(xrahmeninmm), 2) AS xStreuungVar, ROUND(SUM(yrahmeninmm * yrahmeninmm) / COUNT(yrahmeninmm) - AVG(yrahmeninmm) * AVG(yrahmeninmm), 2) AS yStreuungVar, ROUND(SUM(radiusziel * radiusziel) / COUNT(radiusziel) - AVG(radiusziel) * AVG(radiusziel), 2) AS rStreuungVar from (select * from treffer where session='" + strSession + "' and schritt = 1 limit " + i * 10 + ", 10) T; ";
                     reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
@@ -3551,10 +3451,25 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     iZaehler++;
                     string strWertung = trf.fWertung.ToString();
                     float fWertungWidth = ev.Graphics.MeasureString(strWertung, printFont).Width;
+                    // strWertung += string.Format(", {0}°", trf.fWinkel);
                     ev.Graphics.DrawString(strWertung, printFont, Brushes.Black, iAnfang, topMargin);
-                    Graphics g = Graphics.FromImage(Properties.Resources.Pfeil);
-                    g.RotateTransform(trf.fWinkel);
-                    ev.Graphics.DrawImage(RotateImage(Properties.Resources.Pfeil3, new Point(Properties.Resources.Pfeil3.Width / 2, Properties.Resources.Pfeil3.Height / 2), trf.fWinkel), iAnfang + fWertungWidth, topMargin);
+                    if (!trf.bInnenZehner)
+                    {
+                        Graphics g = Graphics.FromImage(Properties.Resources.Pfeil);
+                        /* Bei der Berechnung des Winkels werde ich nicht ganz schlau
+                           bei positiven x- und positiven x-Werten stimmt der Winkel
+                           bei negativen x- und negativen y-Werten stimmt der Winkel in der Datenbank auch
+                           Unterscheiden sich aber die Winkel der x- und der y-Werte, ist der Winkel in der Datenbank falsch.
+                           Der richtige Winkel kann dann durch 360-(Winkel) berechnet werden.
+                           */
+                        float fRichtigerWinkel;
+                        if ((trf.xrahmeninmm * trf.yrahmeninmm) < 0) // wenn also x und y unterschiedliche Vorzeichen haben
+                            fRichtigerWinkel = 360.0f - trf.fWinkel;
+                        else
+                            fRichtigerWinkel = trf.fWinkel;
+                        g.RotateTransform(fRichtigerWinkel);
+                        ev.Graphics.DrawImage(RotateImage(Properties.Resources.Pfeil3, new Point(Properties.Resources.Pfeil3.Width / 2, Properties.Resources.Pfeil3.Height / 2), fRichtigerWinkel), iAnfang + fWertungWidth, topMargin);
+                    }
                     if (iZaehler % 5 != 0)
                     {
                         iAnfang += 50;
@@ -3565,6 +3480,36 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     }
 
                 }
+
+                topMargin += 15;
+                ev.Graphics.DrawString("beste Teiler: ", printFont, Brushes.Black, iAnfang, topMargin);
+                tmpStr = String.Format("{0} ({1}.), {2} ({3}.), {4} ({5}.)",
+                    serie.beste[0].iSchussWert, serie.beste[0].iSchussNummer,
+                    serie.beste[1].iSchussWert, serie.beste[1].iSchussNummer,
+                    serie.beste[2].iSchussWert, serie.beste[2].iSchussNummer);
+                ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, iAnfang + 100, topMargin);
+
+                topMargin += 15;
+                ev.Graphics.DrawString("Trefferlage: ", printFont, Brushes.Black, iAnfang, topMargin);
+                tmpStr = String.Format("{0} mm {1}, {2} mm {3}, Abst: {4}",
+                    Math.Abs(serie.fTrefferlage_x).ToString(), (serie.fTrefferlage_x > 0 ? "rechts" : "links"),
+                    Math.Abs(serie.fTrefferlage_y).ToString(), (serie.fTrefferlage_y > 0 ? "hoch" : "tief"),
+                    serie.fTrefferlage_r);
+                ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, iAnfang + 100, topMargin);
+
+                topMargin += 15;
+                ev.Graphics.DrawString("Standardabw.: ", printFont, Brushes.Black, iAnfang, topMargin);
+                tmpStr = String.Format("{0} mm hor., {1} mm vert., {2} mm Abst.",
+                    serie.fStabw_x.ToString(), serie.fStabw_y.ToString(), serie.fStabw_r.ToString());
+                ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, iAnfang + 100, topMargin);
+
+                topMargin += 15;
+                ev.Graphics.DrawString("Varianz: ", printFont, Brushes.Black, iAnfang, topMargin);
+                tmpStr = String.Format("{0} mm² hor., {1} mm² vert., {2} mm² Abst.",
+                    serie.fVarianz_x.ToString(), serie.fVarianz_y.ToString(), serie.fVarianz_r.ToString());
+                ev.Graphics.DrawString(tmpStr, printFont, Brushes.Black, iAnfang + 100, topMargin);
+
+
                 iRectangleOben += 160;
 //                MessageBox.Show(g.MeasureString("100", printFont).Height.ToString());
 
@@ -3931,6 +3876,43 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             if (iTestLGSchussNummer == 18) testLGTreffer[0].Clear();
             testLGTreffer[0].Add(si);
             TestPictureLG.Invalidate();
+        }
+
+        private void schiessbuchDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            MessageBox.Show("DataError-Ereignis aufgetreten");
+        }
+
+        private void Schiessbuch_ResizeBegin(object sender, EventArgs e)
+        {
+            SuspendLayout();
+        }
+
+        private void Schiessbuch_ResizeEnd(object sender, EventArgs e)
+        {
+            ResumeLayout();
+        }
+
+        private void Schiessbuch_Resize(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void UebersichtTableLayoutPanel_Paint(object sender, PaintEventArgs e)
+        {
+            SuspendLayout();
+            base.OnPaint(e);
+            ResumeLayout();
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000;  // Turn on WS_EX_COMPOSITED
+                return cp;
+            }
         }
     }
 }

@@ -114,5 +114,17 @@ namespace schiessbuch.Properties {
                 return ((string)(this["VereinsheimSiusclubConnectionString1"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.178.202")]
+        public string MySQLServer {
+            get {
+                return ((string)(this["MySQLServer"]));
+            }
+            set {
+                this["MySQLServer"] = value;
+            }
+        }
     }
 }

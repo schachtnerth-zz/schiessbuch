@@ -55,9 +55,13 @@
             this.btnSetzeAktiv = new System.Windows.Forms.Button();
             this.lbAktiveDisziplinen = new System.Windows.Forms.ListBox();
             this.lbVerfuegbareDisziplinen = new System.Windows.Forms.ListBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.tbDBServer = new System.Windows.Forms.TextBox();
             this.groupEinstellungenAktualisierung.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.grpDisziplinen.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupEinstellungenAktualisierung
@@ -152,17 +156,18 @@
             // btnOKEinstellungen
             // 
             this.btnOKEinstellungen.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOKEinstellungen.Location = new System.Drawing.Point(13, 301);
+            this.btnOKEinstellungen.Location = new System.Drawing.Point(13, 369);
             this.btnOKEinstellungen.Name = "btnOKEinstellungen";
             this.btnOKEinstellungen.Size = new System.Drawing.Size(75, 23);
             this.btnOKEinstellungen.TabIndex = 1;
             this.btnOKEinstellungen.Text = "OK";
             this.btnOKEinstellungen.UseVisualStyleBackColor = true;
+            this.btnOKEinstellungen.Click += new System.EventHandler(this.btnOKEinstellungen_Click);
             // 
             // btnEinstellungenAbbrechen
             // 
             this.btnEinstellungenAbbrechen.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnEinstellungenAbbrechen.Location = new System.Drawing.Point(934, 301);
+            this.btnEinstellungenAbbrechen.Location = new System.Drawing.Point(934, 369);
             this.btnEinstellungenAbbrechen.Name = "btnEinstellungenAbbrechen";
             this.btnEinstellungenAbbrechen.Size = new System.Drawing.Size(75, 23);
             this.btnEinstellungenAbbrechen.TabIndex = 2;
@@ -323,14 +328,42 @@
             this.lbVerfuegbareDisziplinen.SelectedIndexChanged += new System.EventHandler(this.lbVerfuegbareDisziplinen_SelectedIndexChanged);
             this.lbVerfuegbareDisziplinen.DoubleClick += new System.EventHandler(this.lbVerfuegbareDisziplinen_DoubleClick);
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.tbDBServer);
+            this.groupBox2.Location = new System.Drawing.Point(13, 306);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(251, 57);
+            this.groupBox2.TabIndex = 5;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Server";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 22);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(92, 13);
+            this.label9.TabIndex = 3;
+            this.label9.Text = "Datenbankserver:";
+            // 
+            // tbDBServer
+            // 
+            this.tbDBServer.Location = new System.Drawing.Point(104, 19);
+            this.tbDBServer.Name = "tbDBServer";
+            this.tbDBServer.Size = new System.Drawing.Size(139, 20);
+            this.tbDBServer.TabIndex = 2;
+            // 
             // Einstellungen
             // 
             this.AcceptButton = this.btnOKEinstellungen;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnEinstellungenAbbrechen;
-            this.ClientSize = new System.Drawing.Size(1021, 336);
+            this.ClientSize = new System.Drawing.Size(1021, 404);
             this.ControlBox = false;
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.grpDisziplinen);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnEinstellungenAbbrechen);
@@ -350,6 +383,8 @@
             this.groupBox1.PerformLayout();
             this.grpDisziplinen.ResumeLayout(false);
             this.grpDisziplinen.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -382,5 +417,8 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label9;
+        public System.Windows.Forms.TextBox tbDBServer;
     }
 }

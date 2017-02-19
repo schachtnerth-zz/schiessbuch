@@ -49,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlternativerMySQLServer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlternativerMySQLServer.Designer.cs">
+      <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
+    </Compile>
     <Compile Include="disziplin.cs" />
     <Compile Include="Einstellungen.cs">
       <SubType>Form</SubType>
@@ -88,6 +94,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
     </Compile>
+    <Compile Include="GetMySQLConnection.cs" />
     <Compile Include="ManuellNachtragen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -143,6 +150,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AlternativerMySQLServer.resx">
+      <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Einstellungen.resx">
       <DependentUpon>Einstellungen.cs</DependentUpon>
     </EmbeddedResource>

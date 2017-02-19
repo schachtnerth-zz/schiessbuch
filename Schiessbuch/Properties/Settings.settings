@@ -41,5 +41,8 @@
 &lt;/SerializableConnectionString&gt;</DesignTimeValue>
       <Value Profile="(Default)">server=192.168.178.202;user id=siusclub;password=siusclub;database=siusclub</Value>
     </Setting>
+    <Setting Name="MySQLServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.178.202</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

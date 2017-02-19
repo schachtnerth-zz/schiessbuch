@@ -212,5 +212,10 @@ namespace schiessbuch
             }
             konfigurationDoc.Save(konfiguration);
         }
+
+        private void btnOKEinstellungen_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
