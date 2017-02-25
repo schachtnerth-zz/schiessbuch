@@ -649,7 +649,7 @@ namespace schiessbuch
             string zielscheibe = "";
             foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
             {
-                if (row.Cells["zielscheibe"]!= null && zielscheibe != row.Cells["zielscheibe"].Value.ToString())
+                if (row.Cells["zielscheibe"].Value != null && zielscheibe != row.Cells["zielscheibe"].Value.ToString())
                 {
                     if (zielscheibe == "")
                         zielscheibe = row.Cells["zielscheibe"].Value.ToString();
@@ -3011,6 +3011,7 @@ namespace schiessbuch
 
         private void Schiessbuch_FormClosing(object sender, FormClosingEventArgs e)
         {
+            DoUpdates.Checked = false;
             DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (res == DialogResult.Yes)
             {
