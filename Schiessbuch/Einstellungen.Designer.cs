@@ -46,18 +46,22 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.grpDisziplinen = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.btnDown = new System.Windows.Forms.Button();
             this.btnUp = new System.Windows.Forms.Button();
             this.btnSetzeInaktiv = new System.Windows.Forms.Button();
             this.btnSetzeAktiv = new System.Windows.Forms.Button();
             this.lbAktiveDisziplinen = new System.Windows.Forms.ListBox();
             this.lbVerfuegbareDisziplinen = new System.Windows.Forms.ListBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.tbDBServer = new System.Windows.Forms.TextBox();
             this.groupEinstellungenAktualisierung.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.grpDisziplinen.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupEinstellungenAktualisierung
@@ -152,17 +156,18 @@
             // btnOKEinstellungen
             // 
             this.btnOKEinstellungen.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOKEinstellungen.Location = new System.Drawing.Point(13, 301);
+            this.btnOKEinstellungen.Location = new System.Drawing.Point(13, 369);
             this.btnOKEinstellungen.Name = "btnOKEinstellungen";
             this.btnOKEinstellungen.Size = new System.Drawing.Size(75, 23);
             this.btnOKEinstellungen.TabIndex = 1;
             this.btnOKEinstellungen.Text = "OK";
             this.btnOKEinstellungen.UseVisualStyleBackColor = true;
+            this.btnOKEinstellungen.Click += new System.EventHandler(this.btnOKEinstellungen_Click);
             // 
             // btnEinstellungenAbbrechen
             // 
             this.btnEinstellungenAbbrechen.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnEinstellungenAbbrechen.Location = new System.Drawing.Point(660, 301);
+            this.btnEinstellungenAbbrechen.Location = new System.Drawing.Point(934, 369);
             this.btnEinstellungenAbbrechen.Name = "btnEinstellungenAbbrechen";
             this.btnEinstellungenAbbrechen.Size = new System.Drawing.Size(75, 23);
             this.btnEinstellungenAbbrechen.TabIndex = 2;
@@ -230,89 +235,10 @@
             this.grpDisziplinen.Controls.Add(this.lbVerfuegbareDisziplinen);
             this.grpDisziplinen.Location = new System.Drawing.Point(270, 13);
             this.grpDisziplinen.Name = "grpDisziplinen";
-            this.grpDisziplinen.Size = new System.Drawing.Size(465, 287);
+            this.grpDisziplinen.Size = new System.Drawing.Size(739, 287);
             this.grpDisziplinen.TabIndex = 4;
             this.grpDisziplinen.TabStop = false;
             this.grpDisziplinen.Text = "Disziplinen verwalten";
-            // 
-            // btnDown
-            // 
-            this.btnDown.Location = new System.Drawing.Point(426, 136);
-            this.btnDown.Name = "btnDown";
-            this.btnDown.Size = new System.Drawing.Size(33, 23);
-            this.btnDown.TabIndex = 5;
-            this.btnDown.Text = "ab";
-            this.btnDown.UseVisualStyleBackColor = true;
-            this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
-            // 
-            // btnUp
-            // 
-            this.btnUp.Location = new System.Drawing.Point(426, 107);
-            this.btnUp.Name = "btnUp";
-            this.btnUp.Size = new System.Drawing.Size(33, 23);
-            this.btnUp.TabIndex = 4;
-            this.btnUp.Text = "auf";
-            this.btnUp.UseVisualStyleBackColor = true;
-            this.btnUp.Click += new System.EventHandler(this.btnUp_Click);
-            // 
-            // btnSetzeInaktiv
-            // 
-            this.btnSetzeInaktiv.Location = new System.Drawing.Point(217, 136);
-            this.btnSetzeInaktiv.Name = "btnSetzeInaktiv";
-            this.btnSetzeInaktiv.Size = new System.Drawing.Size(33, 23);
-            this.btnSetzeInaktiv.TabIndex = 3;
-            this.btnSetzeInaktiv.Text = "<-";
-            this.btnSetzeInaktiv.UseVisualStyleBackColor = true;
-            // 
-            // btnSetzeAktiv
-            // 
-            this.btnSetzeAktiv.Location = new System.Drawing.Point(217, 107);
-            this.btnSetzeAktiv.Name = "btnSetzeAktiv";
-            this.btnSetzeAktiv.Size = new System.Drawing.Size(33, 23);
-            this.btnSetzeAktiv.TabIndex = 2;
-            this.btnSetzeAktiv.Text = "->";
-            this.btnSetzeAktiv.UseVisualStyleBackColor = true;
-            // 
-            // lbAktiveDisziplinen
-            // 
-            this.lbAktiveDisziplinen.FormattingEnabled = true;
-            this.lbAktiveDisziplinen.Location = new System.Drawing.Point(256, 33);
-            this.lbAktiveDisziplinen.Name = "lbAktiveDisziplinen";
-            this.lbAktiveDisziplinen.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbAktiveDisziplinen.Size = new System.Drawing.Size(164, 212);
-            this.lbAktiveDisziplinen.TabIndex = 1;
-            this.lbAktiveDisziplinen.SelectedIndexChanged += new System.EventHandler(this.lbAktiveDisziplinen_SelectedIndexChanged);
-            this.lbAktiveDisziplinen.DoubleClick += new System.EventHandler(this.lbAktiveDisziplinen_DoubleClick);
-            // 
-            // lbVerfuegbareDisziplinen
-            // 
-            this.lbVerfuegbareDisziplinen.FormattingEnabled = true;
-            this.lbVerfuegbareDisziplinen.Location = new System.Drawing.Point(7, 33);
-            this.lbVerfuegbareDisziplinen.Name = "lbVerfuegbareDisziplinen";
-            this.lbVerfuegbareDisziplinen.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbVerfuegbareDisziplinen.Size = new System.Drawing.Size(204, 212);
-            this.lbVerfuegbareDisziplinen.TabIndex = 0;
-            this.lbVerfuegbareDisziplinen.SelectedIndexChanged += new System.EventHandler(this.lbVerfuegbareDisziplinen_SelectedIndexChanged);
-            this.lbVerfuegbareDisziplinen.DoubleClick += new System.EventHandler(this.lbVerfuegbareDisziplinen_DoubleClick);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(292, 258);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(127, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "Disziplinen speichern";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 16);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(112, 13);
-            this.label7.TabIndex = 7;
-            this.label7.Text = "Verfügbare Disziplinen";
             // 
             // label8
             // 
@@ -323,14 +249,121 @@
             this.label8.TabIndex = 8;
             this.label8.Text = "Aktive Disziplinen";
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 16);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(112, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Verfügbare Disziplinen";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(599, 251);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(127, 23);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "Disziplinen speichern";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // btnDown
+            // 
+            this.btnDown.Location = new System.Drawing.Point(693, 136);
+            this.btnDown.Name = "btnDown";
+            this.btnDown.Size = new System.Drawing.Size(33, 23);
+            this.btnDown.TabIndex = 5;
+            this.btnDown.Text = "ab";
+            this.btnDown.UseVisualStyleBackColor = true;
+            this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
+            // 
+            // btnUp
+            // 
+            this.btnUp.Location = new System.Drawing.Point(693, 107);
+            this.btnUp.Name = "btnUp";
+            this.btnUp.Size = new System.Drawing.Size(33, 23);
+            this.btnUp.TabIndex = 4;
+            this.btnUp.Text = "auf";
+            this.btnUp.UseVisualStyleBackColor = true;
+            this.btnUp.Click += new System.EventHandler(this.btnUp_Click);
+            // 
+            // btnSetzeInaktiv
+            // 
+            this.btnSetzeInaktiv.Location = new System.Drawing.Point(325, 136);
+            this.btnSetzeInaktiv.Name = "btnSetzeInaktiv";
+            this.btnSetzeInaktiv.Size = new System.Drawing.Size(33, 23);
+            this.btnSetzeInaktiv.TabIndex = 3;
+            this.btnSetzeInaktiv.Text = "<-";
+            this.btnSetzeInaktiv.UseVisualStyleBackColor = true;
+            // 
+            // btnSetzeAktiv
+            // 
+            this.btnSetzeAktiv.Location = new System.Drawing.Point(325, 107);
+            this.btnSetzeAktiv.Name = "btnSetzeAktiv";
+            this.btnSetzeAktiv.Size = new System.Drawing.Size(33, 23);
+            this.btnSetzeAktiv.TabIndex = 2;
+            this.btnSetzeAktiv.Text = "->";
+            this.btnSetzeAktiv.UseVisualStyleBackColor = true;
+            // 
+            // lbAktiveDisziplinen
+            // 
+            this.lbAktiveDisziplinen.FormattingEnabled = true;
+            this.lbAktiveDisziplinen.Location = new System.Drawing.Point(364, 33);
+            this.lbAktiveDisziplinen.Name = "lbAktiveDisziplinen";
+            this.lbAktiveDisziplinen.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbAktiveDisziplinen.Size = new System.Drawing.Size(323, 212);
+            this.lbAktiveDisziplinen.TabIndex = 1;
+            this.lbAktiveDisziplinen.SelectedIndexChanged += new System.EventHandler(this.lbAktiveDisziplinen_SelectedIndexChanged);
+            this.lbAktiveDisziplinen.DoubleClick += new System.EventHandler(this.lbAktiveDisziplinen_DoubleClick);
+            // 
+            // lbVerfuegbareDisziplinen
+            // 
+            this.lbVerfuegbareDisziplinen.FormattingEnabled = true;
+            this.lbVerfuegbareDisziplinen.Location = new System.Drawing.Point(7, 33);
+            this.lbVerfuegbareDisziplinen.Name = "lbVerfuegbareDisziplinen";
+            this.lbVerfuegbareDisziplinen.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbVerfuegbareDisziplinen.Size = new System.Drawing.Size(312, 212);
+            this.lbVerfuegbareDisziplinen.TabIndex = 0;
+            this.lbVerfuegbareDisziplinen.SelectedIndexChanged += new System.EventHandler(this.lbVerfuegbareDisziplinen_SelectedIndexChanged);
+            this.lbVerfuegbareDisziplinen.DoubleClick += new System.EventHandler(this.lbVerfuegbareDisziplinen_DoubleClick);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.tbDBServer);
+            this.groupBox2.Location = new System.Drawing.Point(13, 306);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(251, 57);
+            this.groupBox2.TabIndex = 5;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Server";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 22);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(92, 13);
+            this.label9.TabIndex = 3;
+            this.label9.Text = "Datenbankserver:";
+            // 
+            // tbDBServer
+            // 
+            this.tbDBServer.Location = new System.Drawing.Point(104, 19);
+            this.tbDBServer.Name = "tbDBServer";
+            this.tbDBServer.Size = new System.Drawing.Size(139, 20);
+            this.tbDBServer.TabIndex = 2;
+            // 
             // Einstellungen
             // 
             this.AcceptButton = this.btnOKEinstellungen;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnEinstellungenAbbrechen;
-            this.ClientSize = new System.Drawing.Size(747, 336);
+            this.ClientSize = new System.Drawing.Size(1021, 404);
             this.ControlBox = false;
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.grpDisziplinen);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnEinstellungenAbbrechen);
@@ -350,6 +383,8 @@
             this.groupBox1.PerformLayout();
             this.grpDisziplinen.ResumeLayout(false);
             this.grpDisziplinen.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -382,5 +417,8 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label9;
+        public System.Windows.Forms.TextBox tbDBServer;
     }
 }

@@ -33,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -48,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlternativerMySQLServer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlternativerMySQLServer.Designer.cs">
+      <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
+    </Compile>
     <Compile Include="disziplin.cs" />
     <Compile Include="Einstellungen.cs">
       <SubType>Form</SubType>
@@ -55,11 +62,37 @@
     <Compile Include="Einstellungen.Designer.cs">
       <DependentUpon>Einstellungen.cs</DependentUpon>
     </Compile>
+    <Compile Include="EinzelAuswertungDaten.cs" />
+    <Compile Include="GauligaAuswahl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GauligaAuswahl.Designer.cs">
+      <DependentUpon>GauligaAuswahl.cs</DependentUpon>
+    </Compile>
     <Compile Include="GauligaAuswertung.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GauligaAuswertung.Designer.cs">
       <DependentUpon>GauligaAuswertung.cs</DependentUpon>
+    </Compile>
+    <Compile Include="gauligaDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>gauligaDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="GauligaZusatzInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GauligaZusatzInfo.Designer.cs">
+      <DependentUpon>GauligaZusatzInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="gemeindemeisterschaft.cs">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="gemeindemeisterschaft.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
     </Compile>
     <Compile Include="ManuellNachtragen.cs">
       <SubType>Form</SubType>
@@ -96,8 +129,34 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>siusclubDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="siusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="TestSiusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="VereinsheimSiusclubDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="VereinsheimSiusclubDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="AlternativerMySQLServer.resx">
+      <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Einstellungen.resx">
       <DependentUpon>Einstellungen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GauligaAuswahl.resx">
+      <DependentUpon>GauligaAuswahl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NeuesSchiessjahr.resx">
       <DependentUpon>NeuesSchiessjahr.cs</DependentUpon>
@@ -118,6 +177,28 @@
     <EmbeddedResource Include="SchiesserieVerschieben.resx">
       <DependentUpon>SchiesserieVerschieben.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="gauligaDataSet.xsc">
+      <DependentUpon>gauligaDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="gauligaDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>gauligaDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="gauligaDataSet.xss">
+      <DependentUpon>gauligaDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="gemeindemeisterschaft.xsc">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </None>
+    <None Include="gemeindemeisterschaft.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>gemeindemeisterschaft.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="gemeindemeisterschaft.xss">
+      <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -138,9 +219,68 @@
     <None Include="siusclubDataSet.xss">
       <DependentUpon>siusclubDataSet.xsd</DependentUpon>
     </None>
+    <None Include="siusclubDataSet1.xsc">
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="siusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>siusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="siusclubDataSet1.xss">
+      <DependentUpon>siusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="TestSiusclubDataSet1.xsc">
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="TestSiusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>TestSiusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="TestSiusclubDataSet1.xss">
+      <DependentUpon>TestSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xsc">
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>VereinsheimSiusclubDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet1.xss">
+      <DependentUpon>VereinsheimSiusclubDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xsc">
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>VereinsheimSiusclubDataSet2.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="VereinsheimSiusclubDataSet2.xss">
+      <DependentUpon>VereinsheimSiusclubDataSet2.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Logo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edelweiss.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pfeil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pfeil2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pfeil3.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

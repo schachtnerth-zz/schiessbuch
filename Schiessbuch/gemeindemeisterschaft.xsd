@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="gemeindemeisterschaft" targetNamespace="http://tempuri.org/gemeindemeisterschaft.xsd" xmlns:mstns="http://tempuri.org/gemeindemeisterschaft.xsd" xmlns="http://tempuri.org/gemeindemeisterschaft.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="siusclubConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="siusclubConnectionString (Settings)" ParameterPrefix="@" PropertyReference="ApplicationSettings.schiessbuch.Properties.Settings.GlobalReference.Default.siusclubConnectionString" Provider="MySql.Data.MySqlClient" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="uebersichtgemeindemeisterschaftTableAdapter" GeneratorDataComponentClassName="uebersichtgemeindemeisterschaftTableAdapter" Name="uebersichtgemeindemeisterschaft" UserDataComponentName="uebersichtgemeindemeisterschaftTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="siusclubConnectionString (Settings)" DbObjectName="siusclub.uebersichtgemeindemeisterschaft" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT Verein, Name, Vorname, Klasse, Datum, `Gemeindemeister Luftgewehr`, `Gemeindemeister Luftpistole`, `Gemeindemeister Luftgewehr Auflage`, `Gemeindemeister Luftpistole Auflage`, `Preis Luftgewehr`, `Preis Luftpistole`, `Preis Luftgewehr Auflage`, `Preis Luftpistole Auflage`, `Bürgermeisterpokal Luftgewehr`, `Bürgermeisterpokal Luftpistole`, `Bürgermeisterpokal Luftgewehr Auflage`, `Bürgermeisterpokal Luftpistole Auflage`, `Gedächtnispokal Luftgewehr`, `Gedächtnispokal Luftpistole`, `Gedächtnispokal Luftgewehr Auflage`, `Gedächtnispokal Luftpistole Auflage`, schiessjahrId, SchuetzeID FROM uebersichtgemeindemeisterschaft</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Verein" DataSetColumn="Verein" />
+              <Mapping SourceColumn="Name" DataSetColumn="Name" />
+              <Mapping SourceColumn="Vorname" DataSetColumn="Vorname" />
+              <Mapping SourceColumn="Klasse" DataSetColumn="Klasse" />
+              <Mapping SourceColumn="Datum" DataSetColumn="Datum" />
+              <Mapping SourceColumn="Gemeindemeister Luftgewehr" DataSetColumn="Gemeindemeister Luftgewehr" />
+              <Mapping SourceColumn="Gemeindemeister Luftpistole" DataSetColumn="Gemeindemeister Luftpistole" />
+              <Mapping SourceColumn="Gemeindemeister Luftgewehr Auflage" DataSetColumn="Gemeindemeister Luftgewehr Auflage" />
+              <Mapping SourceColumn="Gemeindemeister Luftpistole Auflage" DataSetColumn="Gemeindemeister Luftpistole Auflage" />
+              <Mapping SourceColumn="Preis Luftgewehr" DataSetColumn="Preis Luftgewehr" />
+              <Mapping SourceColumn="Preis Luftpistole" DataSetColumn="Preis Luftpistole" />
+              <Mapping SourceColumn="Preis Luftgewehr Auflage" DataSetColumn="Preis Luftgewehr Auflage" />
+              <Mapping SourceColumn="Preis Luftpistole Auflage" DataSetColumn="Preis Luftpistole Auflage" />
+              <Mapping SourceColumn="Bürgermeisterpokal Luftgewehr" DataSetColumn="Bürgermeisterpokal Luftgewehr" />
+              <Mapping SourceColumn="Bürgermeisterpokal Luftpistole" DataSetColumn="Bürgermeisterpokal Luftpistole" />
+              <Mapping SourceColumn="Bürgermeisterpokal Luftgewehr Auflage" DataSetColumn="Bürgermeisterpokal Luftgewehr Auflage" />
+              <Mapping SourceColumn="Bürgermeisterpokal Luftpistole Auflage" DataSetColumn="Bürgermeisterpokal Luftpistole Auflage" />
+              <Mapping SourceColumn="Gedächtnispokal Luftgewehr" DataSetColumn="Gedächtnispokal Luftgewehr" />
+              <Mapping SourceColumn="Gedächtnispokal Luftpistole" DataSetColumn="Gedächtnispokal Luftpistole" />
+              <Mapping SourceColumn="Gedächtnispokal Luftgewehr Auflage" DataSetColumn="Gedächtnispokal Luftgewehr Auflage" />
+              <Mapping SourceColumn="Gedächtnispokal Luftpistole Auflage" DataSetColumn="Gedächtnispokal Luftpistole Auflage" />
+              <Mapping SourceColumn="schiessjahrId" DataSetColumn="schiessjahrId" />
+              <Mapping SourceColumn="SchuetzeID" DataSetColumn="SchuetzeID" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="vereinslisteTableAdapter" GeneratorDataComponentClassName="vereinslisteTableAdapter" Name="vereinsliste" UserDataComponentName="vereinslisteTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="siusclubConnectionString (Settings)" DbObjectName="siusclub.uebersichtgemeindemeisterschaft" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT DISTINCT verein FROM uebersichtgemeindemeisterschaft</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Verein" DataSetColumn="Verein" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="datumlisteTableAdapter" GeneratorDataComponentClassName="datumlisteTableAdapter" Name="datumliste" UserDataComponentName="datumlisteTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="siusclubConnectionString (Settings)" DbObjectName="siusclub.uebersichtgemeindemeisterschaft" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT DISTINCT Datum FROM uebersichtgemeindemeisterschaft</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Datum" DataSetColumn="Datum" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="gemeindemeisterschaft" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="gemeindemeisterschaft" msprop:Generator_UserDSName="gemeindemeisterschaft">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="uebersichtgemeindemeisterschaft" msprop:Generator_TableClassName="uebersichtgemeindemeisterschaftDataTable" msprop:Generator_TableVarName="tableuebersichtgemeindemeisterschaft" msprop:Generator_RowChangedName="uebersichtgemeindemeisterschaftRowChanged" msprop:Generator_TablePropName="uebersichtgemeindemeisterschaft" msprop:Generator_RowDeletingName="uebersichtgemeindemeisterschaftRowDeleting" msprop:Generator_RowChangingName="uebersichtgemeindemeisterschaftRowChanging" msprop:Generator_RowEvHandlerName="uebersichtgemeindemeisterschaftRowChangeEventHandler" msprop:Generator_RowDeletedName="uebersichtgemeindemeisterschaftRowDeleted" msprop:Generator_RowClassName="uebersichtgemeindemeisterschaftRow" msprop:Generator_UserTableName="uebersichtgemeindemeisterschaft" msprop:Generator_RowEvArgName="uebersichtgemeindemeisterschaftRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Verein" msprop:Generator_ColumnVarNameInTable="columnVerein" msprop:Generator_ColumnPropNameInRow="Verein" msprop:Generator_ColumnPropNameInTable="VereinColumn" msprop:Generator_UserColumnName="Verein" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Name" msprop:Generator_ColumnVarNameInTable="columnName" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnPropNameInTable="NameColumn" msprop:Generator_UserColumnName="Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Vorname" msprop:Generator_ColumnVarNameInTable="columnVorname" msprop:Generator_ColumnPropNameInRow="Vorname" msprop:Generator_ColumnPropNameInTable="VornameColumn" msprop:Generator_UserColumnName="Vorname" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Klasse" msprop:Generator_ColumnVarNameInTable="columnKlasse" msprop:Generator_ColumnPropNameInRow="Klasse" msprop:Generator_ColumnPropNameInTable="KlasseColumn" msprop:Generator_UserColumnName="Klasse" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="45" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Datum" msprop:Generator_ColumnVarNameInTable="columnDatum" msprop:Generator_ColumnPropNameInRow="Datum" msprop:Generator_ColumnPropNameInTable="DatumColumn" msprop:Generator_UserColumnName="Datum" type="xs:dateTime" />
+              <xs:element name="Gemeindemeister_x0020_Luftgewehr" msprop:Generator_ColumnVarNameInTable="columnGemeindemeister_Luftgewehr" msprop:Generator_ColumnPropNameInRow="Gemeindemeister_Luftgewehr" msprop:Generator_ColumnPropNameInTable="Gemeindemeister_LuftgewehrColumn" msprop:Generator_UserColumnName="Gemeindemeister Luftgewehr" type="xs:int" minOccurs="0" />
+              <xs:element name="Gemeindemeister_x0020_Luftpistole" msprop:Generator_ColumnVarNameInTable="columnGemeindemeister_Luftpistole" msprop:Generator_ColumnPropNameInRow="Gemeindemeister_Luftpistole" msprop:Generator_ColumnPropNameInTable="Gemeindemeister_LuftpistoleColumn" msprop:Generator_UserColumnName="Gemeindemeister Luftpistole" type="xs:int" minOccurs="0" />
+              <xs:element name="Gemeindemeister_x0020_Luftgewehr_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnGemeindemeister_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInRow="Gemeindemeister_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInTable="Gemeindemeister_Luftgewehr_AuflageColumn" msprop:Generator_UserColumnName="Gemeindemeister Luftgewehr Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Gemeindemeister_x0020_Luftpistole_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnGemeindemeister_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInRow="Gemeindemeister_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInTable="Gemeindemeister_Luftpistole_AuflageColumn" msprop:Generator_UserColumnName="Gemeindemeister Luftpistole Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Preis_x0020_Luftgewehr" msprop:Generator_ColumnVarNameInTable="columnPreis_Luftgewehr" msprop:Generator_ColumnPropNameInRow="Preis_Luftgewehr" msprop:Generator_ColumnPropNameInTable="Preis_LuftgewehrColumn" msprop:Generator_UserColumnName="Preis Luftgewehr" type="xs:int" minOccurs="0" />
+              <xs:element name="Preis_x0020_Luftpistole" msprop:Generator_ColumnVarNameInTable="columnPreis_Luftpistole" msprop:Generator_ColumnPropNameInRow="Preis_Luftpistole" msprop:Generator_ColumnPropNameInTable="Preis_LuftpistoleColumn" msprop:Generator_UserColumnName="Preis Luftpistole" type="xs:int" minOccurs="0" />
+              <xs:element name="Preis_x0020_Luftgewehr_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnPreis_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInRow="Preis_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInTable="Preis_Luftgewehr_AuflageColumn" msprop:Generator_UserColumnName="Preis Luftgewehr Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Preis_x0020_Luftpistole_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnPreis_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInRow="Preis_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInTable="Preis_Luftpistole_AuflageColumn" msprop:Generator_UserColumnName="Preis Luftpistole Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Bürgermeisterpokal_x0020_Luftgewehr" msprop:Generator_ColumnVarNameInTable="columnBürgermeisterpokal_Luftgewehr" msprop:Generator_ColumnPropNameInRow="Bürgermeisterpokal_Luftgewehr" msprop:Generator_ColumnPropNameInTable="Bürgermeisterpokal_LuftgewehrColumn" msprop:Generator_UserColumnName="Bürgermeisterpokal Luftgewehr" type="xs:int" minOccurs="0" />
+              <xs:element name="Bürgermeisterpokal_x0020_Luftpistole" msprop:Generator_ColumnVarNameInTable="columnBürgermeisterpokal_Luftpistole" msprop:Generator_ColumnPropNameInRow="Bürgermeisterpokal_Luftpistole" msprop:Generator_ColumnPropNameInTable="Bürgermeisterpokal_LuftpistoleColumn" msprop:Generator_UserColumnName="Bürgermeisterpokal Luftpistole" type="xs:int" minOccurs="0" />
+              <xs:element name="Bürgermeisterpokal_x0020_Luftgewehr_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnBürgermeisterpokal_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInRow="Bürgermeisterpokal_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInTable="Bürgermeisterpokal_Luftgewehr_AuflageColumn" msprop:Generator_UserColumnName="Bürgermeisterpokal Luftgewehr Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Bürgermeisterpokal_x0020_Luftpistole_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnBürgermeisterpokal_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInRow="Bürgermeisterpokal_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInTable="Bürgermeisterpokal_Luftpistole_AuflageColumn" msprop:Generator_UserColumnName="Bürgermeisterpokal Luftpistole Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Gedächtnispokal_x0020_Luftgewehr" msprop:Generator_ColumnVarNameInTable="columnGedächtnispokal_Luftgewehr" msprop:Generator_ColumnPropNameInRow="Gedächtnispokal_Luftgewehr" msprop:Generator_ColumnPropNameInTable="Gedächtnispokal_LuftgewehrColumn" msprop:Generator_UserColumnName="Gedächtnispokal Luftgewehr" type="xs:int" minOccurs="0" />
+              <xs:element name="Gedächtnispokal_x0020_Luftpistole" msprop:Generator_ColumnVarNameInTable="columnGedächtnispokal_Luftpistole" msprop:Generator_ColumnPropNameInRow="Gedächtnispokal_Luftpistole" msprop:Generator_ColumnPropNameInTable="Gedächtnispokal_LuftpistoleColumn" msprop:Generator_UserColumnName="Gedächtnispokal Luftpistole" type="xs:int" minOccurs="0" />
+              <xs:element name="Gedächtnispokal_x0020_Luftgewehr_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnGedächtnispokal_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInRow="Gedächtnispokal_Luftgewehr_Auflage" msprop:Generator_ColumnPropNameInTable="Gedächtnispokal_Luftgewehr_AuflageColumn" msprop:Generator_UserColumnName="Gedächtnispokal Luftgewehr Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="Gedächtnispokal_x0020_Luftpistole_x0020_Auflage" msprop:Generator_ColumnVarNameInTable="columnGedächtnispokal_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInRow="Gedächtnispokal_Luftpistole_Auflage" msprop:Generator_ColumnPropNameInTable="Gedächtnispokal_Luftpistole_AuflageColumn" msprop:Generator_UserColumnName="Gedächtnispokal Luftpistole Auflage" type="xs:int" minOccurs="0" />
+              <xs:element name="schiessjahrId" msprop:Generator_ColumnVarNameInTable="columnschiessjahrId" msprop:Generator_ColumnPropNameInRow="schiessjahrId" msprop:Generator_ColumnPropNameInTable="schiessjahrIdColumn" msprop:Generator_UserColumnName="schiessjahrId" type="xs:unsignedInt" />
+              <xs:element name="SchuetzeID" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnSchuetzeID" msprop:Generator_ColumnPropNameInRow="SchuetzeID" msprop:Generator_ColumnPropNameInTable="SchuetzeIDColumn" msprop:Generator_UserColumnName="SchuetzeID" type="xs:int" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="vereinsliste" msprop:Generator_TableClassName="vereinslisteDataTable" msprop:Generator_TableVarName="tablevereinsliste" msprop:Generator_RowChangedName="vereinslisteRowChanged" msprop:Generator_TablePropName="vereinsliste" msprop:Generator_RowDeletingName="vereinslisteRowDeleting" msprop:Generator_RowChangingName="vereinslisteRowChanging" msprop:Generator_RowEvHandlerName="vereinslisteRowChangeEventHandler" msprop:Generator_RowDeletedName="vereinslisteRowDeleted" msprop:Generator_RowClassName="vereinslisteRow" msprop:Generator_UserTableName="vereinsliste" msprop:Generator_RowEvArgName="vereinslisteRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Verein" msprop:Generator_ColumnVarNameInTable="columnVerein" msprop:Generator_ColumnPropNameInRow="Verein" msprop:Generator_ColumnPropNameInTable="VereinColumn" msprop:Generator_UserColumnName="Verein" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="datumliste" msprop:Generator_TableClassName="datumlisteDataTable" msprop:Generator_TableVarName="tabledatumliste" msprop:Generator_RowChangedName="datumlisteRowChanged" msprop:Generator_TablePropName="datumliste" msprop:Generator_RowDeletingName="datumlisteRowDeleting" msprop:Generator_RowChangingName="datumlisteRowChanging" msprop:Generator_RowEvHandlerName="datumlisteRowChangeEventHandler" msprop:Generator_RowDeletedName="datumlisteRowDeleted" msprop:Generator_RowClassName="datumlisteRow" msprop:Generator_UserTableName="datumliste" msprop:Generator_RowEvArgName="datumlisteRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Datum" msprop:Generator_ColumnVarNameInTable="columnDatum" msprop:Generator_ColumnPropNameInRow="Datum" msprop:Generator_ColumnPropNameInTable="DatumColumn" msprop:Generator_UserColumnName="Datum" type="xs:dateTime" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:uebersichtgemeindemeisterschaft" />
+      <xs:field xpath="mstns:schiessjahrId" />
+    </xs:unique>
+    <xs:unique name="Constraint2">
+      <xs:selector xpath=".//mstns:uebersichtgemeindemeisterschaft" />
+      <xs:field xpath="mstns:SchuetzeID" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>

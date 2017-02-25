@@ -19,10 +19,10 @@ namespace schiessbuch
         }
 
         XDocument konfigurationDoc;
-//        private readonly string konfiguration= @"C:\Users\Thomas\Documents\Backup Datenbanken\konfiguration.xml";
-//        private readonly string disziplinen= @"C:\Users\Thomas\Documents\Backup Datenbanken\disziplinen.xml";
-        private readonly string konfiguration = @"\\siusclub\siusclub\konfiguration.xml";
-        private readonly string disziplinen = @"\\siusclub\siusclub\disziplinen.xml";
+        private readonly string konfiguration= @"C:\Users\Thomas\Documents\Backup Datenbanken\konfiguration.xml";
+        private readonly string disziplinen= @"C:\Users\Thomas\Documents\Backup Datenbanken\disziplinen.xml";
+//        private readonly string konfiguration = @"\\siusclub\siusclub\konfiguration.xml";
+//        private readonly string disziplinen = @"\\siusclub\siusclub\disziplinen.xml";
 
         private void Einstellungen_Load(object sender, EventArgs e)
         {
@@ -211,6 +211,11 @@ namespace schiessbuch
                 }
             }
             konfigurationDoc.Save(konfiguration);
+        }
+
+        private void btnOKEinstellungen_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
