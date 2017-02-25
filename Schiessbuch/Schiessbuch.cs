@@ -28,7 +28,7 @@ namespace schiessbuch
         private int currentLinesPrinted;
         long ereignisse_count = 0;
         long treffer_count = 0;
-        private string connStr;
+        //private string connStr;
         /// <summary>
         /// Die ID des aktuell ausgewählten Schießjahrs. Diese ID entspricht der ID in der entsprechenden Datenbanktabelle.
         /// </summary>
@@ -84,7 +84,6 @@ namespace schiessbuch
         /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            DoubleBuffered = true;
         }
 
         private bool IsMySQLServerReachable(string strMySQLServer)
@@ -101,7 +100,7 @@ namespace schiessbuch
         {
             MySqlConnection conn;
             MySqlCommand cmdJahre;
-
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             conn = new MySqlConnection(connStr);
             conn.Open();
             cmdJahre = new MySqlCommand();
@@ -109,6 +108,7 @@ namespace schiessbuch
 
             // prüfe, ob heute Wanderpokalschiessen ist
             cmdJahre.CommandText = "SELECT COUNT(id) FROM termine_wanderpokal WHERE Termin = '" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+            //int wps = int.Parse(mysql.doMySqlScalarQuery("SELECT COUNT(id) FROM termine_wanderpokal WHERE Termin = '" + DateTime.Now.ToString("yyyy-MM-dd") + "'").ToString());
             int wps = int.Parse(cmdJahre.ExecuteScalar().ToString());
             if (wps > 0)
                 lblWanderpokalschiessen.Visible = true;
@@ -127,10 +127,12 @@ namespace schiessbuch
         /// </summary>
         private void FillWanderPokalTermine()
         {
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
             MySqlCommand cmdWanderPokal = new MySqlCommand("SELECT Termin FROM termine_wanderpokal WHERE fkSchiessjahr='" + aktuellesSchiessjahrID + "' ORDER BY Termin ASC", conn);
             MySqlDataReader reader = cmdWanderPokal.ExecuteReader();
+            //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT Termin FROM termine_wanderpokal WHERE fkSchiessjahr='" + aktuellesSchiessjahrID + "' ORDER BY Termin ASC");
             int counter = 0;
             while (reader.Read())
             {
@@ -151,9 +153,8 @@ namespace schiessbuch
                 }
                 counter++;
             }
-            conn.Close();
-            conn.Dispose();
-            MySqlConnection.ClearPool(conn);
+            //mysql.closeMySqlReaderQuery(reader);
+            reader.Close();
         }
 
         /// <summary>
@@ -165,12 +166,14 @@ namespace schiessbuch
         /// <returns>Anzahl der Einträge im Schießbuch</returns>
         private long GetEreignisseCount()
         {
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance; // nur, um den ConnectionString zu kriegen
             MySqlConnection conn = new MySqlConnection(connStr);
             try
             {
                 conn.Open();
                 MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) FROM schiessbuch", conn);
                 long tmpCount;
+                // tmpCount = long.Parse(mysql.doMySqlScalarQuery("SELECT COUNT(*) FROM schiessbuch").ToString());
                 tmpCount = long.Parse(cmd.ExecuteScalar().ToString());
                 conn.Close();
                 return tmpCount;
@@ -191,10 +194,13 @@ namespace schiessbuch
         /// <returns>Anzahl der Einträge in der Treffer-Tabelle der Datenbank</returns>
         private long GetTrefferCount()
         {
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+
             MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
             MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) FROM treffer", conn);
             long tmpCount;
+            //tmpCount = long.Parse(mysql.doMySqlScalarQuery("SELECT COUNT(*) FROM treffer").ToString());
             tmpCount = long.Parse(cmd.ExecuteScalar().ToString());
             conn.Close();
             return tmpCount;
@@ -209,9 +215,13 @@ namespace schiessbuch
             schießjahrAuswählenToolStripMenuItem.DropDownItems.Clear();
 
             // Verbindung zur Datenbank aufbauen
-            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
             // Alle Schießjahre auswählen
-            MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT * FROM schiessjahr");
+            MySqlCommand cmd = new MySqlCommand("SELECT * FROM schiessjahr", conn);
+            //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT * FROM schiessjahr");
+            MySqlDataReader reader = cmd.ExecuteReader();
             while (reader.Read())
             {
                 // Liste der Schiessjahre aktualisieren
@@ -224,10 +234,13 @@ namespace schiessbuch
                 schießjahrAuswählenToolStripMenuItem.DropDownItems.Add(tsi);
             }
             // Datenbankverbindung aufräumen
-            mysql.closeMySqlReaderQuery(reader);
+            //mysql.closeMySqlReaderQuery(reader);
+            reader.Close();
 
             // Lies das Schießjahr mit dem höchsten Datum aus der Datenbank und setze das als das aktuelle
-            int activeID = int.Parse(mysql.doMySqlScalarQuery("SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1").ToString());
+            cmd.CommandText = "SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1";
+            int activeID = int.Parse(cmd.ExecuteScalar().ToString());
+            //int activeID = int.Parse(mysql.doMySqlScalarQuery("SELECT idSchiessjahr FROM schiessjahr ORDER BY SchiessjahrBeginn DESC LIMIT 1").ToString());
 
             // Gehe durch alle Schießjahre im Menü und schau, welcher Eintrag dem aktuellen Schießjahr entspricht. Dieser Eintrag soll dann ausgewählt werden.
             foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
@@ -349,8 +362,12 @@ namespace schiessbuch
             aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)tsi_parameter.sender).Tag.ToString());
 
             // Öffne die Datenbank und lese die einzelnen Anfangsdaten der Schießjahre
-            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
-            dtJahrBeginn = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'");
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr = '" + aktuellesSchiessjahrID + "'", conn);
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            //dtJahrBeginn = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE idSchiessjahr='" + aktuellesSchiessjahrID + "'");
+            dtJahrBeginn = (DateTime)cmd.ExecuteScalar();
 
             // Das Ende wird bestimmt, indem der Eintrag gesucht wird, in dem das nächsthöhere Datum abgespeichert ist
             try
@@ -358,7 +375,9 @@ namespace schiessbuch
                 // Wenn es keinen Eintrag in der Datenbank mit einem höheren Datum gibt, dann ist dieses Schießjahr das aktuelle.
                 // In diesem Fall wird eine Exception ausgelöst und wir setzen Anfangsdatum und Enddatum gleich, um auszudrücken, dass
                 // es sich um das aktuelle Schiessjahr handelt.
-                dtJahrEnde = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1");
+                // dtJahrEnde = (DateTime)mysql.doMySqlScalarQuery("SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1");
+                cmd.CommandText = "SELECT SchiessjahrBeginn FROM schiessjahr WHERE SchiessjahrBeginn > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' LIMIT 1";
+                dtJahrEnde = (DateTime)cmd.ExecuteScalar();
             }
             catch (NullReferenceException)
             {
@@ -432,8 +451,12 @@ namespace schiessbuch
                     strSelectedSchiessjahr = fullnameComboBox.SelectedValue.ToString();
             });
             // Erzeuge Auswertungen
-            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
-            MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC");
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC", conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC");
             textbox.Text = Zeile1 + Environment.NewLine;
             textbox.Text += Zeile2 + Environment.NewLine;
             textbox.Text += "--------------------";
@@ -450,7 +473,8 @@ namespace schiessbuch
             }
             textbox.Text += "--------------------";
             textbox.Text += Environment.NewLine;
-            mysql.closeMySqlReaderQuery(reader);
+            //mysql.closeMySqlReaderQuery(reader);
+            reader.Close();
 
             string strFullNameComboBoxValue="";
             this.Invoke((MethodInvoker)delegate ()
@@ -459,7 +483,9 @@ namespace schiessbuch
                     strFullNameComboBoxValue = fullnameComboBox.SelectedValue.ToString();
             });
 
-            reader = mysql.doMySqlReaderQuery("SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter);
+            cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter;
+            reader = cmd.ExecuteReader();
+            //reader = mysql.doMySqlReaderQuery("SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter);
             while (reader.Read())
             {
                 if (Int16.Parse(reader["summe"].ToString()) > 0)
@@ -468,7 +494,8 @@ namespace schiessbuch
                     textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
                 }
             }
-            mysql.closeMySqlReaderQuery(reader);
+            //mysql.closeMySqlReaderQuery(reader);
+            reader.Close();
         }
 
         /// <summary>
@@ -488,23 +515,35 @@ namespace schiessbuch
                     strFullNameComboBoxValue = fullnameComboBox.SelectedValue.ToString();
             });
 
-            MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
-
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            // MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" +
+                    strDisziplin +
+                    "' AND id='" +
+                    strFullNameComboBoxValue +
+                    "' AND status='beendet'" +
+                    strSchiessjahrFilter +
+                    ") T;", conn);
             // Erzeuge Auswertungen
             int Wertungen;
+            int.TryParse(cmd.ExecuteScalar().ToString(), out Wertungen);
             //Object o = cmd.ExecuteScalar();
-            int.TryParse(
-                mysql.doMySqlScalarQuery("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + 
-                    strDisziplin + 
-                    "' AND id='" + 
-                    strFullNameComboBoxValue + 
-                    "' AND status='beendet'" + 
-                    strSchiessjahrFilter + 
-                    ") T;").ToString(), 
-                out Wertungen);
+            //int.TryParse(
+            //
+            //    mysql.doMySqlScalarQuery("SELECT COUNT(*) AS Wertungen FROM (SELECT DISTINCT STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + 
+            //        strDisziplin + 
+            //"' AND id='" + 
+            //strFullNameComboBoxValue + 
+            //"' AND status='beendet'" + 
+            //strSchiessjahrFilter + 
+            //") T;").ToString(), 
+            //    out Wertungen);
             if (Wertungen >= 15)
             {
-                MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15");
+                cmd.CommandText = "SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15";
+                MySqlDataReader reader = cmd.ExecuteReader();
+                // MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15");
                 textbox.Text = Zeile1 + Environment.NewLine;
                 textbox.Text += Zeile2 + Environment.NewLine;
                 textbox.Text += "--------------------";
@@ -523,13 +562,16 @@ namespace schiessbuch
                 textbox.Text += Environment.NewLine;
                 reader.Close();
                 //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
-                reader = mysql.doMySqlReaderQuery("SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2");
+                cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
+                //reader = mysql.doMySqlReaderQuery("SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2");
+                reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     if (reader["summe"] != System.DBNull.Value)
                         textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
                 }
-                mysql.closeMySqlReaderQuery(reader);
+                //mysql.closeMySqlReaderQuery(reader);
+                reader.Close();
             } else
             {
                 textbox.Text = "Zu wenige Wertungen." + Environment.NewLine + "Anzahl Wertungen: " + Wertungen;
@@ -607,7 +649,7 @@ namespace schiessbuch
             string zielscheibe = "";
             foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
             {
-                if (zielscheibe != row.Cells["zielscheibe"].Value.ToString())
+                if (row.Cells["zielscheibe"]!= null && zielscheibe != row.Cells["zielscheibe"].Value.ToString())
                 {
                     if (zielscheibe == "")
                         zielscheibe = row.Cells["zielscheibe"].Value.ToString();
@@ -1414,18 +1456,26 @@ namespace schiessbuch
         private void UpdateKoenig()
         {
             KoenigTextBox.Clear();
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             MySqlConnection conn = new MySqlConnection(connStr);
             try
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
+                //mysql.doMySqlReaderQuery("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
+                //MySqlCommand cmd = new MySqlCommand("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
                 //MySqlCommand cmd = new MySqlCommand("select * from schuetzen", conn);
+                //MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+
+                MySqlCommand cmd = new MySqlCommand("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2", conn);
                 MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+
+                //MySqlDataReader reader = mysql.doMySqlReaderQuery("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2");
                 KoenigTextBox.Font = new Font("Courier New", 16);
                 while (reader.Read())
                 {
                     KoenigTextBox.Text += String.Format("{0,3}  {1,-30}     {2,6}    {3,6}", reader["Rang"].ToString(), reader["Schuetze"].ToString(), reader["Teiler"].ToString(), reader["Typ"].ToString()) + Environment.NewLine;
                 }
+                //mysql.closeMySqlReaderQuery(reader);
                 reader.Close();
 
 
@@ -1443,7 +1493,9 @@ namespace schiessbuch
                 }
                 //cmd.CommandText = "set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2";
                 //cmd.CommandText = "set @row=0;set @d1='LG Koenig SK';set @d1a='LG';set @d2='LP Koenig SK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
                 cmd.CommandText = "set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 int row = 0;
                 while (reader.Read())
@@ -1457,7 +1509,10 @@ namespace schiessbuch
                     row++;
                 }
                 reader.Close();
+                //mysql.closeMySqlReaderQuery(reader);
+                //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
                 cmd.CommandText = "set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 row = 0;
                 while (reader.Read())
@@ -1471,6 +1526,8 @@ namespace schiessbuch
                     row++;
                 }
                 reader.Close();
+                //mysql.closeMySqlReaderQuery(reader);
+                //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig JUG';set @d1a='LG';set @d2='LP Koenig JUG';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
                 cmd.CommandText = "set @row=0;set @d1='LG Koenig JUG';set @d1a='LG';set @d2='LP Koenig JUG';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 row = 0;
@@ -1485,6 +1542,8 @@ namespace schiessbuch
                     row++;
                 }
                 reader.Close();
+                //mysql.closeMySqlReaderQuery(reader);
+                //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig Auflage';set @d1a='LG';set @d2='LP Koenig Auflage';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
                 cmd.CommandText = "set @row=0;set @d1='LG Koenig Auflage';set @d1a='LG';set @d2='LP Koenig Auflage';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 row = 0;
@@ -1499,13 +1558,14 @@ namespace schiessbuch
                     row++;
                 }
                 reader.Close();
+                //mysql.closeMySqlReaderQuery(reader);
 
 
 
 
 
 
-                reader.Close();
+                //reader.Close();
                 reader.Dispose();
                 conn.Close();
                 conn.Dispose();
@@ -1803,12 +1863,14 @@ namespace schiessbuch
             col_vorname.Dispose();
             //MessageBox.Show(Properties.Settings.Default.siusclubConnectionString);
             MySqlConnection conn = new MySqlConnection(connStr);
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             try
             {
                 conn.Open();
                 string filterDateStr = dateTimePicker1.Value.Year + "-" + dateTimePicker1.Value.Month + "-" + dateTimePicker1.Value.Day;
                 MySqlCommand cmd = new MySqlCommand("SELECT DISTINCT DISZIPLIN, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch HAVING Date='" + filterDateStr + "'", conn);
                 MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+                //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT DISTINCT DISZIPLIN, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch HAVING Date='" + filterDateStr + "'");
                 //DataGridViewColumn[] cols = new DataGridViewColumnCollection();
                 int i = 0;
                 Schiessabend.SuspendLayout();
@@ -1823,6 +1885,7 @@ namespace schiessbuch
                     col.Dispose();
                 }
                 reader.Close();
+                //mysql.closeMySqlReaderQuery(reader);
 
                 DataGridViewColumn colKasse = new DataGridViewColumn();
                 colKasse.Name = "Kasse";
@@ -1846,6 +1909,7 @@ namespace schiessbuch
                 //cmd.Cancel();
                 //cmd.Dispose();
                 Schiessabend.SuspendLayout();
+                //mysql.doMySqlReaderQuery("SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' OR status='manuell' HAVING Date='" + filterDateStr + "' ORDER BY name, vorname");
                 cmd.CommandText = "SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' OR status='manuell' HAVING Date='" + filterDateStr + "' ORDER BY name, vorname";
                 reader = cmd.ExecuteReader(CommandBehavior.Default);
                 while (reader.Read())
@@ -1858,6 +1922,7 @@ namespace schiessbuch
                     // Die ersten drei Spalten stehen fest. Alles ab Spalte 4 ist eine Disziplin
                     int disziplinen = Schiessabend.Columns.Count - 3;
                     int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
+
                     MySqlConnection conn2 = new MySqlConnection(connStr);
                     conn2.Open();
                     MySqlDataReader reader2;
@@ -1905,8 +1970,9 @@ namespace schiessbuch
                     conn2.Close();
                     MySqlConnection.ClearPool(conn2);
                 }
+                //mysql.closeMySqlReaderQuery(reader);
                 reader.Close();
-                //reader.Dispose();
+                reader.Dispose();
                 //cmd.Cancel();
                 //cmd.Dispose();
                 conn.Close();
@@ -2981,6 +3047,7 @@ namespace schiessbuch
             einstellungenDlg.tbTimerInterval.Text = Properties.Settings.Default.TimerInterval.ToString();
             einstellungenDlg.tbDatabaseRefresh.Text = Properties.Settings.Default.DatabaseInterval.ToString();
             einstellungenDlg.tbAnzLetzteTreffer.Text = Properties.Settings.Default.AnzLetzteTreffer.ToString();
+            einstellungenDlg.tbDBServer.Text = Properties.Settings.Default.MySQLServer;
             DialogResult result = einstellungenDlg.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -3011,6 +3078,7 @@ namespace schiessbuch
                     enus,
                     out iValue);
                 Properties.Settings.Default.AnzLetzteTreffer = iValue;
+                Properties.Settings.Default.MySQLServer = einstellungenDlg.tbDBServer.Text;
                 Properties.Settings.Default.Save();
                 einstellungenDlg.Close();
                 einstellungenDlg.Dispose();
@@ -3106,9 +3174,11 @@ namespace schiessbuch
             int anzSchuss = 0;
             einzelauswertung = new EinzelAuswertungDaten();
             MySqlConnection conn = new MySqlConnection(connStr);
-            if (strDisziplin.Equals("LG 20 Schuss"))
+            if (strDisziplin.Equals("LG 20 Schuss") || strDisziplin.Equals("LG 40 Schuss"))
             {
-                anzSchuss = 20;
+                if (strDisziplin.Equals("LG 20 Schuss")) anzSchuss = 20;
+                if (strDisziplin.Equals("LG 40 Schuss")) anzSchuss = 40;
+                //anzSchuss = 20;
 
                 conn.Open();
                 // Auslesen der Ring- und der Zehntelwertung
@@ -3878,9 +3948,36 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             TestPictureLG.Invalidate();
         }
 
-        private void schiessbuchDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        private void schiessbuchDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs anError)
         {
             MessageBox.Show("DataError-Ereignis aufgetreten");
+            MessageBox.Show("Error happened " + anError.Context.ToString());
+
+            if (anError.Context == DataGridViewDataErrorContexts.Commit)
+            {
+                MessageBox.Show("Commit error");
+            }
+            if (anError.Context == DataGridViewDataErrorContexts.CurrentCellChange)
+            {
+                MessageBox.Show("Cell change");
+            }
+            if (anError.Context == DataGridViewDataErrorContexts.Parsing)
+            {
+                MessageBox.Show("parsing error");
+            }
+            if (anError.Context == DataGridViewDataErrorContexts.LeaveControl)
+            {
+                MessageBox.Show("leave control error");
+            }
+
+            if ((anError.Exception) is ConstraintException)
+            {
+                DataGridView view = (DataGridView)sender;
+                view.Rows[anError.RowIndex].ErrorText = "an error";
+                view.Rows[anError.RowIndex].Cells[anError.ColumnIndex].ErrorText = "an error";
+
+                anError.ThrowException = false;
+            }
         }
 
         private void Schiessbuch_ResizeBegin(object sender, EventArgs e)
@@ -3913,6 +4010,164 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                 cp.ExStyle |= 0x02000000;  // Turn on WS_EX_COMPOSITED
                 return cp;
             }
+        }
+
+        public static string connStr = "";
+
+        private void detectMySQLServer()
+        {
+            MySqlConnection _conn;
+            string strMySQLServer = Properties.Settings.Default.MySQLServer;
+            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=1;", strMySQLServer);
+            _conn = new MySqlConnection(connStr);
+            try
+            {
+                _conn.Open();
+                _conn.Close();
+            }
+            catch (MySqlException mysqle)
+            {
+                AlternativerMySQLServer altServer = new AlternativerMySQLServer();
+                altServer.tbAlternativeServer.Text = strMySQLServer;
+                altServer.tbAlternativeServer.Focus();
+                DialogResult dr = altServer.ShowDialog();
+                if (dr == DialogResult.OK)
+                {
+                    strMySQLServer = altServer.tbAlternativeServer.Text;
+                }
+            }
+            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=1;", strMySQLServer);
+            _conn.ConnectionString = connStr;
+            try
+            {
+                _conn.Open();
+                _conn.Close();
+            }
+            catch (MySqlException)
+            {
+                MessageBox.Show("Eine Exception ist aufgetreten beim Öffnen der Datenbank!");
+                Application.Exit();
+            }
+        }
+
+        private void Schiessbuch_Load(object sender, EventArgs e)
+        {
+            DoubleBuffered = true;
+            lblProbe1.ForeColor = Color.Blue; lblProbe1.Text = "";
+            lblProbe2.ForeColor = Color.Blue; lblProbe2.Text = "";
+            lblProbe3.ForeColor = Color.Blue; lblProbe3.Text = "";
+            lblProbe4.ForeColor = Color.Blue; lblProbe4.Text = "";
+            lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
+            lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
+
+            //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
+            detectMySQLServer();
+
+            // Zum Aktualisieren der Ergebnisse aller gerade schießenden Schützen wird ein Timer verwendet, der alle x Sekunden
+            // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
+            // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
+            RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
+
+            StandZielscheiben = new Bitmap[6];
+            for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
+
+
+            // Die Zugriffe aller TableAdapters sollen auf die richtige Datenbank erfolgen. Deshalb wird hier der Connection String entsprechend gesetzt.
+            schiessbuchTableAdapter.Connection.ConnectionString = connStr;
+            schuetzenTableAdapter.Connection.ConnectionString = connStr;
+            trefferTableAdapter.Connection.ConnectionString = connStr;
+            vereineTableAdapter.Connection.ConnectionString = connStr;
+            schuetzenlisteTableAdapter.Connection.ConnectionString = connStr;
+            // uebersichtgemeindemeisterschaftTableAdapter.Connection.ConnectionString = connStr;
+            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
+            datumlisteTableAdapter.Connection.ConnectionString = connStr;
+            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
+            vereinslisteTableAdapter.Connection.ConnectionString = connStr;
+            uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
+            // Jetzt wird versucht, Werte aus der Datenbank zu lesen
+            int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
+            this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
+            this.datumlisteTableAdapter.Fill(this.gemeindemeisterschaft.datumliste);
+            this.vereinslisteTableAdapter.Fill(this.gemeindemeisterschaft.vereinsliste);
+
+            // alle in der Datenbank abgespeicherten Vereine werden eingelesen
+            numAllRead += this.vereineTableAdapter.Fill(this.siusclubDataSet1.Vereine);
+            // alle in der Datenbank abgespeicherten Treffer werden eingelesen
+            numAllRead += this.trefferTableAdapter.Fill(this.siusclubDataSet.treffer);
+            // außerdem wird der TableAdapter für die Tabelle schuetzenliste gefüllt
+            this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
+            if (numAllRead == 0)
+            {
+                // sollte nichts gelesen worden sein, wird eine Warnung ausgegeben, das Programm läuft aber weiter.
+                MessageBox.Show("Keine Datensätze aus der Datenbank gelesen. Möglicherweise keine Datenbankverbindung.");
+            }
+
+            // Hier werden standardmäßig die periodischen Aktualisierungen der Schießergebnisse aktiviert
+            DoUpdates.Checked = true;
+
+            // Die Anzahl an Übungsschießen/Wettkämpfen wird in eine Variable gelesen
+            // Diese Variable wird später dazu verwenden, herauszufinden, ob in der Zwischenzeit 
+            // ein neuer Schütze an den Stand gegangen ist bzw. ein bereits schießender Schütze eine weitere Disziplin schießt.
+            ereignisse_count = GetEreignisseCount();
+
+            // Hier wird die Anzahl an Schüssen in eine Variable gelesen.
+            // Mithilfe dieser Variable soll ermittelt werden, ob seit dem letzten Aktualisieren ein Schuss abgegeben wurde
+            // ist dem nicht so, kann man sich das Auslesen der Schüsse sparen. Ein erneutes Auslesen wird keine neuen Erkenntnisse geben...
+            treffer_count = GetTrefferCount();
+
+            // Dieser Bereich sollte überarbeitet werden.
+            // Leider muss die Methode Aktualisiere SchiessjahrMenu() zweimal aufgerufen werden.
+            AktualisiereSchiessjahrMenu();
+            // Die Liste der Schützen wird aktualisiert. Je nach ausgewähltem Schießjahr kann ein Schütze noch oder schon
+            // nicht mehr zur Jugendklasse zählen
+            UpdateSchuetzenListe();
+
+            //AktualisiereSchiessjahrMenu();
+
+            // Die Termine, zu denen für den Jahrespokal geschossen werden darf, werden in der Datenbank hinterlegt.
+            // Hier soll geprüft werden, ob heute ein solcher Termin ist. Wenn ja, wird eine Meldung angezeigt.
+            PruefeJahrespokalAbend();
+
+            // Alle Termine für den Jahrespokal werden aus der Datenbank gelesen und im Hauptformular angezeigt
+            FillWanderPokalTermine();
+
+            // Für die Auswertung des Königsschießens soll das Hauptformular in vier gleiche Teile geteilt werden.
+            // Das wird mittels SplitContainern bewerkstelligt.
+            splitContainerKoenig1.SplitterDistance = splitContainerKoenig1.Width / 2;
+            splitContainerKoenig2.SplitterDistance = splitContainerKoenig2.Height / 2;
+            splitContainerKoenig3.SplitterDistance = splitContainerKoenig3.Height / 2;
+
+            // TODO: Was wird hier genau gemacht?
+            // Diese Methoden werden zur Berechnung des Schützenkönigs verwendet.
+            // Sie werden aber nicht mehr gebraucht.
+            ResizeAllKoenigGridViews();
+
+            // Hier werden die Ergebnisse aus dem Königsschießen ausgewertet und angezeigt.
+            UpdateKoenig();
+
+            // Dieser Teil könnte wahrscheinlich verschoben werden in die Methode, die aufgerufen wird, wenn der Tab "Übersicht" angeklickt wird.
+            for (int stand = 1; stand <= 6; stand++)
+                for (int schuss = 0; schuss < 40; schuss++)
+                    setSchussValue(stand, schuss, schuss.ToString());
+
+            // Die Struktur "aktuelleTreffer" wird initialisiert
+            // Sie wird später gebraucht, wenn über den REST Webservice die Daten der aktuell schießenden Schützen ausgelesen werden
+            // Diese Daten werden dann in "aktuelleTreffer" geschrieben und aus dieser Struktur werden die Daten aus dem Übersicht-Tab befüllt.
+            aktuelleTreffer = new List<SchussInfo>[6];
+            for (int i = 0; i < 6; i++)
+            {
+                aktuelleTreffer[i] = new List<SchussInfo>();
+            }
+
+            // Hier wird ein Handle auf den Tab "tabEinzelscheibe" geholt...
+            EinzelScheibe = tabControl1.TabPages["tabEinzelscheibe"];
+            // und dieser Tab dann aus dem TabControl entfernt. Er wird wieder eingehängt, wenn jemand in der Übersicht auf eine
+            // Scheibe mit der Maus doppelklickt.
+            this.tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
+
+            //schiessbuchDataGridView.Sort(dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Ascending);
+            //schiessbuchDataGridView.Invalidate();
+            schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
         }
     }
 }

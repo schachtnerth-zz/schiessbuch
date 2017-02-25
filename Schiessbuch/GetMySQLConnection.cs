@@ -3,20 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace schiessbuch
 {
-    public sealed class MySqlConnectionWrapper
+    public sealed class MySqlConnectionWrappe
     {
-        private static volatile MySqlConnectionWrapper instance;
+        private static volatile MySqlConnectionWrappe instance;
         private static object syncRoot = new Object();
 
         private MySqlConnection _conn;
         private string _connStr;
 
-        private MySqlConnectionWrapper() {
+        private MySqlConnectionWrappe() {
             string strMySQLServer = Properties.Settings.Default.MySQLServer;
             _connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=1;", strMySQLServer);
             _conn = new MySqlConnection(_connStr);
@@ -50,7 +51,7 @@ namespace schiessbuch
 
         }
 
-        public static MySqlConnectionWrapper Instance
+        public static MySqlConnectionWrappe Instance
         {
             get
             {
@@ -59,7 +60,7 @@ namespace schiessbuch
                     lock (syncRoot)
                     {
                         if (instance == null)
-                            instance = new MySqlConnectionWrapper();
+                            instance = new MySqlConnectionWrappe();
                     }
                 }
 

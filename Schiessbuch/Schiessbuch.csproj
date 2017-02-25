@@ -94,7 +94,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>gemeindemeisterschaft.xsd</DependentUpon>
     </Compile>
-    <Compile Include="GetMySQLConnection.cs" />
     <Compile Include="ManuellNachtragen.cs">
       <SubType>Form</SubType>
     </Compile>
