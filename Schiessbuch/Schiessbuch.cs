@@ -388,10 +388,25 @@ namespace schiessbuch
             foreach (ToolStripMenuItem tsi in schießjahrAuswählenToolStripMenuItem.DropDownItems)
             {
                 // Entferne den Haken bei allen Schießjahren im Menü
-                tsi.Checked = false;
+                // tsi.Checked = false;
+
+                if (menuStrip1.InvokeRequired)
+                {
+                    menuStrip1.BeginInvoke(new MethodInvoker(delegate () { tsi.Checked = false; }));
+                }
+                else
+                {
+                    tsi.Checked = false;
+                }
             }
             // Setze einen Haken beim aktuell ausgewählten Schießjahr
-            ((ToolStripMenuItem)tsi_parameter.sender).Checked = true;
+            if (menuStrip1.InvokeRequired)
+            {
+                menuStrip1.BeginInvoke(new MethodInvoker(delegate () { ((ToolStripMenuItem)tsi_parameter.sender).Checked = true; }));
+            } else
+            {
+                ((ToolStripMenuItem)tsi_parameter.sender).Checked = true;
+            }
 
             // Einige zusätzliche Aufgaben müssen erledigt werden, wenn ein neues Schießjahr ausgewählt wird.
             
@@ -1591,19 +1606,30 @@ namespace schiessbuch
         private string GenerateKoenigSQLStatement(string Jahrgangsklasse)
         {
             string ZeitFilter;
+            string strAuflage = "";
             if (dtJahrBeginn == dtJahrEnde) // aktuelles Jahr?
             {
-                ZeitFilter = " HAVING Datum > '" + dtJahrBeginn.ToShortDateString() + "' ";
+                ZeitFilter = " HAVING Datum > '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' ";
             }
             else
             {
-                ZeitFilter = " HAVING (Datum >= '" + dtJahrBeginn.ToShortDateString() + "' AND Datum < '" + dtJahrEnde.ToShortDateString() + "') ";
+                ZeitFilter = " HAVING (Datum >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' AND Datum < '" + dtJahrEnde.ToString("yyyy-MM-dd") + "') ";
             }
 
+            string strJahrgangsKlasse;
+            switch (Jahrgangsklasse)
+            {
+                case "Schützenklasse": strJahrgangsKlasse = "Jahrgangsklasse = 'Schützenklasse'"; break;
+                case "Damenklasse": strJahrgangsKlasse = "Jahrgangsklasse = 'Damenklasse'"; break;
+                case "Schülerklasse":
+                case "Jugendklasse": strJahrgangsKlasse = "(Jahrgangsklasse = 'Jugendklasse' OR Jahrgangsklasse = 'Schülerklasse')"; break;
+                case "Auflage": strJahrgangsKlasse = "1=1"; strAuflage = " Auflage"; break;
+                default: strJahrgangsKlasse = "1=1"; break;
+            }
             string grundgeruest_Frei = @"set @row=0;
-set @d1 = 'LG Koenig';
+set @d1 = 'LG Koenig{3}';
             set @d1a = 'LG';
-            set @d2 = 'LP Koenig';
+            set @d2 = 'LP Koenig{3}';
             set @d2a = 'LP';
             select
                 @row:= @row + 1 AS Rang,
@@ -1645,7 +1671,7 @@ set @d1 = 'LG Koenig';
                
                                        AND
                
-                                       Jahrgangsklasse = '{1}'
+                                       {1}
                                     {2}
                
                                UNION
@@ -1672,8 +1698,9 @@ set @d1 = 'LG Koenig';
                                    and
                
                                    schiessjahrId = {0}
+                                   AND
                
-                                   AND Jahrgangsklasse = '{1}'
+                                   {1}
                                 {2}
                            ) T
                
@@ -1681,7 +1708,7 @@ set @d1 = 'LG Koenig';
                
                        order by Teiler ASC
                    ) T2";
-            return string.Format(grundgeruest_Frei, aktuellesSchiessjahrID, Jahrgangsklasse, ZeitFilter);
+            return string.Format(grundgeruest_Frei, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, strAuflage);
         }
 
         
@@ -1691,6 +1718,10 @@ set @d1 = 'LG Koenig';
         private void UpdateKoenig()
         {
             KoenigTextBox.Clear();
+            KoenigSKGridView.Rows.Clear();
+            KoenigDKGridView.Rows.Clear();
+            KoenigJUGGridView.Rows.Clear();
+            KoenigAuflageGridView.Rows.Clear();
             //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             MySqlConnection conn = new MySqlConnection(connStr);
             try
@@ -1729,68 +1760,85 @@ set @d1 = 'LG Koenig';
                 //cmd.CommandText = "set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2";
                 //cmd.CommandText = "set @row=0;set @d1='LG Koenig SK';set @d1a='LG';set @d2='LP Koenig SK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
-                cmd.CommandText = "set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                cmd.CommandText = GenerateKoenigSQLStatement("Schützenklasse");
                 //cmd.CommandText = "set @row=0;set @d1='LG Koenig';set @d1a='LG';set @d2='LP Koenig';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 int row = 0;
                 while (reader.Read())
                 {
-                    row = KoenigSKGridView.Rows.Add();
-                    KoenigSKGridView.Rows[row].Cells["Position"].Value = reader["Rang"].ToString();
-                    KoenigSKGridView.Rows[row].Cells["Fullname"].Value = reader["Schuetze"].ToString();
-                    KoenigSKGridView.Rows[row].Cells["Datum"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
-                    KoenigSKGridView.Rows[row].Cells["Teiler"].Value = reader["Teiler"].ToString();
-                    KoenigSKGridView.Rows[row].Cells["Typ"].Value = reader["Typ"].ToString();
-                    row++;
+                    if (KoenigSKGridView.InvokeRequired)
+                    {
+                        KoenigSKGridView.BeginInvoke(
+                            new MethodInvoker(
+                                delegate () { row = FillSchuetzenklasseDGV(reader); }));
+                    }
+                    else
+                    {
+                        row = FillSchuetzenklasseDGV(reader);
+                    }
+                    
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
                 //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
-                cmd.CommandText = "set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                cmd.CommandText = GenerateKoenigSQLStatement("Damenklasse");
                 //cmd.CommandText = "set @row=0;set @d1='LG Koenig DK';set @d1a='LG';set @d2='LP Koenig DK';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
                 reader = cmd.ExecuteReader();
                 row = 0;
                 while (reader.Read())
                 {
-                    row = KoenigDKGridView.Rows.Add();
-                    KoenigDKGridView.Rows[row].Cells["PositionDK"].Value = reader["Rang"].ToString();
-                    KoenigDKGridView.Rows[row].Cells["FullnameDK"].Value = reader["Schuetze"].ToString();
-                    KoenigDKGridView.Rows[row].Cells["DatumDK"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
-                    KoenigDKGridView.Rows[row].Cells["TeilerDK"].Value = reader["Teiler"].ToString();
-                    KoenigDKGridView.Rows[row].Cells["TypDK"].Value = reader["Typ"].ToString();
-                    row++;
+                    if (KoenigSKGridView.InvokeRequired)
+                    {
+                        KoenigSKGridView.BeginInvoke(
+                            new MethodInvoker(
+                                delegate () { row = FillDamenklasseDGV(reader); }));
+                    }
+                    else
+                    {
+                        row = FillDamenklasseDGV(reader);
+                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
                 //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig JUG';set @d1a='LG';set @d2='LP Koenig JUG';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
-                cmd.CommandText = "set @row=0;set @d1='LG Koenig JUG';set @d1a='LG';set @d2='LP Koenig JUG';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig JUG';set @d1a='LG';set @d2='LP Koenig JUG';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                cmd.CommandText = GenerateKoenigSQLStatement("Jugendklasse");
                 reader = cmd.ExecuteReader();
                 row = 0;
                 while (reader.Read())
                 {
-                    row = KoenigJUGGridView.Rows.Add();
-                    KoenigJUGGridView.Rows[row].Cells["PositionJUG"].Value = reader["Rang"].ToString();
-                    KoenigJUGGridView.Rows[row].Cells["FullnameJUG"].Value = reader["Schuetze"].ToString();
-                    KoenigJUGGridView.Rows[row].Cells["DatumJUG"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
-                    KoenigJUGGridView.Rows[row].Cells["TeilerJUG"].Value = reader["Teiler"].ToString();
-                    KoenigJUGGridView.Rows[row].Cells["TypJUG"].Value = reader["Typ"].ToString();
-                    row++;
+                    if (KoenigSKGridView.InvokeRequired)
+                    {
+                        KoenigSKGridView.BeginInvoke(
+                            new MethodInvoker(
+                                delegate () { row = FillJugendklasseDGV(reader); }));
+                    }
+                    else
+                    {
+                        row = FillJugendklasseDGV(reader);
+                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
                 //reader = mysql.doMySqlReaderQuery("set @row=0;set @d1='LG Koenig Auflage';set @d1a='LG';set @d2='LP Koenig Auflage';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2");
-                cmd.CommandText = "set @row=0;set @d1='LG Koenig Auflage';set @d1a='LG';set @d2='LP Koenig Auflage';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                //cmd.CommandText = "set @row=0;set @d1='LG Koenig Auflage';set @d1a='LG';set @d2='LP Koenig Auflage';set @d2a='LP';select @row:=@row+1 AS Rang, Schuetze, Datum, Teiler, Typ FROM (SELECT Schuetze, Datum, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ergebnis, unsigned integer) AS Teiler, @d1a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d1 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, STR_TO_DATE(datum, '%a %M %d %Y') AS Datum, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, @d2a AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin=@d2 AND concat('',ergebnis * 1) = ergebnis " + ZeitFilter + " ) T group by id order by Teiler ASC) T2";
+                cmd.CommandText = GenerateKoenigSQLStatement("Auflage");
                 reader = cmd.ExecuteReader();
                 row = 0;
                 while (reader.Read())
                 {
-                    row = KoenigAuflageGridView.Rows.Add();
-                    KoenigAuflageGridView.Rows[row].Cells["PositionAuflage"].Value = reader["Rang"].ToString();
-                    KoenigAuflageGridView.Rows[row].Cells["FullnameAuflage"].Value = reader["Schuetze"].ToString();
-                    KoenigAuflageGridView.Rows[row].Cells["DatumAuflage"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
-                    KoenigAuflageGridView.Rows[row].Cells["TeilerAuflage"].Value = reader["Teiler"].ToString();
-                    KoenigAuflageGridView.Rows[row].Cells["TypAuflage"].Value = reader["Typ"].ToString();
-                    row++;
+                    if (KoenigSKGridView.InvokeRequired)
+                    {
+                        KoenigSKGridView.BeginInvoke(
+                            new MethodInvoker(
+                                delegate () { row = FillAuflageDGV(reader); }));
+                    }
+                    else
+                    {
+                        row = FillAuflageDGV(reader);
+                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
@@ -1810,6 +1858,54 @@ set @d1 = 'LG Koenig';
                 MessageBox.Show("Kann Datenbank nicht öffnen. (" + mysqle.Message + ")");
                 Application.Exit();
             }
+        }
+
+        private int FillAuflageDGV(MySqlDataReader reader)
+        {
+            int row = KoenigAuflageGridView.Rows.Add();
+            KoenigAuflageGridView.Rows[row].Cells["PositionAuflage"].Value = reader["Rang"].ToString();
+            KoenigAuflageGridView.Rows[row].Cells["FullnameAuflage"].Value = reader["Schuetze"].ToString();
+            KoenigAuflageGridView.Rows[row].Cells["DatumAuflage"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
+            KoenigAuflageGridView.Rows[row].Cells["TeilerAuflage"].Value = reader["Teiler"].ToString();
+            KoenigAuflageGridView.Rows[row].Cells["TypAuflage"].Value = reader["Typ"].ToString();
+            row++;
+            return row;
+        }
+
+        private int FillJugendklasseDGV(MySqlDataReader reader)
+        {
+            int row = KoenigJUGGridView.Rows.Add();
+            KoenigJUGGridView.Rows[row].Cells["PositionJUG"].Value = reader["Rang"].ToString();
+            KoenigJUGGridView.Rows[row].Cells["FullnameJUG"].Value = reader["Schuetze"].ToString();
+            KoenigJUGGridView.Rows[row].Cells["DatumJUG"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
+            KoenigJUGGridView.Rows[row].Cells["TeilerJUG"].Value = reader["Teiler"].ToString();
+            KoenigJUGGridView.Rows[row].Cells["TypJUG"].Value = reader["Typ"].ToString();
+            row++;
+            return row;
+        }
+
+        private int FillDamenklasseDGV(MySqlDataReader reader)
+        {
+            int row = KoenigDKGridView.Rows.Add();
+            KoenigDKGridView.Rows[row].Cells["PositionDK"].Value = reader["Rang"].ToString();
+            KoenigDKGridView.Rows[row].Cells["FullnameDK"].Value = reader["Schuetze"].ToString();
+            KoenigDKGridView.Rows[row].Cells["DatumDK"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
+            KoenigDKGridView.Rows[row].Cells["TeilerDK"].Value = reader["Teiler"].ToString();
+            KoenigDKGridView.Rows[row].Cells["TypDK"].Value = reader["Typ"].ToString();
+            row++;
+            return row;
+        }
+
+        private int FillSchuetzenklasseDGV(MySqlDataReader reader)
+        {
+            int row = KoenigSKGridView.Rows.Add();
+            KoenigSKGridView.Rows[row].Cells["Position"].Value = reader["Rang"].ToString();
+            KoenigSKGridView.Rows[row].Cells["Fullname"].Value = reader["Schuetze"].ToString();
+            KoenigSKGridView.Rows[row].Cells["Datum"].Value = DateTime.Parse(reader["Datum"].ToString()).ToShortDateString();
+            KoenigSKGridView.Rows[row].Cells["Teiler"].Value = reader["Teiler"].ToString();
+            KoenigSKGridView.Rows[row].Cells["Typ"].Value = reader["Typ"].ToString();
+            row++;
+            return row;
         }
 
         private void trefferDataGridView_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
@@ -4587,7 +4683,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             ResizeAllKoenigGridViews();
 
             // Hier werden die Ergebnisse aus dem Königsschießen ausgewertet und angezeigt.
-            UpdateKoenig();
+            //UpdateKoenig(); // Das wird auch beim Aktualisieren durch das Setzen des Schießjahres ausgeführt, deshalb soll es hier nicht gemacht werden.
 
             // Dieser Teil könnte wahrscheinlich verschoben werden in die Methode, die aufgerufen wird, wenn der Tab "Übersicht" angeklickt wird.
             for (int stand = 1; stand <= 6; stand++)
