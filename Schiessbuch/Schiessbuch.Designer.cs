@@ -7281,6 +7281,8 @@ namespace schiessbuch
             this.schiessbuchDataGridView.TabIndex = 23;
             this.schiessbuchDataGridView.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.schiessbuchDataGridView_CellMouseEnter);
             this.schiessbuchDataGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.schiessbuchDataGridView_DataError);
+            this.schiessbuchDataGridView.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.schiessbuchDataGridView_RowEnter);
+            this.schiessbuchDataGridView.RowLeave += new System.Windows.Forms.DataGridViewCellEventHandler(this.schiessbuchDataGridView_RowLeave);
             this.schiessbuchDataGridView.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.schiessbuchDataGridView_UserDeletingRow);
             // 
             // dataGridViewTextBoxColumn2

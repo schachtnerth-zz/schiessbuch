@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
@@ -661,6 +662,7 @@ namespace schiessbuch
                     }
                 }
             }
+
             Pen pen = new Pen(Color.White, 1f);
             Brush brush = new SolidBrush(Color.FromArgb(150, Color.Red));
             Brush bluebrush = new SolidBrush(Color.Blue);
@@ -718,8 +720,9 @@ namespace schiessbuch
                     zielscheibeStr[0] = Properties.Resources.Luftpistole;
                 }
 
-
-                ZeichneTrefferInZielscheibe(pictureBox1, e, 0, schussliste, zielscheibeStr, false);
+                Graphics g = e.Graphics;
+                ZeichneTrefferInZielscheibe(pictureBox1, g, 0, schussliste, zielscheibeStr, false);
+//                g.Dispose();
             }
         }
 
@@ -728,13 +731,15 @@ namespace schiessbuch
         private RefreshTimerTickDelegate refreshTimerTickDelegate = null;
         private bool bTimerUpdateStillRunning=false;
 
+        private System.Windows.Forms.Timer tmBildUpdateTimer = new System.Windows.Forms.Timer();
+
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
-            this.RefreshTimerWorkerThread.Start();
+            //  this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
+            //  this.RefreshTimerWorkerThread.Start();
 
             //this.refreshTimerTickDelegate = new RefreshTimerTickDelegate(RefreshTimerWorker);
-            //RefreshTimerWorker();
+            RefreshTimerWorker();
         }
 
         private void RefreshTimerWorker()
@@ -750,12 +755,12 @@ namespace schiessbuch
                 if (generateOverview)
                 {
                     updateOverview();
-                    stand1Zielscheibe.Invalidate();
-                    stand2Zielscheibe.Invalidate();
-                    stand3Zielscheibe.Invalidate();
-                    stand4Zielscheibe.Invalidate();
-                    stand5Zielscheibe.Invalidate();
-                    stand6Zielscheibe.Invalidate();
+                    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
+                    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
+                    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
+                    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
+                    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
+                    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
                 }
                 if (databaseRequestCounter == 0)
                 {
@@ -909,7 +914,8 @@ namespace schiessbuch
         private void UpdateStandTrefferDaten(int stand)
         {
             this.aktuelleTreffer[stand - 1].Clear();
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
             request.Method = "GET";
             XDocument document = new XDocument();
 //            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
@@ -1026,14 +1032,148 @@ namespace schiessbuch
                     }
                 }
             }
+            for (int i = 0; i < 6; i++)
+            {   // Wenn sich bei einem Stand entweder der Schütze oder die Anzahl der geschossenen Schüsse verändert,
+                // vermerke das in einem Flag in der extra dafür vorgesehenen Struktur sSchusszahlVeraendert und sorge
+                // damit für ein Neuzeichnen der Schusstabelle
+                sSchusszahlVeraendert[i].stand = i + 1;
+                if (aktuelleTreffer[i].Count > 0)
+                {
+                    int iTmp = aktuelleTreffer[i][0].schuetze;
+                    if (sSchusszahlVeraendert[i].schuetze != iTmp)
+                    {
+                        sSchusszahlVeraendert[i].veraendert = true;
+                        sSchusszahlVeraendert[i].schuetze = iTmp;
+                    }
+                    iTmp = aktuelleTreffer[i].Count;
+                    if (sSchusszahlVeraendert[i].schusszahl != iTmp)
+                    {
+                        sSchusszahlVeraendert[i].veraendert = true;
+                        sSchusszahlVeraendert[i].schusszahl = iTmp;
+                    }
+                }
+            }
         }
+
+        private class SchusszahlInfo
+        {
+            public bool bValid;
+            public int stand;
+            public int schuetze;
+            public int schusszahl;
+            public bool veraendert;
+        }
+
+        private SchusszahlInfo[] sSchusszahlVeraendert;
 
         public void TestZielscheibe()
         {
 
         }
 
-        private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, PaintEventArgs e, int stand, List<SchussInfo>[] trefferliste, Bitmap[] zielscheiben, bool FillMatrix)
+        Ergebnisbild[] ergebnisbilder;
+
+        private void CreateGraphicsForAnzeige(Ergebnisbild ergebnis, float boxWidth, float boxHeight, float imgWidth, float imgHeight, int stand, List<SchussInfo>[] trefferliste)
+        {
+            Pen pen = new Pen(Color.Red, 1f);
+            Font font = new Font("Arial", 1f);
+            float kaliber = 4.5f;
+            float millimeterToPixel = 23.622f;
+            float schusslochDurchmesser = kaliber * millimeterToPixel;
+            Graphics graphics;
+            float zoomFactor = imgWidth / boxWidth;
+            int stand1 = stand + 1;
+            int AnzTreffer = Properties.Settings.Default.AnzLetzteTreffer;
+            int anzeigenAb = 0;
+            if (trefferliste != null)
+            {
+                anzeigenAb = trefferliste[stand].Count - AnzTreffer;
+                int trefferZaehler = 0;
+                ergebnis.SetValid(false);
+                if (ergebnis.bild != null) ergebnis.bild.Dispose();
+                ergebnis.bild = new Bitmap(StandZielscheiben[stand]);
+                graphics = Graphics.FromImage(ergebnis.bild);
+                ergebnis.fMaxX = 0.0f;
+                ergebnis.fMaxY = 0.0f;
+                foreach (SchussInfo info in trefferliste[stand])
+                {
+                    trefferZaehler++;
+                    if (trefferZaehler > anzeigenAb)
+                    {
+                        Brush brush;
+                        float textWidth;
+                        float textHeight;
+                        float schussPosLinks = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        float schussPosOben = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        float schussPosOben2 = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                        float AbstandVonMitteX, AbstandVonMitteY;
+                        if (schussPosLinks < 0)
+                            AbstandVonMitteX = (info.xrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        else
+                            AbstandVonMitteX = (info.xrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+                        if (schussPosOben < 0)
+                            AbstandVonMitteY = (info.yrahmeninmm - (kaliber / 2f)) * millimeterToPixel;
+                        else
+                            AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
+
+                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
+                        if (Math.Abs(AbstandVonMitteX) > ergebnis.fMaxX) ergebnis.fMaxX = Math.Abs(AbstandVonMitteX);
+                        if (Math.Abs(AbstandVonMitteY) > ergebnis.fMaxY) ergebnis.fMaxY = Math.Abs(AbstandVonMitteY);
+                        if (info == trefferliste[stand].Last<SchussInfo>())
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Red));
+                        }
+                        else if (info.ring < 10)
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.LightGray));
+                        }
+                        else
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Green));
+                        }
+                        if (info.probe)
+                        {
+                            brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
+                            ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
+                        }
+
+                        Rectangle rect = new Rectangle(
+                            (int)(schussPosLinks + imgWidth / 2),
+                            (int)(imgHeight / 2 - schussPosOben2),
+                            (int)(schusslochDurchmesser),
+                            (int)(schusslochDurchmesser));
+
+                        graphics.FillEllipse(brush, rect);
+                        graphics.DrawEllipse(new Pen(Brushes.LightGray, 1f), rect);
+                        string text = info.schussnummer.ToString();
+                        while (true)
+                        {
+                            textWidth = graphics.MeasureString(text, font).Width;
+                            textHeight = graphics.MeasureString(text, font).Height;
+                            if ((textHeight > (rect.Height * 0.8)) || (textWidth > (rect.Width * 0.8)))
+                            {
+                                break;
+                            }
+                            font = new Font("Arial", font.Size + 1f);
+                        }
+                        graphics.DrawString(text, font, Brushes.White, (float)((rect.X + (rect.Width / 2)) - (textWidth / 2f)), (float)((rect.Y + (rect.Height / 2)) - (textHeight / 2f)));
+                    }
+
+                    // So, jetzt kümmern wir uns mal um das Zoomen...
+                    if (ergebnis.fMaxX > ergebnis.fMaxY)
+                        ergebnis.maxAbstand = ergebnis.fMaxX;
+                    else
+                        ergebnis.maxAbstand = ergebnis.fMaxY;
+
+                    if (ergebnis.maxAbstand < 200)
+                        ergebnis.maxAbstand = 200;
+                }
+                graphics.Dispose();
+                ergebnis.SetValid(true);
+            }
+        }
+
+        private void ZeichneTrefferInZielscheibe(PictureBox pictureBox, Graphics g, int stand, List<SchussInfo>[] trefferliste, Bitmap[] zielscheiben, bool FillMatrix)
         {
             Pen pen = new Pen(Color.Red, 1f);
             Font font = new Font("Arial", 1f);
@@ -1205,8 +1345,7 @@ namespace schiessbuch
                     if (maxAbstand > pictureBox.Image.Width / 2)
                         maxAbstand = pictureBox.Image.Width / 2;
                     // MessageBox.Show("MaxAbstand: " + maxAbstand.ToString() + ", seitenlaenge: " + seitenlaenge + ", Bildgroesse: " + pictureBox.Image.Width + "x" + pictureBox.Image.Height);
-
-                    e.Graphics.DrawImage(
+                    g.DrawImage(
                         scheibeBitmap,
                         new Rectangle((pictureBox.Width / 2) - (seitenlaenge / 2), (pictureBox.Height / 2) - (seitenlaenge / 2), seitenlaenge, seitenlaenge),
                         new Rectangle(
@@ -1449,6 +1588,102 @@ namespace schiessbuch
                 ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
 
+        private string GenerateKoenigSQLStatement(string Jahrgangsklasse)
+        {
+            string ZeitFilter;
+            if (dtJahrBeginn == dtJahrEnde) // aktuelles Jahr?
+            {
+                ZeitFilter = " HAVING Datum > '" + dtJahrBeginn.ToShortDateString() + "' ";
+            }
+            else
+            {
+                ZeitFilter = " HAVING (Datum >= '" + dtJahrBeginn.ToShortDateString() + "' AND Datum < '" + dtJahrEnde.ToShortDateString() + "') ";
+            }
+
+            string grundgeruest_Frei = @"set @row=0;
+set @d1 = 'LG Koenig';
+            set @d1a = 'LG';
+            set @d2 = 'LP Koenig';
+            set @d2a = 'LP';
+            select
+                @row:= @row + 1 AS Rang,
+                   Schuetze,
+                   Datum,
+                   Teiler,
+                   Jahrgangsklasse,
+                   Typ FROM(
+                       SELECT
+               
+                           Schuetze,
+                           Datum,
+                           MIN(Teiler) AS Teiler,
+                           Jahrgangsklasse,
+                           Typ from(
+                               select
+               
+                                   fullname AS Schuetze,
+                                   schuetzenliste.id as ID,
+                                   Jahrgangsklasse AS Jahrgangsklasse,
+                                   STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
+                                   convert(ergebnis, unsigned integer) AS Teiler,
+                                   @d1a AS Typ
+               
+                               from
+                                   schiessbuch
+                                       inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
+               
+                                   where
+                                       disziplin = @d1
+               
+                                       AND
+               
+                                       concat('', ergebnis * 1) = ergebnis
+               
+                                       AND
+               
+                                       schiessjahrId = {0}
+               
+                                       AND
+               
+                                       Jahrgangsklasse = '{1}'
+                                    {2}
+               
+                               UNION
+               
+                               select
+               
+                                   fullname AS Schuetze,
+                                   schuetzenliste.id as ID,
+                                   Jahrgangsklasse AS Jahrgangsklasse,
+                                   STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
+                                   convert(ROUND(ergebnis / 2.6, 0), unsigned integer) AS Teiler,
+                                   @d2a AS Typ
+               
+                               from
+                                   schiessbuch inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
+               
+                               where
+                                   disziplin = @d2
+               
+                                   AND
+               
+                                   concat('', ergebnis * 1) = ergebnis
+               
+                                   and
+               
+                                   schiessjahrId = {0}
+               
+                                   AND Jahrgangsklasse = '{1}'
+                                {2}
+                           ) T
+               
+                       group by id
+               
+                       order by Teiler ASC
+                   ) T2";
+            return string.Format(grundgeruest_Frei, aktuellesSchiessjahrID, Jahrgangsklasse, ZeitFilter);
+        }
+
         
         /// <summary>
         /// Berechnung und Anzeige des Schützenkönigs
@@ -1655,6 +1890,7 @@ namespace schiessbuch
             // Aktualisierung nichts.
             this.stopUebersicht();
             this.stopEinzelScheibe();
+            tmBildUpdateTimer.Stop();
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
             if (tabControl1.SelectedTab.Text.Equals("Tagesauswertung"))
@@ -1686,6 +1922,7 @@ namespace schiessbuch
 
         private void startUebersicht()
         {
+            tmBildUpdateTimer.Start();
             this.generateOverview = true;
         }
 
@@ -2798,11 +3035,114 @@ namespace schiessbuch
             }
         }
 
+        private void standXZielscheibe_Paint(int stand, object sender, PaintEventArgs e)
+        {
+            PictureBox pb;
+            pb = (PictureBox)Controls["tabControl1"]
+                .Controls["tabStandUebersicht"]
+                .Controls["UebersichtTableLayoutPanel"]
+                .Controls["Stand" + (stand + 1).ToString() + "SplitContainer"]
+                .Controls[0]
+                .Controls["stand" + (stand + 1).ToString() + "Zielscheibe"];
+
+            // Berechne die kleinste Seitenlänge und mache das Bild quadratisch
+            int seitenlaenge;
+            if (pb.Width < pb.Height)
+                seitenlaenge = (int)pb.Width;
+            else
+                seitenlaenge = (int)pb.Height;
+
+            if (ergebnisbilder[stand].maxAbstand > pb.Image.Width / 2)
+                ergebnisbilder[stand].maxAbstand = pb.Image.Width / 2;
+
+            if (ergebnisbilder[stand].IsValid())
+            {
+                e.Graphics.DrawImage(
+                    ergebnisbilder[stand].bild,
+                    new Rectangle((pb.Width / 2) - (seitenlaenge / 2), (pb.Height / 2) - (seitenlaenge / 2), seitenlaenge, seitenlaenge),
+                    new Rectangle(
+                        (int)(StandZielscheiben[stand].Width / 2 - ergebnisbilder[stand].maxAbstand),
+                        (int)(StandZielscheiben[stand].Height / 2 - ergebnisbilder[stand].maxAbstand),
+                        (int)(2 * ergebnisbilder[stand].maxAbstand), (int)(2 * ergebnisbilder[stand].maxAbstand)),
+                    GraphicsUnit.Pixel);
+                ergebnisbilder[stand].bIsChanged = false;
+                //e.Graphics.Dispose();
+            }
+
+            if (sSchusszahlVeraendert[stand].veraendert)
+            {
+                this.cleanSchussTable(stand);
+                // Fülle die Tabelle aller Schüsse auf
+                int iSumme = 0;
+                foreach (SchussInfo info in aktuelleTreffer[stand])
+                {
+                    int spalte = (info.schussnummer - 1) % 5;
+                    int zeile = (info.schussnummer - 1) / 5;
+                    string str2 = "txtSchuss" + (stand + 1).ToString() + spalte.ToString() + zeile.ToString();
+
+                    ((TableLayoutPanel)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1).ToString() + "SplitContainer"]).Panel2.Controls["Stand" + (stand + 1).ToString() + "SchussPanel"]).Controls[str2].Text = info.ring.ToString();
+                    iSumme += info.ring;
+                }
+                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + (stand + 1).ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + (stand + 1).ToString()]).Text = iSumme.ToString();
+                sSchusszahlVeraendert[stand].veraendert = false; // bestätige, dass die Veränderung berücksichtigt wurde und verhindere ein Neuzeichnen bis zur nächsten Veränderung
+            }
+        }
+
         private void stand1Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
-            this.cleanSchussTable(0);
-            // setze die richtige Zielscheibe ein
-            this.ZeichneTrefferInZielscheibe(this.stand1Zielscheibe, e, 0, aktuelleTreffer, StandZielscheiben, true);
+            standXZielscheibe_Paint(0, sender, e);
+        }
+
+        private void stand2Zielscheibe_Paint(object sender, PaintEventArgs e)
+        {
+            standXZielscheibe_Paint(1, sender, e);
+        }
+
+        private void stand3Zielscheibe_Paint(object sender, PaintEventArgs e)
+        {
+            standXZielscheibe_Paint(2, sender, e);
+        }
+
+        private void stand4Zielscheibe_Paint(object sender, PaintEventArgs e)
+        {
+            standXZielscheibe_Paint(3, sender, e);
+        }
+
+        private void stand5Zielscheibe_Paint(object sender, PaintEventArgs e)
+        {
+            standXZielscheibe_Paint(4, sender, e);
+        }
+
+        private void stand6Zielscheibe_Paint(object sender, PaintEventArgs e)
+        {
+            standXZielscheibe_Paint(5, sender, e);
+        }
+
+        private void SetTextAcrossThread(Control control, string text)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(
+                    new MethodInvoker(
+                        delegate () { SetTextAcrossThread(control, text); }));
+            } else
+            {
+                control.Text = text;
+            }
+        }
+
+        private void SetImageAcrossThread(PictureBox control, Bitmap image)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(
+                    new MethodInvoker(
+                        delegate () { SetImageAcrossThread(control, image); }));
+            }
+            else
+            {
+                control.Image = image;
+            }
         }
 
         private void setzeZielscheibeInUebersicht(int stand)
@@ -2826,16 +3166,18 @@ namespace schiessbuch
             catch (ArgumentOutOfRangeException)
             { // Exception soll einfach ignoriert werden 
             }
-            ((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]).Image = bScheibe;
+            SetImageAcrossThread(((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]), bScheibe);
+            //((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]).Image = bScheibe;
 
             // Disziplin setzen
             try
             {
-                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]).Text = aktuelleTreffer[stand][0].disziplin;
+                SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]), aktuelleTreffer[stand][0].disziplin);
             }
             catch (ArgumentOutOfRangeException)
             {
-                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]).Text = "keine";
+                SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]), "keine");
+                //((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtDisziplinStand" + strStand]).Text = "keine";
             }
 
             // Schütze setzen
@@ -2847,15 +3189,18 @@ namespace schiessbuch
                 MySqlDataReader reader= cmd.ExecuteReader();
                 if (reader.Read())
                 {
-                    ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = reader["fullname"].ToString();
+                    SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]), reader["fullname"].ToString());
+                    // ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = reader["fullname"].ToString();
                 } else
                 {
-                    ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "Gastschütze";
+                    SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]), "Gastschütze");
+                    // ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "Gastschütze";
                 }
             }
             catch (ArgumentOutOfRangeException)
             {
-                ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "kein Schütze";
+                SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]), "kein Schütze");
+                // ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "kein Schütze";
             }
             conn.Clone();
             conn.Dispose();
@@ -2863,36 +3208,107 @@ namespace schiessbuch
 
         }
 
-        private void stand2Zielscheibe_Paint(object sender, PaintEventArgs e)
+        /*private void stand2Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(1);
-            this.ZeichneTrefferInZielscheibe(this.stand2Zielscheibe, e, 1, aktuelleTreffer, StandZielscheiben, true);
+            //ZeichneTrefferInZielscheibe(stand2Zielscheibe, e, 1, aktuelleTreffer, StandZielscheiben, true);
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.WorkerSupportsCancellation = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            BackgroundWorkerZeichneTrefferArguments bwArguments = new BackgroundWorkerZeichneTrefferArguments();
+            bwArguments.pictureBox = this.stand2Zielscheibe;
+            bwArguments.g = e.Graphics;
+            bwArguments.stand = 1;
+            bwArguments.trefferliste = aktuelleTreffer;
+            bwArguments.zielscheiben = StandZielscheiben;
+            bwArguments.fillMatrix = true;
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync(bwArguments);
+            }
         }
 
         private void stand3Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(2);
-            this.ZeichneTrefferInZielscheibe(this.stand3Zielscheibe, e, 2, aktuelleTreffer, StandZielscheiben, true);
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.WorkerSupportsCancellation = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            BackgroundWorkerZeichneTrefferArguments bwArguments = new BackgroundWorkerZeichneTrefferArguments();
+            bwArguments.pictureBox = this.stand3Zielscheibe;
+            bwArguments.g = e.Graphics;
+            bwArguments.stand = 2;
+            bwArguments.trefferliste = aktuelleTreffer;
+            bwArguments.zielscheiben = StandZielscheiben;
+            bwArguments.fillMatrix = true;
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync(bwArguments);
+            }
         }
 
         private void stand4Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(3);
-            this.ZeichneTrefferInZielscheibe(this.stand4Zielscheibe, e, 3, aktuelleTreffer, StandZielscheiben, true);
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.WorkerSupportsCancellation = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            BackgroundWorkerZeichneTrefferArguments bwArguments = new BackgroundWorkerZeichneTrefferArguments();
+            bwArguments.pictureBox = this.stand4Zielscheibe;
+            bwArguments.g = e.Graphics;
+            bwArguments.stand = 3;
+            bwArguments.trefferliste = aktuelleTreffer;
+            bwArguments.zielscheiben = StandZielscheiben;
+            bwArguments.fillMatrix = true;
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync(bwArguments);
+            }
         }
 
         private void stand5Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(4);
-            this.ZeichneTrefferInZielscheibe(this.stand5Zielscheibe, e, 4, aktuelleTreffer, StandZielscheiben, true);
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.WorkerSupportsCancellation = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            BackgroundWorkerZeichneTrefferArguments bwArguments = new BackgroundWorkerZeichneTrefferArguments();
+            bwArguments.pictureBox = this.stand5Zielscheibe;
+            bwArguments.g = e.Graphics;
+            bwArguments.stand = 4;
+            bwArguments.trefferliste = aktuelleTreffer;
+            bwArguments.zielscheiben = StandZielscheiben;
+            bwArguments.fillMatrix = true;
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync(bwArguments);
+            }
         }
 
         private void stand6Zielscheibe_Paint(object sender, PaintEventArgs e)
         {
             this.cleanSchussTable(5);
-            this.ZeichneTrefferInZielscheibe(this.stand6Zielscheibe, e, 5, aktuelleTreffer, StandZielscheiben, true);
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.WorkerSupportsCancellation = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            BackgroundWorkerZeichneTrefferArguments bwArguments = new BackgroundWorkerZeichneTrefferArguments();
+            bwArguments.pictureBox = this.stand6Zielscheibe;
+            bwArguments.g = e.Graphics;
+            bwArguments.stand = 5;
+            bwArguments.trefferliste = aktuelleTreffer;
+            bwArguments.zielscheiben = StandZielscheiben;
+            bwArguments.fillMatrix = true;
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync(bwArguments);
+            }
         }
-
+*/
         private void geschlechtTextBox_TextChanged(object sender, EventArgs e)
         {
             if (this.bearbeitungsmodusToolStripMenuItem.Checked)
@@ -3012,6 +3428,8 @@ namespace schiessbuch
         private void Schiessbuch_FormClosing(object sender, FormClosingEventArgs e)
         {
             DoUpdates.Checked = false;
+            tmBildUpdateTimer.Stop();
+
             DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (res == DialogResult.Yes)
             {
@@ -3091,7 +3509,9 @@ namespace schiessbuch
         {
             // this.cleanSchussTable(0); nur benötigt, wenn eine Tabelle mit allen Schüssen angezeigt werden soll
             // setze die richtige Zielscheibe ein
-            ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, e, standFuerEinzelScheibe - 1, aktuelleTreffer, StandZielscheiben, true);
+            Graphics g = e.Graphics;
+            ZeichneTrefferInZielscheibe(pictureBoxEinzelScheibe, g, standFuerEinzelScheibe - 1, aktuelleTreffer, StandZielscheiben, true);
+            g.Dispose();
         }
 
         private void Schiessabend_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -3919,7 +4339,12 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             if (testLGTreffer[0] == null)
                 testLGTreffer[0] = new List<SchussInfo>();
             if (testLGTreffer[0].Count > 0)
-            ZeichneTrefferInZielscheibe(TestPictureLG, e, 0, testLGTreffer, StandZielscheiben, false);
+            {
+                Graphics g = e.Graphics;
+                ZeichneTrefferInZielscheibe(TestPictureLG, g, 0, testLGTreffer, StandZielscheiben, false);
+                g.Dispose();
+            }
+            
         }
         
         int iTestLGSchussNummer = 0;
@@ -4072,6 +4497,23 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             StandZielscheiben = new Bitmap[6];
             for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
 
+            // Ergebnisbilder instantiieren, um später die Abbildungen für die Übersicht zeichnen zu können
+            ergebnisbilder = new Ergebnisbild[6];
+            for (int i = 0; i < 6; ergebnisbilder[i++] = new Ergebnisbild()) ;
+
+            // Hilfsstruktur, um das Zeichnen der Schussliste auf ein Minimum zu reduzieren
+            sSchusszahlVeraendert = new SchusszahlInfo[6];
+            for (int i = 0; i < 6; i++)
+            {
+                sSchusszahlVeraendert[i] = new SchusszahlInfo();
+                sSchusszahlVeraendert[i].veraendert = false;
+            }
+
+            // Initialisiere den Timer, der die Bilder der Schießscheiben aktuell hält
+            tmBildUpdateTimer = new System.Windows.Forms.Timer();
+            tmBildUpdateTimer.Interval = 2000; // alle zwei Sekunden weden die Bilder aktualisiert
+            tmBildUpdateTimer.Tick += TmBildUpdateTimer_Tick;
+
 
             // Die Zugriffe aller TableAdapters sollen auf die richtige Datenbank erfolgen. Deshalb wird hier der Connection String entsprechend gesetzt.
             schiessbuchTableAdapter.Connection.ConnectionString = connStr;
@@ -4085,6 +4527,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
             vereinslisteTableAdapter.Connection.ConnectionString = connStr;
             uebersichtgemeindemeisterschaftTableAdapter3.Connection.ConnectionString = connStr;
+
             // Jetzt wird versucht, Werte aus der Datenbank zu lesen
             int numAllRead = 0; // Das dient zur Überprüfung, ob Daten aus der Datenbank kommen
             this.uebersichtgemeindemeisterschaftTableAdapter3.Fill(this.vereinsheimSiusclubDataSet2.uebersichtgemeindemeisterschaft);
@@ -4169,6 +4612,29 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             //schiessbuchDataGridView.Sort(dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Ascending);
             //schiessbuchDataGridView.Invalidate();
             schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
+        }
+
+        private void TmBildUpdateTimer_Tick(object sender, EventArgs e)
+        {
+            PictureBox pb;
+            string strControlName;
+            for (int i = 0; i < 6; i++)
+            {
+                strControlName = "stand" + (i+1).ToString() + "Zielscheibe";
+
+                pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
+                CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+            }
+        }
+
+        private void schiessbuchDataGridView_RowLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            RefreshTimer.Enabled = false;
+        }
+
+        private void schiessbuchDataGridView_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            DoUpdates_CheckedChanged(null, null);
         }
     }
 }

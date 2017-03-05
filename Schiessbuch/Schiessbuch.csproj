@@ -63,6 +63,7 @@
       <DependentUpon>Einstellungen.cs</DependentUpon>
     </Compile>
     <Compile Include="EinzelAuswertungDaten.cs" />
+    <Compile Include="Ergebnisbild.cs" />
     <Compile Include="GauligaAuswahl.cs">
       <SubType>Form</SubType>
     </Compile>
