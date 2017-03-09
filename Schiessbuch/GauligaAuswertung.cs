@@ -148,16 +148,6 @@ namespace schiessbuch
             ev.Graphics.DrawString(gastverein, schrift, Brushes.Blue, 50, 174);
             reader.Close();
 
-            string strMetaDaten = string.Format("SELECT RundeNr, Gruppe FROM gauligameta WHERE YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day);
-            cmd.CommandText = strMetaDaten;
-            reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                ev.Graphics.DrawString(reader["RundeNr"].ToString(), schrift, Brushes.Blue, 135, 60);
-                ev.Graphics.DrawString(reader["Gruppe"].ToString(), schrift, Brushes.Blue, 135, 40);
-            }
-            reader.Close();
-
             // jetzt lese alle Schützen der Heimmannschaft und prüfe, ob es mehr als 5 sind.
             string strHeimschuetzen = string.Format("SELECT schuetzen.id AS id, CONCAT(name, ', ', vorname) as fullname, ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date, session from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='Gauliga' and verein='{3}' and status='beendet' having YEAR(Date)={0} and MONTH(Date)={1} and DAY(Date)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day, heimverein);
             //reader.Dispose();
@@ -390,6 +380,19 @@ namespace schiessbuch
                 ev.Graphics.DrawString(strFusszeile, arial10, Brushes.Black, 48, 272);
                 ev.Graphics.DrawString("Mobil 0151 6244 28 39 E-mail: rwkl@ksv-donaugau.de", arial10, Brushes.Black, 48, 272 + wdthFusszeile);
                 ev.Graphics.DrawString("Fax 032 21 - 119 112 5", arial10, Brushes.Black, 48, 272 + 2 * wdthFusszeile);
+                reader.Close();
+
+                string strMetaDaten = string.Format("SELECT RundeNr, Gruppe FROM gauligameta WHERE YEAR(datum)={0} and MONTH(datum)={1} and DAY(datum)={2}", dateTimePicker1.Value.Year, dateTimePicker1.Value.Month, dateTimePicker1.Value.Day);
+                cmd.CommandText = strMetaDaten;
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    ev.Graphics.DrawString(reader["RundeNr"].ToString(), schrift, Brushes.Blue, 135, 60);
+                    ev.Graphics.DrawString(reader["Gruppe"].ToString(), schrift, Brushes.Blue, 135, 40);
+                }
+                reader.Close();
+
+
             }
         }
 

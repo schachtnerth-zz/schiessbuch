@@ -327,40 +327,16 @@ namespace schiessbuch
             this.schuetzenlisteTableAdapter.Fill(this.siusclubDataSet.schuetzenliste);
         }
 
-        private Thread Tsi_Click_WorkerThread = null;
-        private bool stop_Tsi_Click_WorkerThread = false;
-        public class Tsi_Click_Parameter
-        {
-            public object sender;
-            public EventArgs e;
-        };
-
         private void Tsi_Click(object sender, EventArgs e)
         {
-            this.stop_Tsi_Click_WorkerThread = false;
-            // Initialize and start worker thread
-            Tsi_Click_Parameter parameter = new Tsi_Click_Parameter();
-            parameter.e = e;
-            parameter.sender = sender;
-            ParameterizedThreadStart pts = new ParameterizedThreadStart(this.Tsi_ClickWorker);
-            this.Tsi_Click_WorkerThread = new Thread(pts);
-            this.Tsi_Click_WorkerThread.Start(parameter);
-        }
-
-        /// <summary>
-        /// Eventhandler, der beim Auswählen eines Eintrags aus der Schießjahrauswahl aufgerufen wird (ToolStripMenuItem)
-        /// </summary>
-        public void Tsi_ClickWorker(object parameter)
-        {
-            Tsi_Click_Parameter tsi_parameter = (Tsi_Click_Parameter)parameter;
             int aktuellerSchuetze = -1;
             // Zwischenspeichern des aktuell ausgewählten Schützen, da dieser nach Ändern des Schießjahres wieder ausgewählt werden soll
-            if (int.Parse(schuetzenListeBindingSource.Count.ToString())!=0)
+            if (int.Parse(schuetzenListeBindingSource.Count.ToString()) != 0)
                 aktuellerSchuetze = int.Parse(((DataRowView)schuetzenListeBindingSource.Current)["id"].ToString());
             //int aktuellerSchuetze = schuetzenListeBindingSource.Position;
 
             // Befülle oder aktualisiere die globale Variable aktuellesSchiessjahrID, in der die ID des aktuellen Schießjahrs gespeichert wird.
-            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)tsi_parameter.sender).Tag.ToString());
+            aktuellesSchiessjahrID = Int32.Parse(((ToolStripMenuItem)sender).Tag.ToString());
 
             // Öffne die Datenbank und lese die einzelnen Anfangsdaten der Schießjahre
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -402,14 +378,15 @@ namespace schiessbuch
             // Setze einen Haken beim aktuell ausgewählten Schießjahr
             if (menuStrip1.InvokeRequired)
             {
-                menuStrip1.BeginInvoke(new MethodInvoker(delegate () { ((ToolStripMenuItem)tsi_parameter.sender).Checked = true; }));
-            } else
+                menuStrip1.BeginInvoke(new MethodInvoker(delegate () { ((ToolStripMenuItem)sender).Checked = true; }));
+            }
+            else
             {
-                ((ToolStripMenuItem)tsi_parameter.sender).Checked = true;
+                ((ToolStripMenuItem)sender).Checked = true;
             }
 
             // Einige zusätzliche Aufgaben müssen erledigt werden, wenn ein neues Schießjahr ausgewählt wird.
-            
+
             // Der Filter für die schuetzenListeBindingSource wird mit dem aktuellen Jahr aktualisiert
             populateSchiessjahrFilter();
 
@@ -434,6 +411,13 @@ namespace schiessbuch
             // deshalb wird die entsprechende Tabelle neu befüllt.
             schiessbuchTableAdapter.Fill(this.siusclubDataSet.schiessbuch);
             schuetzenListeBindingSource.Position = schuetzenListeBindingSource.Find("id", aktuellerSchuetze);
+        }
+
+        /// <summary>
+        /// Eventhandler, der beim Auswählen eines Eintrags aus der Schießjahrauswahl aufgerufen wird (ToolStripMenuItem)
+        /// </summary>
+        public void Tsi_ClickWorker(object parameter)
+        {
         }
 
         /// <summary>
@@ -929,11 +913,11 @@ namespace schiessbuch
         private void UpdateStandTrefferDaten(int stand)
         {
             this.aktuelleTreffer[stand - 1].Clear();
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
             request.Method = "GET";
             XDocument document = new XDocument();
-//            document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
+            //document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
                 document = XDocument.Load(response.GetResponseStream());
@@ -1619,15 +1603,15 @@ namespace schiessbuch
             string strJahrgangsKlasse;
             switch (Jahrgangsklasse)
             {
-                case "Schützenklasse": strJahrgangsKlasse = "Jahrgangsklasse = 'Schützenklasse'"; break;
-                case "Damenklasse": strJahrgangsKlasse = "Jahrgangsklasse = 'Damenklasse'"; break;
+                case "Schützenklasse": strJahrgangsKlasse = "((Jahrgangsklasse = 'Schützenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'm'))"; break;
+                case "Damenklasse": strJahrgangsKlasse = "((Jahrgangsklasse = 'Damenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'w'))"; break;
                 case "Schülerklasse":
                 case "Jugendklasse": strJahrgangsKlasse = "(Jahrgangsklasse = 'Jugendklasse' OR Jahrgangsklasse = 'Schülerklasse')"; break;
-                case "Auflage": strJahrgangsKlasse = "1=1"; strAuflage = " Auflage"; break;
+                case "Auflage": strJahrgangsKlasse = "Jahrgangsklasse = 'Seniorenklasse'"; strAuflage = " Auflage"; break;
                 default: strJahrgangsKlasse = "1=1"; break;
             }
-            string grundgeruest_Frei = @"set @row=0;
-set @d1 = 'LG Koenig{3}';
+            string grundgeruest_Frei_Auflage = @"set @row=0;
+            set @d1 = 'LG Koenig{3}';
             set @d1a = 'LG';
             set @d2 = 'LP Koenig{3}';
             set @d2a = 'LP';
@@ -1637,78 +1621,129 @@ set @d1 = 'LG Koenig{3}';
                    Datum,
                    Teiler,
                    Jahrgangsklasse,
+                   Geschlecht,
                    Typ FROM(
                        SELECT
-               
                            Schuetze,
                            Datum,
                            MIN(Teiler) AS Teiler,
                            Jahrgangsklasse,
+                           Geschlecht,
                            Typ from(
                                select
-               
                                    fullname AS Schuetze,
                                    schuetzenliste.id as ID,
                                    Jahrgangsklasse AS Jahrgangsklasse,
+                                   Geschlecht,
                                    STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
                                    convert(ergebnis, unsigned integer) AS Teiler,
                                    @d1a AS Typ
-               
                                from
                                    schiessbuch
                                        inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
-               
                                    where
                                        disziplin = @d1
-               
                                        AND
-               
                                        concat('', ergebnis * 1) = ergebnis
-               
                                        AND
-               
                                        schiessjahrId = {0}
-               
                                        AND
-               
                                        {1}
                                     {2}
-               
                                UNION
-               
                                select
-               
                                    fullname AS Schuetze,
                                    schuetzenliste.id as ID,
                                    Jahrgangsklasse AS Jahrgangsklasse,
+                                   Geschlecht,
                                    STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
                                    convert(ROUND(ergebnis / 2.6, 0), unsigned integer) AS Teiler,
                                    @d2a AS Typ
-               
                                from
                                    schiessbuch inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
-               
                                where
                                    disziplin = @d2
-               
                                    AND
-               
                                    concat('', ergebnis * 1) = ergebnis
-               
                                    and
-               
                                    schiessjahrId = {0}
                                    AND
-               
                                    {1}
                                 {2}
                            ) T
-               
                        group by id
-               
                        order by Teiler ASC
                    ) T2";
-            return string.Format(grundgeruest_Frei, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, strAuflage);
+
+            string grundgeruest_Jugend_Schueler = @"set @row=0;
+            set @d1 = 'LG Koenig';
+            set @d1a = 'LG';
+            set @d2 = 'LG Koenig Auflage';
+            set @d2a = 'LGA';
+            select
+                @row:= @row + 1 AS Rang,
+                   Schuetze,
+                   Datum,
+                   Teiler,
+                   Jahrgangsklasse,
+                   Geschlecht,
+                   Typ FROM(
+                       SELECT
+                           Schuetze,
+                           Datum,
+                           MIN(Teiler) AS Teiler,
+                           Jahrgangsklasse,
+                           Geschlecht,
+                           Typ from(
+                               select
+                                   fullname AS Schuetze,
+                                   schuetzenliste.id as ID,
+                                   Jahrgangsklasse AS Jahrgangsklasse,
+                                   Geschlecht,
+                                   STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
+                                   convert(ergebnis, unsigned integer) AS Teiler,
+                                   @d1a AS Typ
+                               from
+                                   schiessbuch
+                                       inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
+                                   where
+                                       disziplin = @d1
+                                       AND
+                                       concat('', ergebnis * 1) = ergebnis
+                                       AND
+                                       schiessjahrId = {0}
+                                       AND
+                                       {1}
+                                    {2}
+                               UNION
+                               select
+                                   fullname AS Schuetze,
+                                   schuetzenliste.id as ID,
+                                   Jahrgangsklasse AS Jahrgangsklasse,
+                                   Geschlecht,
+                                   STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
+                                   convert(ergebnis, unsigned integer) AS Teiler,
+                                   @d2a AS Typ
+                               from
+                                   schiessbuch inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
+                               where
+                                   disziplin = @d2
+                                   AND
+                                   concat('', ergebnis * 1) = ergebnis
+                                   and
+                                   schiessjahrId = {0}
+                                   AND
+                                   {1}
+                                {2}
+                           ) T
+                       group by id
+                       order by Teiler ASC
+                   ) T2";
+            if (Jahrgangsklasse == "Jugendklasse" || Jahrgangsklasse == "Schülerklasse") {
+                return string.Format(grundgeruest_Jugend_Schueler, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter);
+            } else {
+                return string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, strAuflage);
+            }
         }
 
         
@@ -2019,6 +2054,10 @@ set @d1 = 'LG Koenig{3}';
         private void startUebersicht()
         {
             tmBildUpdateTimer.Start();
+            foreach (Ergebnisbild ereignisbild in ergebnisbilder)
+            {
+                ereignisbild.bIsChanged = true; // Nach dem Umstellen auf den Übersicht-Tab sollen alle Bilder nochmal neu gezeichnet werden - zur Sicherheit ;-)
+            }
             this.generateOverview = true;
         }
 
