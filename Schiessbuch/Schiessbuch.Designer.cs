@@ -558,8 +558,6 @@ namespace schiessbuch
             this.DatumJUG = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TeilerJUG = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TypJUG = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.KoenigTextBox = new System.Windows.Forms.TextBox();
             this.TagesAuswertung = new System.Windows.Forms.TabPage();
             this.btnKassenbericht = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
@@ -671,9 +669,6 @@ namespace schiessbuch
             this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SchrittText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.TestLG = new System.Windows.Forms.TabPage();
-            this.button6 = new System.Windows.Forms.Button();
-            this.TestPictureLG = new System.Windows.Forms.PictureBox();
             vereinLabel1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).BeginInit();
@@ -769,7 +764,6 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.KoenigAuflageGridView)).BeginInit();
             this.tableLayoutPanel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigJUGGridView)).BeginInit();
-            this.tabPage1.SuspendLayout();
             this.TagesAuswertung.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Schiessabend)).BeginInit();
             this.AuswertungTab.SuspendLayout();
@@ -787,8 +781,6 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferDataGridView)).BeginInit();
             this.tabControl1.SuspendLayout();
-            this.TestLG.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.TestPictureLG)).BeginInit();
             this.SuspendLayout();
             // 
             // vereinLabel1
@@ -5917,7 +5909,7 @@ namespace schiessbuch
             this.KoenigTab.Padding = new System.Windows.Forms.Padding(3);
             this.KoenigTab.Size = new System.Drawing.Size(952, 419);
             this.KoenigTab.TabIndex = 4;
-            this.KoenigTab.Text = "König 2";
+            this.KoenigTab.Text = "König";
             this.KoenigTab.UseVisualStyleBackColor = true;
             // 
             // splitContainerKoenig1
@@ -6310,25 +6302,6 @@ namespace schiessbuch
             this.TypJUG.Name = "TypJUG";
             this.TypJUG.ReadOnly = true;
             this.TypJUG.Width = 30;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.KoenigTextBox);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(952, 419);
-            this.tabPage1.TabIndex = 2;
-            this.tabPage1.Text = "König";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // KoenigTextBox
-            // 
-            this.KoenigTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.KoenigTextBox.Location = new System.Drawing.Point(0, 0);
-            this.KoenigTextBox.Multiline = true;
-            this.KoenigTextBox.Name = "KoenigTextBox";
-            this.KoenigTextBox.Size = new System.Drawing.Size(952, 419);
-            this.KoenigTextBox.TabIndex = 0;
             // 
             // TagesAuswertung
             // 
@@ -7698,52 +7671,17 @@ namespace schiessbuch
             this.tabControl1.Controls.Add(this.SchiessbuchTab);
             this.tabControl1.Controls.Add(this.AuswertungTab);
             this.tabControl1.Controls.Add(this.TagesAuswertung);
-            this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.KoenigTab);
             this.tabControl1.Controls.Add(this.wanderpokal);
             this.tabControl1.Controls.Add(this.tabStandUebersicht);
             this.tabControl1.Controls.Add(this.tabEinzelscheibe);
             this.tabControl1.Controls.Add(this.tabGemeindemeisterschaft);
-            this.tabControl1.Controls.Add(this.TestLG);
             this.tabControl1.Location = new System.Drawing.Point(12, 55);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(960, 445);
             this.tabControl1.TabIndex = 29;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
-            // 
-            // TestLG
-            // 
-            this.TestLG.Controls.Add(this.button6);
-            this.TestLG.Controls.Add(this.TestPictureLG);
-            this.TestLG.Location = new System.Drawing.Point(4, 22);
-            this.TestLG.Name = "TestLG";
-            this.TestLG.Padding = new System.Windows.Forms.Padding(3);
-            this.TestLG.Size = new System.Drawing.Size(952, 419);
-            this.TestLG.TabIndex = 9;
-            this.TestLG.Text = "Test (LG)";
-            this.TestLG.UseVisualStyleBackColor = true;
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(578, 7);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(112, 23);
-            this.button6.TabIndex = 1;
-            this.button6.Text = "Neuer Schuss";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // TestPictureLG
-            // 
-            this.TestPictureLG.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
-            this.TestPictureLG.Location = new System.Drawing.Point(6, 6);
-            this.TestPictureLG.Name = "TestPictureLG";
-            this.TestPictureLG.Size = new System.Drawing.Size(565, 407);
-            this.TestPictureLG.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.TestPictureLG.TabIndex = 0;
-            this.TestPictureLG.TabStop = false;
-            this.TestPictureLG.Paint += new System.Windows.Forms.PaintEventHandler(this.TestPictureLG_Paint);
             // 
             // Schiessbuch
             // 
@@ -7880,8 +7818,6 @@ namespace schiessbuch
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KoenigJUGGridView)).EndInit();
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.TagesAuswertung.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.Schiessabend)).EndInit();
             this.AuswertungTab.ResumeLayout(false);
@@ -7905,8 +7841,6 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferDataGridView)).EndInit();
             this.tabControl1.ResumeLayout(false);
-            this.TestLG.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.TestPictureLG)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -8091,8 +8025,6 @@ namespace schiessbuch
         private DataGridViewTextBoxColumn DatumJUG;
         private DataGridViewTextBoxColumn TeilerJUG;
         private DataGridViewTextBoxColumn TypJUG;
-        private TabPage tabPage1;
-        private TextBox KoenigTextBox;
         private TabPage TagesAuswertung;
         private Button btnKassenbericht;
         private Button button4;
@@ -8204,9 +8136,6 @@ namespace schiessbuch
         private DataGridViewTextBoxColumn id;
         private DataGridViewTextBoxColumn SchrittText;
         private TabControl tabControl1;
-        private TabPage TestLG;
-        private Button button6;
-        private PictureBox TestPictureLG;
         private TableLayoutPanel UebersichtTableLayoutPanel;
         private SplitContainer Stand1SplitContainer;
         private PictureBox stand1Zielscheibe;

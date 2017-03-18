@@ -731,14 +731,19 @@ namespace schiessbuch
         private bool bTimerUpdateStillRunning=false;
 
         private System.Windows.Forms.Timer tmBildUpdateTimer = new System.Windows.Forms.Timer();
-
+        bool bInRefreshTimerTick = false;
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            //  this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
-            //  this.RefreshTimerWorkerThread.Start();
+            if (!bInRefreshTimerTick)
+            {
+                bInRefreshTimerTick = true;
+                //  this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
+                //  this.RefreshTimerWorkerThread.Start();
 
-            //this.refreshTimerTickDelegate = new RefreshTimerTickDelegate(RefreshTimerWorker);
-            RefreshTimerWorker();
+                //this.refreshTimerTickDelegate = new RefreshTimerTickDelegate(RefreshTimerWorker);
+                RefreshTimerWorker();
+                bInRefreshTimerTick = false;
+            }
         }
 
         private void RefreshTimerWorker()
@@ -876,7 +881,7 @@ namespace schiessbuch
                 }
                 databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
                 bTimerUpdateStillRunning = false;
-            }
+            }   
         }
 
 
@@ -1601,19 +1606,8 @@ namespace schiessbuch
             }
 
             string strJahrgangsKlasse;
-            switch (Jahrgangsklasse)
-            {
-                case "Schützenklasse": strJahrgangsKlasse = "((Jahrgangsklasse = 'Schützenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'm'))"; break;
-                case "Damenklasse": strJahrgangsKlasse = "((Jahrgangsklasse = 'Damenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'w'))"; break;
-                case "Schülerklasse":
-                case "Jugendklasse": strJahrgangsKlasse = "(Jahrgangsklasse = 'Jugendklasse' OR Jahrgangsklasse = 'Schülerklasse')"; break;
-                case "Auflage": strJahrgangsKlasse = "Jahrgangsklasse = 'Seniorenklasse'"; strAuflage = " Auflage"; break;
-                default: strJahrgangsKlasse = "1=1"; break;
-            }
             string grundgeruest_Frei_Auflage = @"set @row=0;
-            set @d1 = 'LG Koenig{3}';
             set @d1a = 'LG';
-            set @d2 = 'LP Koenig{3}';
             set @d2a = 'LP';
             select
                 @row:= @row + 1 AS Rang,
@@ -1642,7 +1636,7 @@ namespace schiessbuch
                                    schiessbuch
                                        inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
                                    where
-                                       disziplin = @d1
+                                       disziplin IN {3}
                                        AND
                                        concat('', ergebnis * 1) = ergebnis
                                        AND
@@ -1662,7 +1656,7 @@ namespace schiessbuch
                                from
                                    schiessbuch inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
                                where
-                                   disziplin = @d2
+                                   disziplin IN {4}
                                    AND
                                    concat('', ergebnis * 1) = ergebnis
                                    and
@@ -1676,9 +1670,7 @@ namespace schiessbuch
                    ) T2";
 
             string grundgeruest_Jugend_Schueler = @"set @row=0;
-            set @d1 = 'LG Koenig';
             set @d1a = 'LG';
-            set @d2 = 'LG Koenig Auflage';
             set @d2a = 'LGA';
             select
                 @row:= @row + 1 AS Rang,
@@ -1707,7 +1699,7 @@ namespace schiessbuch
                                    schiessbuch
                                        inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
                                    where
-                                       disziplin = @d1
+                                       disziplin IN {3}
                                        AND
                                        concat('', ergebnis * 1) = ergebnis
                                        AND
@@ -1715,35 +1707,37 @@ namespace schiessbuch
                                        AND
                                        {1}
                                     {2}
-                               UNION
-                               select
-                                   fullname AS Schuetze,
-                                   schuetzenliste.id as ID,
-                                   Jahrgangsklasse AS Jahrgangsklasse,
-                                   Geschlecht,
-                                   STR_TO_DATE(datum, '%a %M %d %Y') AS Datum,
-                                   convert(ergebnis, unsigned integer) AS Teiler,
-                                   @d2a AS Typ
-                               from
-                                   schiessbuch inner join schuetzenliste on schuetzenliste.id = schiessbuch.id
-                               where
-                                   disziplin = @d2
-                                   AND
-                                   concat('', ergebnis * 1) = ergebnis
-                                   and
-                                   schiessjahrId = {0}
-                                   AND
-                                   {1}
-                                {2}
                            ) T
                        group by id
                        order by Teiler ASC
                    ) T2";
-            if (Jahrgangsklasse == "Jugendklasse" || Jahrgangsklasse == "Schülerklasse") {
-                return string.Format(grundgeruest_Jugend_Schueler, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter);
-            } else {
-                return string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, strAuflage);
+            string sqlString;
+            switch (Jahrgangsklasse)
+            {
+                case "Schützenklasse":
+                    strJahrgangsKlasse = "((Jahrgangsklasse = 'Schützenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'm'))";
+                    sqlString = string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, "('LG Koenig', 'LG Koenig SK', 'LG Koenig DK', 'LG Koenig JUG')", "('LP Koenig', 'LP Koenig SK', 'LP Koenig DK', 'LP Koenig JUG')");
+                    break;
+                case "Damenklasse":
+                    strJahrgangsKlasse = "((Jahrgangsklasse = 'Damenklasse') OR (Jahrgangsklasse = 'Seniorenklasse' AND Geschlecht = 'w'))";
+                    sqlString = string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, "('LG Koenig', 'LG Koenig SK', 'LG Koenig DK', 'LG Koenig JUG')", "('LP Koenig', 'LP Koenig SK', 'LP Koenig DK', 'LP Koenig JUG')");
+                    break;
+                case "Schülerklasse":
+                case "Jugendklasse":
+                    strJahrgangsKlasse = "(Jahrgangsklasse = 'Jugendklasse' OR Jahrgangsklasse = 'Schülerklasse')";
+                    sqlString = string.Format(grundgeruest_Jugend_Schueler, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, "('LG Koenig', 'LG Koenig SK', 'LG Koenig DK', 'LG Koenig JUG', 'LG Koenig Auflage', 'LG Koenig JUG Auflage')");
+                    //sqlString = string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, "('LG Koenig', 'LG Koenig SK', 'LG Koenig DK', 'LG Koenig JUG')", "('LP Koenig', 'LP Koenig SK', 'LP Koenig DK', 'LP Koenig JUG')");
+                    break;
+                case "Auflage":
+                    strJahrgangsKlasse = "Jahrgangsklasse = 'Seniorenklasse'"; strAuflage = " Auflage";
+                    sqlString = string.Format(grundgeruest_Frei_Auflage, aktuellesSchiessjahrID, strJahrgangsKlasse, ZeitFilter, "('LG Koenig Auflage', 'LG Koenig SK Auflage', 'LG Koenig DK Auflage', 'LG Koenig JUG Auflage')", "('LP Koenig Auflage', 'LP Koenig SK Auflage', 'LP Koenig DK Auflage', 'LP Koenig JUG Auflage')");
+                    break;
+                default: strJahrgangsKlasse = "1=1"; sqlString = ""; break;
             }
+
+
+            return sqlString;
+
         }
 
         
@@ -1752,7 +1746,6 @@ namespace schiessbuch
         /// </summary>
         private void UpdateKoenig()
         {
-            KoenigTextBox.Clear();
             KoenigSKGridView.Rows.Clear();
             KoenigDKGridView.Rows.Clear();
             KoenigJUGGridView.Rows.Clear();
@@ -1771,11 +1764,6 @@ namespace schiessbuch
                 MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
 
                 //MySqlDataReader reader = mysql.doMySqlReaderQuery("set @row=0;select @row:=@row+1 AS Rang, Schuetze, Teiler, Typ FROM (SELECT Schuetze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ergebnis, unsigned integer) AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LG Koenig' AND concat('',ergebnis * 1) = ergebnis UNION select CONCAT(name, ', ', vorname) AS Schuetze, schuetzen.id as ID, convert(ROUND (ergebnis / 2.6, 0), unsigned integer) AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin='LP Koenig' AND concat('',ergebnis * 1) = ergebnis) T GROUP BY ID ORDER BY Teiler ASC ) T2");
-                KoenigTextBox.Font = new Font("Courier New", 16);
-                while (reader.Read())
-                {
-                    KoenigTextBox.Text += String.Format("{0,3}  {1,-30}     {2,6}    {3,6}", reader["Rang"].ToString(), reader["Schuetze"].ToString(), reader["Teiler"].ToString(), reader["Typ"].ToString()) + Environment.NewLine;
-                }
                 //mysql.closeMySqlReaderQuery(reader);
                 reader.Close();
 
@@ -2355,6 +2343,7 @@ namespace schiessbuch
             catch (MySqlException mysqle)
             {
                 MessageBox.Show("Konnte MySQL-Datenbank nicht öffnen: " + mysqle.Message);
+                MessageBox.Show(mysqle.StackTrace);
             }
         }
 
@@ -3336,6 +3325,13 @@ namespace schiessbuch
             {
                 SetTextAcrossThread(((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]), "kein Schütze");
                 // ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel2.Controls["txtSchuetzeStand" + strStand]).Text = "kein Schütze";
+            }
+            catch (MySqlException e)
+            {
+                MessageBox.Show("Fehler beim Lesen von Daten aus der Datenbank.");
+                MessageBox.Show("Fehler: " + e.Message);
+                MessageBox.Show("Stack:" + e.StackTrace);
+                MessageBox.Show("Connection string: " + connStr);
             }
             conn.Clone();
             conn.Dispose();
@@ -4476,7 +4472,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             if (testLGTreffer[0].Count > 0)
             {
                 Graphics g = e.Graphics;
-                ZeichneTrefferInZielscheibe(TestPictureLG, g, 0, testLGTreffer, StandZielscheiben, false);
+                //ZeichneTrefferInZielscheibe(TestPictureLG, g, 0, testLGTreffer, StandZielscheiben, false);
                 g.Dispose();
             }
             
@@ -4506,7 +4502,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
             if (iTestLGSchussNummer == 18) testLGTreffer[0].Clear();
             testLGTreffer[0].Add(si);
-            TestPictureLG.Invalidate();
+            //TestPictureLG.Invalidate();
         }
 
         private void schiessbuchDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs anError)
@@ -4579,7 +4575,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
         {
             MySqlConnection _conn;
             string strMySQLServer = Properties.Settings.Default.MySQLServer;
-            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=1;", strMySQLServer);
+            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=10;", strMySQLServer);
             _conn = new MySqlConnection(connStr);
             try
             {
@@ -4597,7 +4593,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     strMySQLServer = altServer.tbAlternativeServer.Text;
                 }
             }
-            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=1;", strMySQLServer);
+            connStr = string.Format("server={0};user id=siusclub;password=siusclub;database=siusclub;persistsecurityinfo=True;Allow User Variables=true;Connection Timeout=10;", strMySQLServer);
             _conn.ConnectionString = connStr;
             try
             {
@@ -4748,17 +4744,22 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             //schiessbuchDataGridView.Invalidate();
             schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
         }
-
+        bool bInTmBildUpdateTimer = false;
         private void TmBildUpdateTimer_Tick(object sender, EventArgs e)
         {
-            PictureBox pb;
-            string strControlName;
-            for (int i = 0; i < 6; i++)
+            if (!bInTmBildUpdateTimer)
             {
-                strControlName = "stand" + (i+1).ToString() + "Zielscheibe";
+                bInTmBildUpdateTimer = true;
+                PictureBox pb;
+                string strControlName;
+                for (int i = 0; i < 6; i++)
+                {
+                    strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
 
-                pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
+                    CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                }
+                bInTmBildUpdateTimer = false;
             }
         }
 
