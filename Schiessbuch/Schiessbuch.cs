@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -267,11 +268,11 @@ namespace schiessbuch
             strSchuetzenListeBindingSourceFilter = "  Jahr = '" + dtJahrBeginn.ToString("yyyy") + "'";
             schuetzenListeBindingSource.Filter = strSchuetzenListeBindingSourceFilter;
 
+            schuetzenlisteschiessbuchBindingSource.ResetBindings(true);
             if (dtJahrBeginn == dtJahrEnde)
                 schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "'";
             else
                 schuetzenlisteschiessbuchBindingSource.Filter = "dt >= '" + dtJahrBeginn.ToShortDateString() + "' AND dt < '" + dtJahrEnde.ToShortDateString() + "'";
-
         }
 
         /// <summary>
@@ -453,7 +454,7 @@ namespace schiessbuch
             // Erzeuge Auswertungen
             MySqlConnection conn = new MySqlConnection(connStr);
             conn.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC", conn);
+            MySqlCommand cmd = new MySqlCommand("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT CONVERT(ergebnis,UNSIGNED) AS Ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND (status='beendet' OR status='manuell')" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC", conn);
             MySqlDataReader reader = cmd.ExecuteReader();
             //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strSelectedSchiessjahr + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY Date DESC");
@@ -468,7 +469,7 @@ namespace schiessbuch
             while (reader.Read())
             {
                 zaehler++;
-                string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine, zaehler);
+                string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"].ToString(), Environment.NewLine, zaehler);
                 textbox.Text += line;
             }
             textbox.Text += "--------------------";
@@ -483,7 +484,7 @@ namespace schiessbuch
                     strFullNameComboBoxValue = fullnameComboBox.SelectedValue.ToString();
             });
 
-            cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter;
+            cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND (status='beendet' OR status='manuell')" + strSchiessjahrFilter;
             reader = cmd.ExecuteReader();
             //reader = mysql.doMySqlReaderQuery("SELECT COUNT(*) AS count, SUM(ergebnis) AS summe, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + strFullNameComboBoxValue + "' AND status='beendet'" + strSchiessjahrFilter);
             while (reader.Read())
@@ -522,7 +523,7 @@ namespace schiessbuch
                     strDisziplin +
                     "' AND id='" +
                     strFullNameComboBoxValue +
-                    "' AND status='beendet'" +
+                    "' AND (status='beendet' OR status='manuell') " +
                     strSchiessjahrFilter +
                     ") T;", conn);
             // Erzeuge Auswertungen
@@ -541,7 +542,7 @@ namespace schiessbuch
             //    out Wertungen);
             if (Wertungen >= 15)
             {
-                cmd.CommandText = "SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15";
+                cmd.CommandText = "SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT CONVERT(ergebnis,UNSIGNED) AS Ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND (status='beendet' OR status='manuell')" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15";
                 MySqlDataReader reader = cmd.ExecuteReader();
                 // MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15");
                 textbox.Text = Zeile1 + Environment.NewLine;
@@ -555,20 +556,23 @@ namespace schiessbuch
                 while (reader.Read())
                 {
                     zaehler++;
-                    string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"], Environment.NewLine, zaehler);
+                    string line = String.Format("{3,2}. {0:dd.MM.yyyy}   {1:6}{2}", reader["Date"], reader["ergebnis"].ToString(), Environment.NewLine, zaehler);
                     textbox.Text += line;
                 }
                 textbox.Text += "--------------------";
                 textbox.Text += Environment.NewLine;
                 reader.Close();
                 //cmd.CommandText = "SELECT COUNT(*) AS count, SUM(ergebnis) AS summe FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet' GROUP BY id ORDER";
-                cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
+                cmd.CommandText = "SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT CONVERT(ergebnis,UNSIGNED) AS Ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND (status='beendet' OR status='manuell')" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2";
                 //reader = mysql.doMySqlReaderQuery("SELECT SUM(ergebnis) AS summe FROM (SELECT MAX(ergebnis) AS ergebnis, Date FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + strDisziplin + "' AND id='" + fullnameComboBox.SelectedValue + "' AND status='beendet'" + strSchiessjahrFilter + ") T GROUP BY Date ORDER BY ergebnis DESC LIMIT 15) T2");
                 reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     if (reader["summe"] != System.DBNull.Value)
-                        textbox.Text += String.Format("Summe: {0:7}", reader["summe"].ToString());
+                    {
+                        textbox.Text += String.Format("Summe: {0,9}", reader["summe"].ToString()) + Environment.NewLine;
+                        textbox.Text += String.Format("Durchschnit: {0:0.00}", float.Parse(reader["summe"].ToString()) / 15.0);
+                    }
                 }
                 //mysql.closeMySqlReaderQuery(reader);
                 reader.Close();
@@ -730,7 +734,29 @@ namespace schiessbuch
         private RefreshTimerTickDelegate refreshTimerTickDelegate = null;
         private bool bTimerUpdateStillRunning=false;
 
-        private System.Windows.Forms.Timer tmBildUpdateTimer = new System.Windows.Forms.Timer();
+        //private System.Windows.Forms.Timer tmBildUpdateTimer = new System.Windows.Forms.Timer();
+        private static System.Threading.Timer tmBildUpdateTimer;
+
+        private void BildUpdateTimerCallback(object state)
+        {  
+            if (!bInTmBildUpdateTimer)
+            {
+                bInTmBildUpdateTimer = true;
+                PictureBox pb;
+                string strControlName;
+                for (int i = 0; i < 6; i++)
+                {
+                    strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
+
+                    pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
+                    CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                }
+                bInTmBildUpdateTimer = false;
+            }
+
+//            throw new NotImplementedException();
+        }
+
         bool bInRefreshTimerTick = false;
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
@@ -909,10 +935,38 @@ namespace schiessbuch
             {
 
                 MessageBox.Show("Keine Verbindung zum Schießstand-Computer. Aktualisierung wurde abgeschaltet.\nUm sie wieder einzuschalten, bitte im Reiter \"Schiessbuch\" die Schaltfläche mit den grünen Pfeilen wieder drücken.");
-                DoUpdates.Checked = false;
+                SetControlPropertyThreadSafe(DoUpdates, "Checked", false);
+                //DoUpdates.Checked = false;
             }            // Zeichne die richtigen Zielscheiben
             for (int iStand = 0; iStand < 6; iStand++)
                 this.setzeZielscheibeInUebersicht(iStand);
+        }
+
+        private delegate void SetControlPropertyThreadSafeDelegate(
+            Control control,
+            string propertyName,
+            object propertyValue);
+
+        public static void SetControlPropertyThreadSafe(
+            Control control,
+            string propertyName,
+            object propertyValue)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetControlPropertyThreadSafeDelegate
+                (SetControlPropertyThreadSafe),
+                new object[] { control, propertyName, propertyValue });
+            }
+            else
+            {
+                control.GetType().InvokeMember(
+                    propertyName,
+                    BindingFlags.SetProperty,
+                    null,
+                    control,
+                    new object[] { propertyValue });
+            }
         }
 
         private void UpdateStandTrefferDaten(int stand)
@@ -1099,7 +1153,7 @@ namespace schiessbuch
                 graphics = Graphics.FromImage(ergebnis.bild);
                 ergebnis.fMaxX = 0.0f;
                 ergebnis.fMaxY = 0.0f;
-                foreach (SchussInfo info in trefferliste[stand])
+                foreach (SchussInfo info in trefferliste[stand].ToList())
                 {
                     trefferZaehler++;
                     if (trefferZaehler > anzeigenAb)
@@ -1120,7 +1174,7 @@ namespace schiessbuch
                         else
                             AbstandVonMitteY = (info.yrahmeninmm + (kaliber / 2f)) * millimeterToPixel;
 
-                        ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "";
+                        SetControlPropertyThreadSafe(((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()], "Text", "");
                         if (Math.Abs(AbstandVonMitteX) > ergebnis.fMaxX) ergebnis.fMaxX = Math.Abs(AbstandVonMitteX);
                         if (Math.Abs(AbstandVonMitteY) > ergebnis.fMaxY) ergebnis.fMaxY = Math.Abs(AbstandVonMitteY);
                         if (info == trefferliste[stand].Last<SchussInfo>())
@@ -1138,7 +1192,7 @@ namespace schiessbuch
                         if (info.probe)
                         {
                             brush = new SolidBrush(Color.FromArgb(120, Color.Blue));
-                            ((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()].Text = "Probe";
+                            SetControlPropertyThreadSafe(((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["lblProbe" + stand1.ToString()], "Text", "Probe");
                         }
 
                         Rectangle rect = new Rectangle(
@@ -1592,6 +1646,36 @@ namespace schiessbuch
                 ((Label)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + stand1.ToString() + "SplitContainer"]).Panel2.Controls["txtSchussStand" + stand1.ToString()]).Text = iSumme.ToString();
         }
 
+        private void GenerateJahresübersichtVereinsmeister()
+        {
+            string sql;
+            string ZeitFilter;
+            
+            if (dtJahrBeginn == dtJahrEnde) // aktuelles Jahr?
+            {
+                ZeitFilter = " HAVING Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' ";
+            } else {
+                ZeitFilter = " HAVING (Date >= '" + dtJahrBeginn.ToString("yyyy-MM-dd") + "' AND Datum < '" + dtJahrEnde.ToString("yyyy-MM-dd") + "') ";
+            }
+            sql = "SELECT schuetzenliste.id, fullname, disziplin, COUNT(*) AS Wertungen FROM (SELECT DISTINCT id, disziplin, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch where (status = 'beendet' OR status='manuell') " + ZeitFilter + " ) T inner join schuetzenliste on T.id = schuetzenliste.id where SchiessjahrID = 4 group by fullname, disziplin";
+            Vereinsmeisterübersicht vmu = new Vereinsmeisterübersicht();
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+            //MySqlDataReader reader = cmd.ExecuteReader();
+            vmu.VereinsmeisterDGV.AutoGenerateColumns = true;
+            vmu.VereinsmeisterDGV.DataSource = dt;
+            vmu.VereinsmeisterDGV.Refresh();
+            //vmu.VereinsmeisterDGV.DataMember
+            vmu.ShowDialog();
+            //reader.Close();
+            
+            conn.Close();
+        }
+
         private string GenerateKoenigSQLStatement(string Jahrgangsklasse)
         {
             string ZeitFilter;
@@ -1790,16 +1874,16 @@ namespace schiessbuch
                 int row = 0;
                 while (reader.Read())
                 {
-                    if (KoenigSKGridView.InvokeRequired)
-                    {
-                        KoenigSKGridView.BeginInvoke(
-                            new MethodInvoker(
-                                delegate () { row = FillSchuetzenklasseDGV(reader); }));
-                    }
-                    else
-                    {
+//                   if (KoenigSKGridView.InvokeRequired)
+//                    {
+//                        KoenigSKGridView.BeginInvoke(
+//                            new MethodInvoker(
+//                                delegate () { row = FillSchuetzenklasseDGV(reader); }));
+//                    }
+//                    else
+//                    {
                         row = FillSchuetzenklasseDGV(reader);
-                    }
+//                    }
                     
                 }
                 reader.Close();
@@ -1812,16 +1896,16 @@ namespace schiessbuch
                 row = 0;
                 while (reader.Read())
                 {
-                    if (KoenigSKGridView.InvokeRequired)
-                    {
-                        KoenigSKGridView.BeginInvoke(
-                            new MethodInvoker(
-                                delegate () { row = FillDamenklasseDGV(reader); }));
-                    }
-                    else
-                    {
+//                    if (KoenigSKGridView.InvokeRequired)
+//                    {
+//                        KoenigSKGridView.BeginInvoke(
+//                            new MethodInvoker(
+//                                delegate () { row = FillDamenklasseDGV(reader); }));
+//                    }
+//                    else
+//                    {
                         row = FillDamenklasseDGV(reader);
-                    }
+//                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
@@ -1832,16 +1916,16 @@ namespace schiessbuch
                 row = 0;
                 while (reader.Read())
                 {
-                    if (KoenigSKGridView.InvokeRequired)
-                    {
-                        KoenigSKGridView.BeginInvoke(
-                            new MethodInvoker(
-                                delegate () { row = FillJugendklasseDGV(reader); }));
-                    }
-                    else
-                    {
+//                    if (KoenigSKGridView.InvokeRequired)
+//                    {
+//                        KoenigSKGridView.BeginInvoke(
+//                            new MethodInvoker(
+//                                delegate () { row = FillJugendklasseDGV(reader); }));
+//                    }
+//                    else
+//                    {
                         row = FillJugendklasseDGV(reader);
-                    }
+//                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
@@ -1852,16 +1936,16 @@ namespace schiessbuch
                 row = 0;
                 while (reader.Read())
                 {
-                    if (KoenigSKGridView.InvokeRequired)
-                    {
-                        KoenigSKGridView.BeginInvoke(
-                            new MethodInvoker(
-                                delegate () { row = FillAuflageDGV(reader); }));
-                    }
-                    else
-                    {
+//                    if (KoenigSKGridView.InvokeRequired)
+//                    {
+//                        KoenigSKGridView.BeginInvoke(
+//                            new MethodInvoker(
+//                                delegate () { row = FillAuflageDGV(reader); }));
+//                    }
+//                    else
+//                    {
                         row = FillAuflageDGV(reader);
-                    }
+//                    }
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
@@ -1968,12 +2052,16 @@ namespace schiessbuch
             if (DoUpdates.Checked)
             {
                 DoUpdates.Image = Properties.Resources.refresh40;
-                RefreshTimer.Start();
+                RefreshTimer.Change(0, (int)(Properties.Settings.Default.TimerInterval * 1000));
+                RefreshTimerRunning = true;
+                //RefreshTimer.Start();
             }
             else
             {
                 DoUpdates.Image = Properties.Resources.refresh40bw;
-                RefreshTimer.Stop();
+                RefreshTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                RefreshTimerRunning = false;
+                //RefreshTimer.Stop();
             }
         }
 
@@ -2009,11 +2097,14 @@ namespace schiessbuch
             // Aktualisierung nichts.
             this.stopUebersicht();
             this.stopEinzelScheibe();
-            tmBildUpdateTimer.Stop();
+            tmBildUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
             if (tabControl1.SelectedTab.Text.Equals("Tagesauswertung"))
-                ErstelleAuswertung();
+                if (!ErstelleAuswertungBackgroundWorker.IsBusy)
+                    ErstelleAuswertungBackgroundWorker.RunWorkerAsync();
+            if (tabControl1.SelectedTab.Text.Equals("Jahrespokal"))
+                BerechneJahrespokal();
             if (tabControl1.SelectedTab.Text.Equals("Übersicht"))
                 startUebersicht();
             if (tabControl1.SelectedTab.Text.Equals("Gemeindemeisterschaft"))
@@ -2022,6 +2113,351 @@ namespace schiessbuch
                 tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
             else
                 startEinzelScheibe();
+        }
+
+        private void BerechneJahrespokal()
+        {
+            string strSqlJahresPokalErwachsene = @"SELECT 
+	Datum,
+    DatumZeit,
+    Schuetze,
+    name,
+    vorname,
+    Geschlecht,
+    Jahrgangsklasse,
+    -- Teiler,
+    MIN(korrigiert) as korrigiert,
+    disziplin
+FROM
+(
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis AS korrigiert,
+        'LG' AS disziplin
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, 
+            name, 
+            vorname, 
+            geschlecht, 
+            Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LG Jahrespokal' AND
+            (Jahrgangsklasse='Seniorenklasse' OR Jahrgangsklasse='Schützenklasse' OR Jahrgangsklasse='Damenklasse')
+		
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+	@") T1
+	group by 
+		DATE(Date), Schuetze
+        
+    UNION ALL
+    
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis * 2 AS korrigiert,
+        'LGA'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LG Jahrespokal Auflage' AND
+            Jahrgangsklasse='Seniorenklasse'
+		 
+			" + strSchiessjahrFilter + //date >= '2016-04-08' 
+	@") T2
+	group by 
+		DATE(Date), Schuetze
+    
+	UNION ALL
+        
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis / 2.6 AS korrigiert,
+        'LP'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LP Jahrespokal' AND
+            (Jahrgangsklasse='Seniorenklasse' OR Jahrgangsklasse='Schützenklasse' OR Jahrgangsklasse='Damenklasse')
+		 
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+	@") T3
+	group by 
+		DATE(Date), Schuetze
+        
+	UNION ALL
+        
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis / 2.6 * 2 AS korrigiert,
+        'LPA'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LP Jahrespokal Auflage' AND
+            Jahrgangsklasse='Seniorenklasse'
+		 
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+	@") T4
+	group by 
+		DATE(Date), Schuetze
+        
+) T5
+GROUP BY
+	Schuetze
+ORDER BY
+	korrigiert ASC";
+
+            string strSqlJahresPokalJugend = @"SELECT 
+	Datum,
+    DatumZeit,
+    Schuetze,
+    name,
+    vorname,
+    Geschlecht,
+    Jahrgangsklasse,
+    -- Teiler,
+    MIN(korrigiert) as korrigiert,
+    disziplin
+FROM
+(
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis AS korrigiert,
+        'LG' AS disziplin
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, 
+            name, 
+            vorname, 
+            geschlecht, 
+            Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LG Jahrespokal' AND
+            Jahrgangsklasse='Jugendklasse'
+		
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+    @") T1
+	group by 
+		DATE(Date), Schuetze
+        
+    UNION ALL
+    
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis * 2 AS korrigiert,
+        'LGA'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LG Jahrespokal Auflage' AND
+            Jahrgangsklasse='Jugendklasse'
+		 
+			" + strSchiessjahrFilter + //date >= '2016-04-08' 
+    @") T2
+	group by 
+		DATE(Date), Schuetze
+    
+	UNION ALL
+        
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis / 2.6 AS korrigiert,
+        'LP'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LP Jahrespokal' AND
+            Jahrgangsklasse='Jugendklasse'
+		 
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+    @") T3
+	group by 
+		DATE(Date), Schuetze
+        
+	UNION ALL
+        
+	select 
+		min(TIME(Date)) AS Datum, 
+		Date AS DatumZeit, 
+		Schuetze, 
+        name,
+        vorname,
+        Geschlecht,
+        Jahrgangsklasse,
+		Ergebnis AS Teiler,
+        Ergebnis / 2.6 * 2 AS korrigiert,
+        'LPA'
+	FROM
+	(
+		select 
+			schiessbuch.id AS Schuetze, 
+			CONVERT(ergebnis,UNSIGNED) AS Ergebnis, 
+			disziplin, name, vorname, Geschlecht, Jahrgangsklasse,
+			STR_TO_DATE(datum, '%a %M %d %Y %H:%i:%s') AS Date 
+		from 
+			schiessbuch inner join 
+				schuetzenliste 
+				on schuetzenliste.id=schiessbuch.id 
+		where 
+			(status='beendet' or status='manuell') and 
+			schiessjahrId=" + aktuellesSchiessjahrID + @" and 
+			disziplin='LP Jahrespokal Auflage' AND
+            Jahrgangsklasse='Jugendklasse'
+		 
+			" + strSchiessjahrFilter + // date >= '2016-04-08' 
+    @") T4
+	group by 
+		DATE(Date), Schuetze
+        
+) T5
+GROUP BY
+	Schuetze
+ORDER BY
+	korrigiert ASC";
+
+            MySqlConnection conn = new MySqlConnection(connStr);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand(strSqlJahresPokalErwachsene, conn);
+            MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+            JahrespokalErwachseneDGV.AutoGenerateColumns = true;
+            JahrespokalErwachseneDGV.DataSource = dt;
+            JahrespokalErwachseneDGV.Refresh();
+
+            cmd.CommandText = strSqlJahresPokalJugend;
+            MySqlDataAdapter JugendAdapter = new MySqlDataAdapter(cmd);
+            DataTable dtJugend = new DataTable();
+            JugendAdapter.Fill(dtJugend);
+            JahrespokalJugendDGV.AutoGenerateColumns = true;
+            JahrespokalJugendDGV.DataSource = dtJugend;
+            JahrespokalJugendDGV.Refresh();
+
+
         }
 
         private void startEinzelScheibe()
@@ -2041,7 +2477,9 @@ namespace schiessbuch
 
         private void startUebersicht()
         {
-            tmBildUpdateTimer.Start();
+            tmBildUpdateTimer.Change(0, 2000);
+            //TmBildUpdateTimer_Tick(null, null);
+            //tmBildUpdateTimer.Start();
             foreach (Ergebnisbild ereignisbild in ergebnisbilder)
             {
                 ereignisbild.bIsChanged = true; // Nach dem Umstellen auf den Übersicht-Tab sollen alle Bilder nochmal neu gezeichnet werden - zur Sicherheit ;-)
@@ -2198,29 +2636,85 @@ namespace schiessbuch
             }
         }
 
+        public delegate void AddColumnToDGV(DataGridViewColumn col);
+        void AddColumnToSchiessabendDGV(DataGridViewColumn col)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new AddColumnToDGV(AddColumnToSchiessabendDGV), col);
+            } else
+            {
+                Schiessabend.Columns.Add(col);
+            }
+        }
+
+        public delegate void AddColumnsToDGV(List<DataGridViewColumn> cols);
+        void AddColumnsToSchiessabendDGV(List<DataGridViewColumn> cols)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new AddColumnsToDGV(AddColumnsToSchiessabendDGV), cols);
+            }
+            else
+            {
+                Schiessabend.Columns.AddRange(cols.ToArray());
+            }
+        }
+
+        public delegate void ClearColumnsDGV();
+        void ClearColumnsFromSchiessabendDGV()
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new ClearColumnsDGV(ClearColumnsFromSchiessabendDGV));
+            }
+            else
+                Schiessabend.Columns.Clear();
+        }
+
+        public delegate void AddMultipleRowsDGV(List<DataGridViewRow> rows);
+        void AddRowsToSchiessabendDGV(List<DataGridViewRow> rows)
+        {
+            if (this.InvokeRequired)
+            {
+                try
+                {
+                    this.BeginInvoke(new AddMultipleRowsDGV(AddRowsToSchiessabendDGV), rows);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Exception");
+                }
+            }
+            else
+            {
+                Schiessabend.Rows.AddRange(rows.ToArray());
+            }
+        }
+
         private void ErstelleAuswertung()
         {
-            Schiessabend.Columns.Clear();
-            DataGridViewColumn col_id = new DataGridViewColumn();
-            DataGridViewColumn col_name = new DataGridViewColumn();
-            DataGridViewColumn col_vorname = new DataGridViewColumn();
+            
+            DataGridViewColumn col_id = new DataGridViewTextBoxColumn();
+            DataGridViewColumn col_name = new DataGridViewTextBoxColumn();
+            DataGridViewColumn col_vorname = new DataGridViewTextBoxColumn();
             col_id.Name = "ID";
             DataGridViewCell cell = new DataGridViewTextBoxCell();
             col_id.CellTemplate = cell;
             col_id.Width = 20;
             col_id.ReadOnly = true;
-            Schiessabend.Columns.Add(col_id);
+
+            
+
             col_name.Name = "Name";
             col_name.CellTemplate = cell;
             col_name.ReadOnly = true;
-            Schiessabend.Columns.Add(col_name);
+            //Schiessabend.Columns.Add(col_name);
             col_vorname.Name = "Vorname";
             col_vorname.CellTemplate = cell;
             col_vorname.ReadOnly = true;
-            Schiessabend.Columns.Add(col_vorname);
-            col_id.Dispose();
-            col_name.Dispose();
-            col_vorname.Dispose();
+
+            //Schiessabend.Enabled = false;
             //MessageBox.Show(Properties.Settings.Default.siusclubConnectionString);
             MySqlConnection conn = new MySqlConnection(connStr);
             //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
@@ -2233,21 +2727,24 @@ namespace schiessbuch
                 //MySqlDataReader reader = mysql.doMySqlReaderQuery("SELECT DISTINCT DISZIPLIN, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch HAVING Date='" + filterDateStr + "'");
                 //DataGridViewColumn[] cols = new DataGridViewColumnCollection();
                 int i = 0;
-                Schiessabend.SuspendLayout();
+                //Schiessabend.SuspendLayout();
+                List<DataGridViewColumn> dgvColsList = new List<DataGridViewColumn>();
                 while (reader.Read())
                 {
-                    DataGridViewColumn col = new DataGridViewColumn();
+                    DataGridViewColumn col = new DataGridViewTextBoxColumn();
                     col.Name = reader["disziplin"].ToString();
                     col.CellTemplate = cell;
                     col.ReadOnly = true;
-                    Schiessabend.Columns.Add(col);
+                    //Schiessabend.Columns.Add(col);
+                    dgvColsList.Add(col);
+
                     i++;
                     col.Dispose();
                 }
                 reader.Close();
                 //mysql.closeMySqlReaderQuery(reader);
 
-                DataGridViewColumn colKasse = new DataGridViewColumn();
+                DataGridViewColumn colKasse = new DataGridViewTextBoxColumn();
                 colKasse.Name = "Kasse";
                 colKasse.HeaderText = "Kasse";
                 colKasse.CellTemplate = cell;
@@ -2262,16 +2759,15 @@ namespace schiessbuch
                 colKasse.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.Yellow;
                 colKasse.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.Black;
 
-                Schiessabend.Columns.Add(colKasse);
-                colKasse.Dispose();
 
                 //reader.Dispose();
                 //cmd.Cancel();
                 //cmd.Dispose();
-                Schiessabend.SuspendLayout();
+                //Schiessabend.SuspendLayout();
                 //mysql.doMySqlReaderQuery("SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' OR status='manuell' HAVING Date='" + filterDateStr + "' ORDER BY name, vorname");
                 cmd.CommandText = "SELECT DISTINCT schuetzen.id as SID, name, vorname, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id WHERE status='beendet' OR status='manuell' HAVING Date='" + filterDateStr + "' ORDER BY name, vorname";
                 reader = cmd.ExecuteReader(CommandBehavior.Default);
+                List<DataGridViewRow> dgvRows = new List<DataGridViewRow>();
                 while (reader.Read())
                 {
                     //DataGridViewRow row = n
@@ -2280,8 +2776,15 @@ namespace schiessbuch
                     //row.Cells["Vorname"].Value = reader["vorname"];
 
                     // Die ersten drei Spalten stehen fest. Alles ab Spalte 4 ist eine Disziplin
-                    int disziplinen = Schiessabend.Columns.Count - 3;
-                    int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
+                    int disziplinen = i; // Schiessabend.Columns.Count - 4;
+                    //int newRow = Schiessabend.Rows.Add(reader["SID"], reader["name"], reader["vorname"]);
+                    DataGridViewRow dgvr = new DataGridViewRow();
+                    DataGridViewCell c1 = new DataGridViewTextBoxCell(); c1.Value = reader["SID"];
+                    DataGridViewCell c2 = new DataGridViewTextBoxCell(); c2.Value = reader["name"];
+                    DataGridViewCell c3 = new DataGridViewTextBoxCell(); c3.Value = reader["vorname"];
+                    dgvr.Cells.Add(c1);
+                    dgvr.Cells.Add(c2);
+                    dgvr.Cells.Add(c3);
 
                     MySqlConnection conn2 = new MySqlConnection(connStr);
                     conn2.Open();
@@ -2290,7 +2793,7 @@ namespace schiessbuch
                     {
 
                         //MessageBox.Show(Schiessabend.Columns[j + 3].Name);
-                        string cmdstr = "select MAX(CONVERT(ergebnis, UNSIGNED INTEGER)) AS ergebnis FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + Schiessabend.Columns[j + 3].Name + "' AND id='" + reader["SID"] + "' AND (status='beendet' OR status='manuell') HAVING Date='" + filterDateStr + "') T";
+                        string cmdstr = "select MAX(CONVERT(ergebnis, UNSIGNED INTEGER)) AS ergebnis FROM (SELECT ergebnis, STR_TO_DATE(datum, '%a %M %d %Y') AS Date FROM schiessbuch WHERE disziplin='" + /* Schiessabend.Columns[j + 3].Name */ dgvColsList[j].Name + "' AND id='" + reader["SID"] + "' AND (status='beendet' OR status='manuell') HAVING Date='" + filterDateStr + "') T";
                         MySqlCommand cmd2 = new MySqlCommand(cmdstr, conn2);
                         reader2 = cmd2.ExecuteReader();
                         int count = 0;
@@ -2312,7 +2815,11 @@ namespace schiessbuch
                         //conn2.Close();
                         //conn2.Dispose();
 
-                        Schiessabend[j + 3, newRow].Value = result;
+                        //Schiessabend[j + 3, newRow].Value = result;
+                        DataGridViewTextBoxCell cX = new DataGridViewTextBoxCell();
+                        cX.Value = result;
+                        dgvr.Cells.Add(cX);
+                        //dgvr.Cells[j + 3].Value = result;
 
                     }
                     // Betrag anzeigen
@@ -2324,12 +2831,34 @@ namespace schiessbuch
                         fBetrag = 0f;
                     else
                         if (!float.TryParse(o.ToString(), out fBetrag)) fBetrag = 0f;
-                    Schiessabend["Kasse", newRow].Value = fBetrag;
+                    //Schiessabend["Kasse", newRow].Value = fBetrag;
+                    DataGridViewTextBoxCell cX2 = new DataGridViewTextBoxCell();
+                    cX2.Value = fBetrag;
+                    dgvr.Cells.Add(cX2);
+                    //dgvr.Cells["Kasse"].Value = fBetrag;
                     cmd3.Cancel();
                     cmd3.Dispose();
                     conn2.Close();
                     MySqlConnection.ClearPool(conn2);
+                    dgvRows.Add(dgvr);
                 }
+                //Schiessabend.Columns.Add(colKasse);
+                ClearColumnsFromSchiessabendDGV();
+                AddColumnToSchiessabendDGV(col_id);
+                AddColumnToSchiessabendDGV(col_name);
+                AddColumnToSchiessabendDGV(col_vorname);
+                //Schiessabend.Columns.Add(col_vorname);
+                col_id.Dispose();
+                col_name.Dispose();
+                col_vorname.Dispose();
+                if (dgvColsList.Count > 0)
+                    AddColumnsToSchiessabendDGV(dgvColsList);
+                AddColumnToSchiessabendDGV(colKasse);
+                colKasse.Dispose();
+
+
+                if (dgvRows.Count > 0)
+                    AddRowsToSchiessabendDGV(dgvRows);
                 //mysql.closeMySqlReaderQuery(reader);
                 reader.Close();
                 reader.Dispose();
@@ -2338,7 +2867,8 @@ namespace schiessbuch
                 conn.Close();
                 conn.Dispose();
                 MySqlConnection.ClearPool(conn);
-                Schiessabend.ResumeLayout();
+                //Schiessabend.ResumeLayout();
+                //Schiessabend.Enabled= true;
             }
             catch (MySqlException mysqle)
             {
@@ -2349,7 +2879,11 @@ namespace schiessbuch
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            ErstelleAuswertung();
+            //BackgroundWorker bw = new BackgroundWorker();
+            //bw.t
+            //ErstelleAuswertung();
+            if (!ErstelleAuswertungBackgroundWorker.IsBusy)
+                ErstelleAuswertungBackgroundWorker.RunWorkerAsync();
         }
 
         private void pd_PrintPage(object sender, PrintPageEventArgs ev)
@@ -2822,7 +3356,8 @@ namespace schiessbuch
 
         private void button4_Click(object sender, EventArgs e)
         {
-            ErstelleAuswertung();
+            if (!ErstelleAuswertungBackgroundWorker.IsBusy)
+                ErstelleAuswertungBackgroundWorker.RunWorkerAsync();
         }
 
         private void btnKassenbericht_Click(object sender, EventArgs e)
@@ -3559,7 +4094,8 @@ namespace schiessbuch
         private void Schiessbuch_FormClosing(object sender, FormClosingEventArgs e)
         {
             DoUpdates.Checked = false;
-            tmBildUpdateTimer.Stop();
+            //tmBildUpdateTimer.Stop();
+            tmBildUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
             DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (res == DialogResult.Yes)
@@ -3591,6 +4127,8 @@ namespace schiessbuch
 
         }
 
+        bool RefreshTimerRunning = false;
+
         private void einstellungenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Einstellungen einstellungenDlg = new Einstellungen();
@@ -3611,7 +4149,8 @@ namespace schiessbuch
                     enus, 
                     out fValue);
                 Properties.Settings.Default.TimerInterval = fValue;
-                RefreshTimer.Interval = (int)(fValue * 1000);
+                //RefreshTimer.Interval = (int)(fValue * 1000);
+                if (RefreshTimerRunning) RefreshTimer.Change((int)fValue * 1000, (int)fValue * 1000);
 
                 int iValue = 1;
                 int.TryParse(einstellungenDlg.tbDatabaseRefresh.Text,
@@ -4607,6 +5146,9 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             }
         }
 
+        System.Threading.Timer RefreshTimer;
+        BackgroundWorker ErstelleAuswertungBackgroundWorker;
+
         private void Schiessbuch_Load(object sender, EventArgs e)
         {
             DoubleBuffered = true;
@@ -4616,6 +5158,12 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             lblProbe4.ForeColor = Color.Blue; lblProbe4.Text = "";
             lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
             lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
+            Schiessabend.AutoGenerateColumns = false;
+
+            tmBildUpdateTimer = new System.Threading.Timer(BildUpdateTimerCallback);
+            RefreshTimer = new System.Threading.Timer(RefreshTimerCallback);
+            ErstelleAuswertungBackgroundWorker = new BackgroundWorker();
+            ErstelleAuswertungBackgroundWorker.DoWork += ErstelleAuswertungBackgroundWorker_DoWork;
 
             //MySqlConnectionWrapper mysql = MySqlConnectionWrapper.Instance;
             detectMySQLServer();
@@ -4623,7 +5171,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             // Zum Aktualisieren der Ergebnisse aller gerade schießenden Schützen wird ein Timer verwendet, der alle x Sekunden
             // die neusten Daten holt. Dieser Wert kann über einen Einstellungsdialog in der Anwendung verändert werden.
             // Dieser Wert wird in den Properties gespeichert. Hier wird dieser Wert gelesen und der Timer auf diesen Wert voreingestellt.
-            RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
+            //RefreshTimer.Interval = (int)(Properties.Settings.Default.TimerInterval * 1000);
 
             StandZielscheiben = new Bitmap[6];
             for (int i = 0; i < 6; StandZielscheiben[i++] = Properties.Resources.Luftgewehr) ;
@@ -4641,9 +5189,9 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             }
 
             // Initialisiere den Timer, der die Bilder der Schießscheiben aktuell hält
-            tmBildUpdateTimer = new System.Windows.Forms.Timer();
-            tmBildUpdateTimer.Interval = 2000; // alle zwei Sekunden weden die Bilder aktualisiert
-            tmBildUpdateTimer.Tick += TmBildUpdateTimer_Tick;
+            //tmBildUpdateTimer = new System.Windows.Forms.Timer();
+            //tmBildUpdateTimer.Interval = 2000; // alle zwei Sekunden weden die Bilder aktualisiert
+            //tmBildUpdateTimer.Tick += TmBildUpdateTimer_Tick;
 
 
             // Die Zugriffe aller TableAdapters sollen auf die richtige Datenbank erfolgen. Deshalb wird hier der Connection String entsprechend gesetzt.
@@ -4744,6 +5292,159 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             //schiessbuchDataGridView.Invalidate();
             schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
         }
+
+        bool inErstelleAuswertungBackgroundWorker = false;
+        private void ErstelleAuswertungBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (!inErstelleAuswertungBackgroundWorker)
+            {
+                inErstelleAuswertungBackgroundWorker = true;
+                ErstelleAuswertung();
+                inErstelleAuswertungBackgroundWorker = false;
+            }
+            //throw new NotImplementedException();
+        }
+
+        private void RefreshTimerCallback(object state)
+        {
+            if (!bTimerUpdateStillRunning)
+            {
+                bTimerUpdateStillRunning = true;
+                if (generateEinzelScheibe)
+                {
+                    setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
+                    UpdateStandTrefferDaten(standFuerEinzelScheibe);
+                }
+                if (generateOverview)
+                {
+                    updateOverview();
+                    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
+                    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
+                    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
+                    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
+                    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
+                    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
+                }
+                if (databaseRequestCounter == 0)
+                {
+
+
+                    // trefferBindingSource.ResetBindings(false);
+                    // schuetzenBindingSource.ResetBindings(false);
+                    // schiessbuchBindingSource.ResetBindings(false);
+                    if (GetEreignisseCount() != ereignisse_count)
+                    {
+                        ereignisse_count = GetEreignisseCount();
+                        treffer_count = GetTrefferCount();
+                        int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
+                        int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                        List<string> eventsSelected = new List<string>();
+                        List<long> trefferSelected = new List<long>();
+                        foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
+                        {
+                            eventsSelected.Add(row.Cells["session"].Value.ToString());
+                        }
+                        foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+                        {
+                            trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
+                        }
+                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                        schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                        trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
+                        {
+                            //row.Selected = false;
+                            foreach (string selItem in eventsSelected)
+                            {
+                                if (row.Cells["session"].Value.ToString() == selItem)
+                                {
+                                    row.Selected = true;
+                                    schiessbuchBindingSource.Position = row.Index;
+                                }
+                            }
+                        }
+                        foreach (DataGridViewRow row in trefferDataGridView.Rows)
+                        {
+                            row.Selected = false;
+                            foreach (long selId in trefferSelected)
+                            {
+                                if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                                {
+                                    row.Selected = true;
+                                }
+                            }
+                        }
+                        //schiessbuchBindingSource.ResetBindings(false);
+                        //trefferBindingSource.ResetBindings(false);
+
+                        if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
+                            schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
+                        if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
+                            trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                        //siusclubDataSet.Reset();
+                        //schiessbuchBindingSource.ResetBindings(false);
+
+                        //schiessbuchDataGridView.DataSource = null;
+                        //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
+
+                        //MessageBox.Show("Tick");
+                        //schiessbuchBindingSource.ResetBindings(false);
+                        //trefferBindingSource.ResetBindings(false);
+                        //schuetzenBindingSource.ResetBindings(false);
+
+                        //schiessbuchDataGridView.Refresh();
+                        //schiessbuchDataGridView.Invalidate();
+
+                        //siusclubDataSet.Reset();
+                        //trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
+                        //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                        //schiessbuchDataGridView.Invalidate();
+                        // SELECT für König:
+                        // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
+                        // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
+                        // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
+                        //UpdateKoenig();
+                    }
+                    else
+                    {
+                        if (GetTrefferCount() != treffer_count)
+                        {
+                            treffer_count = GetTrefferCount();
+                            int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
+                            List<long> trefferSelected = new List<long>();
+                            foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
+                            {
+                                trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
+                            }
+
+                            trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
+                            {
+                                row.Selected = false;
+                                foreach (long selId in trefferSelected)
+                                {
+                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                                    {
+                                        row.Selected = true;
+                                    }
+                                }
+                            }
+                            //schiessbuchBindingSource.ResetBindings(false);
+                            //trefferBindingSource.ResetBindings(false);
+                            if (TrefferScrollposition != -1)
+                                trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                            UpdateKoenig();
+                        }
+                    }
+                }
+                databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
+                bTimerUpdateStillRunning = false;
+            }
+
+            //throw new NotImplementedException();
+        }
+
         bool bInTmBildUpdateTimer = false;
         private void TmBildUpdateTimer_Tick(object sender, EventArgs e)
         {
@@ -4765,12 +5466,24 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
         private void schiessbuchDataGridView_RowLeave(object sender, DataGridViewCellEventArgs e)
         {
-            RefreshTimer.Enabled = false;
+            RefreshTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            RefreshTimerRunning = false;
+            //RefreshTimer.Enabled = false;
         }
 
         private void schiessbuchDataGridView_RowEnter(object sender, DataGridViewCellEventArgs e)
         {
             DoUpdates_CheckedChanged(null, null);
+        }
+
+        private void vereinsmeisterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void jahresübersichtToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GenerateJahresübersichtVereinsmeister();
         }
     }
 }

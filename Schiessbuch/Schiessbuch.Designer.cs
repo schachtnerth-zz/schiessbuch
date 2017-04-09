@@ -99,7 +99,6 @@ namespace schiessbuch
             this.schuetzenlisteschiessbuchBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.trefferBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.schiessbuchtrefferBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.RefreshTimer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.schießjahrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.neuesSchießjahrBeginnenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -113,6 +112,8 @@ namespace schiessbuch
             this.backupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ordnerFürSicherungenFestlegenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pfadZuMysqldumpFestlegenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.vereinsmeisterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.jahresübersichtToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.datumlisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.gemeindemeisterschaft = new schiessbuch.gemeindemeisterschaft();
             this.vereinslisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
@@ -486,15 +487,9 @@ namespace schiessbuch
             this.txtSchuetzeStand4 = new System.Windows.Forms.Label();
             this.wanderpokal = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.dataGridView5 = new System.Windows.Forms.DataGridView();
-            this.dataGridView6 = new System.Windows.Forms.DataGridView();
-            this.dataGridView7 = new System.Windows.Forms.DataGridView();
-            this.dataGridView8 = new System.Windows.Forms.DataGridView();
-            this.dataGridView9 = new System.Windows.Forms.DataGridView();
+            this.JahrespokalErwachseneDGV = new System.Windows.Forms.DataGridView();
+            this.JahrespokalJugendDGV = new System.Windows.Forms.DataGridView();
             this.labelWPSK = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -738,11 +733,8 @@ namespace schiessbuch
             this.Stand4SchussPanel.SuspendLayout();
             this.wanderpokal.SuspendLayout();
             this.tableLayoutPanel8.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView6)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView7)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView8)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView9)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JahrespokalErwachseneDGV)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JahrespokalJugendDGV)).BeginInit();
             this.KoenigTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerKoenig1)).BeginInit();
             this.splitContainerKoenig1.Panel1.SuspendLayout();
@@ -893,18 +885,14 @@ namespace schiessbuch
             this.schiessbuchtrefferBindingSource.DataMember = "schiessbuch_treffer";
             this.schiessbuchtrefferBindingSource.DataSource = this.schuetzenlisteschiessbuchBindingSource;
             // 
-            // RefreshTimer
-            // 
-            this.RefreshTimer.Interval = 10000;
-            this.RefreshTimer.Tick += new System.EventHandler(this.RefreshTimer_Tick);
-            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.schießjahrToolStripMenuItem,
             this.bearbeitenToolStripMenuItem,
             this.toolStripMenuItem1,
-            this.backupToolStripMenuItem});
+            this.backupToolStripMenuItem,
+            this.vereinsmeisterToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(984, 24);
@@ -1000,6 +988,22 @@ namespace schiessbuch
             this.pfadZuMysqldumpFestlegenToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
             this.pfadZuMysqldumpFestlegenToolStripMenuItem.Text = "&Pfad zu mysqldump festlegen";
             this.pfadZuMysqldumpFestlegenToolStripMenuItem.Click += new System.EventHandler(this.pfadZuMysqldumpFestlegenToolStripMenuItem_Click);
+            // 
+            // vereinsmeisterToolStripMenuItem
+            // 
+            this.vereinsmeisterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.jahresübersichtToolStripMenuItem});
+            this.vereinsmeisterToolStripMenuItem.Name = "vereinsmeisterToolStripMenuItem";
+            this.vereinsmeisterToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.vereinsmeisterToolStripMenuItem.Text = "Vereinsmeister";
+            this.vereinsmeisterToolStripMenuItem.Click += new System.EventHandler(this.vereinsmeisterToolStripMenuItem_Click);
+            // 
+            // jahresübersichtToolStripMenuItem
+            // 
+            this.jahresübersichtToolStripMenuItem.Name = "jahresübersichtToolStripMenuItem";
+            this.jahresübersichtToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.jahresübersichtToolStripMenuItem.Text = "&Jahresübersicht";
+            this.jahresübersichtToolStripMenuItem.Click += new System.EventHandler(this.jahresübersichtToolStripMenuItem_Click);
             // 
             // datumlisteBindingSource
             // 
@@ -5570,21 +5574,15 @@ namespace schiessbuch
             this.tableLayoutPanel8.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel8.ColumnCount = 5;
+            this.tableLayoutPanel8.ColumnCount = 2;
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel8.Controls.Add(this.label12, 4, 0);
-            this.tableLayoutPanel8.Controls.Add(this.label11, 3, 0);
-            this.tableLayoutPanel8.Controls.Add(this.label10, 2, 0);
             this.tableLayoutPanel8.Controls.Add(this.label9, 1, 0);
-            this.tableLayoutPanel8.Controls.Add(this.dataGridView5, 0, 1);
-            this.tableLayoutPanel8.Controls.Add(this.dataGridView6, 1, 1);
-            this.tableLayoutPanel8.Controls.Add(this.dataGridView7, 2, 1);
-            this.tableLayoutPanel8.Controls.Add(this.dataGridView8, 3, 1);
-            this.tableLayoutPanel8.Controls.Add(this.dataGridView9, 4, 1);
+            this.tableLayoutPanel8.Controls.Add(this.JahrespokalErwachseneDGV, 0, 1);
+            this.tableLayoutPanel8.Controls.Add(this.JahrespokalJugendDGV, 1, 1);
             this.tableLayoutPanel8.Controls.Add(this.labelWPSK, 0, 0);
             this.tableLayoutPanel8.Location = new System.Drawing.Point(269, 6);
             this.tableLayoutPanel8.Name = "tableLayoutPanel8";
@@ -5594,100 +5592,43 @@ namespace schiessbuch
             this.tableLayoutPanel8.Size = new System.Drawing.Size(677, 407);
             this.tableLayoutPanel8.TabIndex = 26;
             // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(543, 0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(122, 13);
-            this.label12.TabIndex = 9;
-            this.label12.Text = "Wanderpokal Luftpistole";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(408, 0);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(127, 26);
-            this.label11.TabIndex = 8;
-            this.label11.Text = "Wanderpokal Luftgewehr Jugend";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(273, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(127, 26);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Wanderpokal Luftgewehr Auflage";
-            // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(138, 0);
+            this.label9.Location = new System.Drawing.Point(341, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(127, 26);
+            this.label9.Size = new System.Drawing.Size(102, 13);
             this.label9.TabIndex = 6;
-            this.label9.Text = "Wanderpokal Luftgewehr Damenklasse";
+            this.label9.Text = "Jahrespokal Jugend";
             // 
-            // dataGridView5
+            // JahrespokalErwachseneDGV
             // 
-            this.dataGridView5.BackgroundColor = System.Drawing.SystemColors.Control;
-            this.dataGridView5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView5.Location = new System.Drawing.Point(3, 29);
-            this.dataGridView5.Name = "dataGridView5";
-            this.dataGridView5.Size = new System.Drawing.Size(129, 401);
-            this.dataGridView5.TabIndex = 0;
+            this.JahrespokalErwachseneDGV.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.JahrespokalErwachseneDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.JahrespokalErwachseneDGV.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.JahrespokalErwachseneDGV.Location = new System.Drawing.Point(3, 16);
+            this.JahrespokalErwachseneDGV.Name = "JahrespokalErwachseneDGV";
+            this.JahrespokalErwachseneDGV.Size = new System.Drawing.Size(332, 401);
+            this.JahrespokalErwachseneDGV.TabIndex = 0;
             // 
-            // dataGridView6
+            // JahrespokalJugendDGV
             // 
-            this.dataGridView6.BackgroundColor = System.Drawing.SystemColors.Control;
-            this.dataGridView6.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView6.Location = new System.Drawing.Point(138, 29);
-            this.dataGridView6.Name = "dataGridView6";
-            this.dataGridView6.Size = new System.Drawing.Size(129, 401);
-            this.dataGridView6.TabIndex = 1;
-            // 
-            // dataGridView7
-            // 
-            this.dataGridView7.BackgroundColor = System.Drawing.SystemColors.Control;
-            this.dataGridView7.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView7.Location = new System.Drawing.Point(273, 29);
-            this.dataGridView7.Name = "dataGridView7";
-            this.dataGridView7.Size = new System.Drawing.Size(129, 401);
-            this.dataGridView7.TabIndex = 2;
-            // 
-            // dataGridView8
-            // 
-            this.dataGridView8.BackgroundColor = System.Drawing.SystemColors.Control;
-            this.dataGridView8.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView8.Location = new System.Drawing.Point(408, 29);
-            this.dataGridView8.Name = "dataGridView8";
-            this.dataGridView8.Size = new System.Drawing.Size(129, 401);
-            this.dataGridView8.TabIndex = 3;
-            // 
-            // dataGridView9
-            // 
-            this.dataGridView9.BackgroundColor = System.Drawing.SystemColors.Control;
-            this.dataGridView9.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView9.Location = new System.Drawing.Point(543, 29);
-            this.dataGridView9.Name = "dataGridView9";
-            this.dataGridView9.Size = new System.Drawing.Size(131, 401);
-            this.dataGridView9.TabIndex = 4;
+            this.JahrespokalJugendDGV.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.JahrespokalJugendDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.JahrespokalJugendDGV.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.JahrespokalJugendDGV.Location = new System.Drawing.Point(341, 16);
+            this.JahrespokalJugendDGV.Name = "JahrespokalJugendDGV";
+            this.JahrespokalJugendDGV.Size = new System.Drawing.Size(333, 401);
+            this.JahrespokalJugendDGV.TabIndex = 1;
             // 
             // labelWPSK
             // 
             this.labelWPSK.AutoSize = true;
             this.labelWPSK.Location = new System.Drawing.Point(3, 0);
             this.labelWPSK.Name = "labelWPSK";
-            this.labelWPSK.Size = new System.Drawing.Size(127, 26);
+            this.labelWPSK.Size = new System.Drawing.Size(126, 13);
             this.labelWPSK.TabIndex = 5;
-            this.labelWPSK.Text = "Wanderpokal Luftgewehr Schützenklasse";
+            this.labelWPSK.Text = "Jahrespokal Erwachsene";
             // 
             // button3
             // 
@@ -7788,11 +7729,8 @@ namespace schiessbuch
             this.wanderpokal.PerformLayout();
             this.tableLayoutPanel8.ResumeLayout(false);
             this.tableLayoutPanel8.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView6)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView7)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView8)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView9)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JahrespokalErwachseneDGV)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JahrespokalJugendDGV)).EndInit();
             this.KoenigTab.ResumeLayout(false);
             this.splitContainerKoenig1.Panel1.ResumeLayout(false);
             this.splitContainerKoenig1.Panel2.ResumeLayout(false);
@@ -7855,7 +7793,7 @@ namespace schiessbuch
         private System.Windows.Forms.BindingSource schiessbuchBindingSource;
         private System.Windows.Forms.BindingSource trefferBindingSource;
         private trefferTableAdapter trefferTableAdapter;
-        private System.Windows.Forms.Timer RefreshTimer;
+        //private System.Windows.Forms.Timer RefreshTimer;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
@@ -7953,15 +7891,9 @@ namespace schiessbuch
         private TabPage tabStandUebersicht;
         private TabPage wanderpokal;
         private TableLayoutPanel tableLayoutPanel8;
-        private Label label12;
-        private Label label11;
-        private Label label10;
         private Label label9;
-        private DataGridView dataGridView5;
-        private DataGridView dataGridView6;
-        private DataGridView dataGridView7;
-        private DataGridView dataGridView8;
-        private DataGridView dataGridView9;
+        private DataGridView JahrespokalErwachseneDGV;
+        private DataGridView JahrespokalJugendDGV;
         private Label labelWPSK;
         private Button button3;
         private Button button2;
@@ -8437,6 +8369,8 @@ namespace schiessbuch
         private Label txtDisziplinStand4;
         private Label lblSchuetzeStand4;
         private Label txtSchuetzeStand4;
+        private ToolStripMenuItem vereinsmeisterToolStripMenuItem;
+        private ToolStripMenuItem jahresübersichtToolStripMenuItem;
     }
 }
 
