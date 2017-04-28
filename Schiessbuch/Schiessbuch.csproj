@@ -56,6 +56,12 @@
       <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
     </Compile>
     <Compile Include="disziplin.cs" />
+    <Compile Include="DisziplinAendern.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DisziplinAendern.Designer.cs">
+      <DependentUpon>DisziplinAendern.cs</DependentUpon>
+    </Compile>
     <Compile Include="Einstellungen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -158,6 +164,9 @@
     </Compile>
     <EmbeddedResource Include="AlternativerMySQLServer.resx">
       <DependentUpon>AlternativerMySQLServer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DisziplinAendern.resx">
+      <DependentUpon>DisziplinAendern.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Einstellungen.resx">
       <DependentUpon>Einstellungen.cs</DependentUpon>

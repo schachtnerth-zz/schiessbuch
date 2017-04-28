@@ -85,12 +85,11 @@ namespace schiessbuch
             this.siusclubDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.siusclubDataSet = new schiessbuch.siusclubDataSet();
             this.schuetzenListeBindingSourceA = new System.Windows.Forms.BindingSource(this.components);
-            this.vereineBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.siusclubDataSet1 = new schiessbuch.siusclubDataSet();
             this.schiessbuchBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.schuetzenBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.SchiessbuchContexMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.moveEntry = new System.Windows.Forms.ToolStripMenuItem();
+            this.disziplinkorrigierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteEntry = new System.Windows.Forms.ToolStripMenuItem();
             this.eintratgültigSetzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -114,11 +113,6 @@ namespace schiessbuch
             this.pfadZuMysqldumpFestlegenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vereinsmeisterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.jahresübersichtToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.datumlisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.gemeindemeisterschaft = new schiessbuch.gemeindemeisterschaft();
-            this.vereinslisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.uebersichtgemeindemeisterschaftBindingSource4 = new System.Windows.Forms.BindingSource(this.components);
-            this.vereinsheimSiusclubDataSet2 = new schiessbuch.VereinsheimSiusclubDataSet2();
             this.button5 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.bindingNavigator1 = new System.Windows.Forms.BindingNavigator(this.components);
@@ -134,28 +128,18 @@ namespace schiessbuch
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.schuetzenTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schuetzenTableAdapter();
-            this.tableAdapterManager = new schiessbuch.siusclubDataSetTableAdapters.TableAdapterManager();
-            this.schiessbuchTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schiessbuchTableAdapter();
-            this.schuetzenlisteTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schuetzenlisteTableAdapter();
-            this.trefferTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.trefferTableAdapter();
-            this.gemeindemeisterschaftBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.vereineTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.VereineTableAdapter();
-            this.uebersichtgemeindemeisterschaftTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
-            this.vereinslisteTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.vereinslisteTableAdapter();
-            this.datumlisteTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.datumlisteTableAdapter();
             this.uebersichtgemeindemeisterschaftBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.vereinsheimSiusclubDataSet1 = new schiessbuch.VereinsheimSiusclubDataSet1();
-            this.uebersichtgemeindemeisterschaftBindingSource2 = new System.Windows.Forms.BindingSource(this.components);
-            this.uebersichtgemeindemeisterschaftTableAdapter1 = new schiessbuch.VereinsheimSiusclubDataSet1TableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
-            this.uebersichtgemeindemeisterschaftTableAdapter3 = new schiessbuch.VereinsheimSiusclubDataSet2TableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
+            this.gemeindemeisterschaftBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.gemeindemeisterschaft = new schiessbuch.gemeindemeisterschaft();
             this.tabGemeindemeisterschaft = new System.Windows.Forms.TabPage();
             this.label13 = new System.Windows.Forms.Label();
             this.cbDatumFiltern = new System.Windows.Forms.CheckBox();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.cbVereineFiltern = new System.Windows.Forms.CheckBox();
             this.comboDatumFiltern = new System.Windows.Forms.ComboBox();
+            this.datumlisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.comboVereineFiltern = new System.Windows.Forms.ComboBox();
+            this.vereinslisteBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.btnGmmDruck = new System.Windows.Forms.Button();
             this.gmmDGV = new System.Windows.Forms.DataGridView();
             this.vereinDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -181,6 +165,8 @@ namespace schiessbuch
             this.gedächtnispokalLuftpistoleAuflageDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.schiessjahrIdDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.schuetzeIDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uebersichtgemeindemeisterschaftBindingSource4 = new System.Windows.Forms.BindingSource(this.components);
+            this.vereinsheimSiusclubDataSet2 = new schiessbuch.VereinsheimSiusclubDataSet2();
             this.tabEinzelscheibe = new System.Windows.Forms.TabPage();
             this.pictureBoxEinzelScheibe = new System.Windows.Forms.PictureBox();
             this.tabStandUebersicht = new System.Windows.Forms.TabPage();
@@ -607,6 +593,8 @@ namespace schiessbuch
             this.lblWanderpokalschiessen = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.vereinComboBox = new System.Windows.Forms.ComboBox();
+            this.vereineBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.siusclubDataSet1 = new schiessbuch.siusclubDataSet();
             this.DoUpdates = new System.Windows.Forms.CheckBox();
             this.fullnameLabel = new System.Windows.Forms.Label();
             this.idLabel = new System.Windows.Forms.Label();
@@ -625,7 +613,7 @@ namespace schiessbuch
             this.SchiessabendPicker = new System.Windows.Forms.DateTimePicker();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.schiessbuchDataGridView = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDisziplin = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.session = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -664,13 +652,24 @@ namespace schiessbuch
             this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SchrittText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.schuetzenTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schuetzenTableAdapter();
+            this.tableAdapterManager = new schiessbuch.siusclubDataSetTableAdapters.TableAdapterManager();
+            this.schiessbuchTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schiessbuchTableAdapter();
+            this.schuetzenlisteTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.schuetzenlisteTableAdapter();
+            this.trefferTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.trefferTableAdapter();
+            this.vereineTableAdapter = new schiessbuch.siusclubDataSetTableAdapters.VereineTableAdapter();
+            this.uebersichtgemeindemeisterschaftTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
+            this.vereinslisteTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.vereinslisteTableAdapter();
+            this.datumlisteTableAdapter = new schiessbuch.gemeindemeisterschaftTableAdapters.datumlisteTableAdapter();
+            this.vereinsheimSiusclubDataSet1 = new schiessbuch.VereinsheimSiusclubDataSet1();
+            this.uebersichtgemeindemeisterschaftBindingSource2 = new System.Windows.Forms.BindingSource(this.components);
+            this.uebersichtgemeindemeisterschaftTableAdapter1 = new schiessbuch.VereinsheimSiusclubDataSet1TableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
+            this.uebersichtgemeindemeisterschaftTableAdapter3 = new schiessbuch.VereinsheimSiusclubDataSet2TableAdapters.uebersichtgemeindemeisterschaftTableAdapter();
             vereinLabel1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSourceA)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenBindingSource)).BeginInit();
             this.SchiessbuchContexMenu.SuspendLayout();
@@ -678,19 +677,17 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.trefferBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchtrefferBindingSource)).BeginInit();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.datumlisteBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaft)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinslisteBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).BeginInit();
             this.bindingNavigator1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaftBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaftBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaft)).BeginInit();
             this.tabGemeindemeisterschaft.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.datumlisteBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.vereinslisteBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gmmDGV)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet2)).BeginInit();
             this.tabEinzelscheibe.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEinzelScheibe)).BeginInit();
             this.tabStandUebersicht.SuspendLayout();
@@ -769,10 +766,14 @@ namespace schiessbuch
             this.groupBox2.SuspendLayout();
             this.SchiessbuchTab.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferDataGridView)).BeginInit();
             this.tabControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource2)).BeginInit();
             this.SuspendLayout();
             // 
             // vereinLabel1
@@ -800,16 +801,6 @@ namespace schiessbuch
             this.siusclubDataSet.DataSetName = "siusclubDataSet";
             this.siusclubDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
-            // vereineBindingSource
-            // 
-            this.vereineBindingSource.DataMember = "Vereine";
-            this.vereineBindingSource.DataSource = this.siusclubDataSet1;
-            // 
-            // siusclubDataSet1
-            // 
-            this.siusclubDataSet1.DataSetName = "siusclubDataSet";
-            this.siusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
             // schiessbuchBindingSource
             // 
             this.schiessbuchBindingSource.DataMember = "schuetzen_schiessbuch";
@@ -824,13 +815,14 @@ namespace schiessbuch
             // 
             this.SchiessbuchContexMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.moveEntry,
+            this.disziplinkorrigierenToolStripMenuItem,
             this.toolStripSeparator1,
             this.deleteEntry,
             this.eintratgültigSetzenToolStripMenuItem,
             this.toolStripSeparator3,
             this.auswertenEntry});
             this.SchiessbuchContexMenu.Name = "contextMenuStrip1";
-            this.SchiessbuchContexMenu.Size = new System.Drawing.Size(196, 104);
+            this.SchiessbuchContexMenu.Size = new System.Drawing.Size(196, 126);
             // 
             // moveEntry
             // 
@@ -838,6 +830,13 @@ namespace schiessbuch
             this.moveEntry.Size = new System.Drawing.Size(195, 22);
             this.moveEntry.Text = "Eintrag &verschieben ...";
             this.moveEntry.Click += new System.EventHandler(this.moveEntry_Click);
+            // 
+            // disziplinkorrigierenToolStripMenuItem
+            // 
+            this.disziplinkorrigierenToolStripMenuItem.Name = "disziplinkorrigierenToolStripMenuItem";
+            this.disziplinkorrigierenToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.disziplinkorrigierenToolStripMenuItem.Text = "Disziplin &korrigieren ...";
+            this.disziplinkorrigierenToolStripMenuItem.Click += new System.EventHandler(this.disziplinkorrigierenToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -1005,31 +1004,6 @@ namespace schiessbuch
             this.jahresübersichtToolStripMenuItem.Text = "&Jahresübersicht";
             this.jahresübersichtToolStripMenuItem.Click += new System.EventHandler(this.jahresübersichtToolStripMenuItem_Click);
             // 
-            // datumlisteBindingSource
-            // 
-            this.datumlisteBindingSource.DataMember = "datumliste";
-            this.datumlisteBindingSource.DataSource = this.gemeindemeisterschaft;
-            // 
-            // gemeindemeisterschaft
-            // 
-            this.gemeindemeisterschaft.DataSetName = "gemeindemeisterschaft";
-            this.gemeindemeisterschaft.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // vereinslisteBindingSource
-            // 
-            this.vereinslisteBindingSource.DataMember = "vereinsliste";
-            this.vereinslisteBindingSource.DataSource = this.gemeindemeisterschaft;
-            // 
-            // uebersichtgemeindemeisterschaftBindingSource4
-            // 
-            this.uebersichtgemeindemeisterschaftBindingSource4.DataMember = "uebersichtgemeindemeisterschaft";
-            this.uebersichtgemeindemeisterschaftBindingSource4.DataSource = this.vereinsheimSiusclubDataSet2;
-            // 
-            // vereinsheimSiusclubDataSet2
-            // 
-            this.vereinsheimSiusclubDataSet2.DataSetName = "VereinsheimSiusclubDataSet2";
-            this.vereinsheimSiusclubDataSet2.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
             // button5
             // 
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -1182,73 +1156,20 @@ namespace schiessbuch
             this.saveToolStripButton1.Text = "&Save";
             this.saveToolStripButton1.Click += new System.EventHandler(this.saveToolStripButton_Click);
             // 
-            // schuetzenTableAdapter
+            // uebersichtgemeindemeisterschaftBindingSource
             // 
-            this.schuetzenTableAdapter.ClearBeforeFill = true;
-            // 
-            // tableAdapterManager
-            // 
-            this.tableAdapterManager.BackupDataSetBeforeUpdate = false;
-            this.tableAdapterManager.schiessbuchTableAdapter = this.schiessbuchTableAdapter;
-            this.tableAdapterManager.schuetzenTableAdapter = this.schuetzenTableAdapter;
-            this.tableAdapterManager.trefferTableAdapter = null;
-            this.tableAdapterManager.UpdateOrder = schiessbuch.siusclubDataSetTableAdapters.TableAdapterManager.UpdateOrderOption.InsertUpdateDelete;
-            // 
-            // schiessbuchTableAdapter
-            // 
-            this.schiessbuchTableAdapter.ClearBeforeFill = true;
-            // 
-            // schuetzenlisteTableAdapter
-            // 
-            this.schuetzenlisteTableAdapter.ClearBeforeFill = true;
-            // 
-            // trefferTableAdapter
-            // 
-            this.trefferTableAdapter.ClearBeforeFill = true;
+            this.uebersichtgemeindemeisterschaftBindingSource.DataMember = "uebersichtgemeindemeisterschaft";
+            this.uebersichtgemeindemeisterschaftBindingSource.DataSource = this.gemeindemeisterschaftBindingSource;
             // 
             // gemeindemeisterschaftBindingSource
             // 
             this.gemeindemeisterschaftBindingSource.DataSource = this.gemeindemeisterschaft;
             this.gemeindemeisterschaftBindingSource.Position = 0;
             // 
-            // vereineTableAdapter
+            // gemeindemeisterschaft
             // 
-            this.vereineTableAdapter.ClearBeforeFill = true;
-            // 
-            // uebersichtgemeindemeisterschaftTableAdapter
-            // 
-            this.uebersichtgemeindemeisterschaftTableAdapter.ClearBeforeFill = true;
-            // 
-            // vereinslisteTableAdapter
-            // 
-            this.vereinslisteTableAdapter.ClearBeforeFill = true;
-            // 
-            // datumlisteTableAdapter
-            // 
-            this.datumlisteTableAdapter.ClearBeforeFill = true;
-            // 
-            // uebersichtgemeindemeisterschaftBindingSource
-            // 
-            this.uebersichtgemeindemeisterschaftBindingSource.DataMember = "uebersichtgemeindemeisterschaft";
-            this.uebersichtgemeindemeisterschaftBindingSource.DataSource = this.gemeindemeisterschaftBindingSource;
-            // 
-            // vereinsheimSiusclubDataSet1
-            // 
-            this.vereinsheimSiusclubDataSet1.DataSetName = "VereinsheimSiusclubDataSet1";
-            this.vereinsheimSiusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // uebersichtgemeindemeisterschaftBindingSource2
-            // 
-            this.uebersichtgemeindemeisterschaftBindingSource2.DataMember = "uebersichtgemeindemeisterschaft";
-            this.uebersichtgemeindemeisterschaftBindingSource2.DataSource = this.vereinsheimSiusclubDataSet1;
-            // 
-            // uebersichtgemeindemeisterschaftTableAdapter1
-            // 
-            this.uebersichtgemeindemeisterschaftTableAdapter1.ClearBeforeFill = true;
-            // 
-            // uebersichtgemeindemeisterschaftTableAdapter3
-            // 
-            this.uebersichtgemeindemeisterschaftTableAdapter3.ClearBeforeFill = true;
+            this.gemeindemeisterschaft.DataSetName = "gemeindemeisterschaft";
+            this.gemeindemeisterschaft.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // tabGemeindemeisterschaft
             // 
@@ -1324,6 +1245,11 @@ namespace schiessbuch
             this.comboDatumFiltern.SelectedValueChanged += new System.EventHandler(this.comboDatumFiltern_SelectedValueChanged);
             this.comboDatumFiltern.TextChanged += new System.EventHandler(this.comboDatumFiltern_TextChanged);
             // 
+            // datumlisteBindingSource
+            // 
+            this.datumlisteBindingSource.DataMember = "datumliste";
+            this.datumlisteBindingSource.DataSource = this.gemeindemeisterschaft;
+            // 
             // comboVereineFiltern
             // 
             this.comboVereineFiltern.DataBindings.Add(new System.Windows.Forms.Binding("SelectedValue", this.vereinslisteBindingSource, "Verein", true));
@@ -1341,6 +1267,11 @@ namespace schiessbuch
             this.comboVereineFiltern.DropDown += new System.EventHandler(this.comboVereineFiltern_DropDown);
             this.comboVereineFiltern.SelectedValueChanged += new System.EventHandler(this.comboVereineFiltern_SelectedValueChanged);
             this.comboVereineFiltern.TextChanged += new System.EventHandler(this.comboVereineFiltern_TextChanged);
+            // 
+            // vereinslisteBindingSource
+            // 
+            this.vereinslisteBindingSource.DataMember = "vereinsliste";
+            this.vereinslisteBindingSource.DataSource = this.gemeindemeisterschaft;
             // 
             // btnGmmDruck
             // 
@@ -1607,6 +1538,16 @@ namespace schiessbuch
             this.schuetzeIDDataGridViewTextBoxColumn.Name = "schuetzeIDDataGridViewTextBoxColumn";
             this.schuetzeIDDataGridViewTextBoxColumn.Visible = false;
             this.schuetzeIDDataGridViewTextBoxColumn.Width = 40;
+            // 
+            // uebersichtgemeindemeisterschaftBindingSource4
+            // 
+            this.uebersichtgemeindemeisterschaftBindingSource4.DataMember = "uebersichtgemeindemeisterschaft";
+            this.uebersichtgemeindemeisterschaftBindingSource4.DataSource = this.vereinsheimSiusclubDataSet2;
+            // 
+            // vereinsheimSiusclubDataSet2
+            // 
+            this.vereinsheimSiusclubDataSet2.DataSetName = "VereinsheimSiusclubDataSet2";
+            this.vereinsheimSiusclubDataSet2.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // tabEinzelscheibe
             // 
@@ -6968,6 +6909,16 @@ namespace schiessbuch
             this.vereinComboBox.Visible = false;
             this.vereinComboBox.TextChanged += new System.EventHandler(this.nameTextBox_TextChanged);
             // 
+            // vereineBindingSource
+            // 
+            this.vereineBindingSource.DataMember = "Vereine";
+            this.vereineBindingSource.DataSource = this.siusclubDataSet1;
+            // 
+            // siusclubDataSet1
+            // 
+            this.siusclubDataSet1.DataSetName = "siusclubDataSet";
+            this.siusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
             // DoUpdates
             // 
             this.DoUpdates.Appearance = System.Windows.Forms.Appearance.Button;
@@ -7158,7 +7109,7 @@ namespace schiessbuch
             this.schiessbuchDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle29;
             this.schiessbuchDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.schiessbuchDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn2,
+            this.colDisziplin,
             this.dataGridViewTextBoxColumn4,
             this.session,
             this.dataGridViewTextBoxColumn3,
@@ -7199,14 +7150,14 @@ namespace schiessbuch
             this.schiessbuchDataGridView.RowLeave += new System.Windows.Forms.DataGridViewCellEventHandler(this.schiessbuchDataGridView_RowLeave);
             this.schiessbuchDataGridView.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.schiessbuchDataGridView_UserDeletingRow);
             // 
-            // dataGridViewTextBoxColumn2
+            // colDisziplin
             // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "disziplin";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Disziplin";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewTextBoxColumn2.Width = 120;
+            this.colDisziplin.DataPropertyName = "disziplin";
+            this.colDisziplin.HeaderText = "Disziplin";
+            this.colDisziplin.Name = "colDisziplin";
+            this.colDisziplin.ReadOnly = true;
+            this.colDisziplin.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.colDisziplin.Width = 120;
             // 
             // dataGridViewTextBoxColumn4
             // 
@@ -7366,6 +7317,7 @@ namespace schiessbuch
             this.trefferDataGridView.Size = new System.Drawing.Size(267, 407);
             this.trefferDataGridView.TabIndex = 25;
             this.trefferDataGridView.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.trefferDataGridView_CellFormatting);
+            this.trefferDataGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.trefferDataGridView_DataError);
             this.trefferDataGridView.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.trefferDataGridView_RowsRemoved);
             this.trefferDataGridView.SelectionChanged += new System.EventHandler(this.trefferDataGridView_SelectionChanged);
             // 
@@ -7624,6 +7576,64 @@ namespace schiessbuch
             this.tabControl1.TabIndex = 29;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
+            // schuetzenTableAdapter
+            // 
+            this.schuetzenTableAdapter.ClearBeforeFill = true;
+            // 
+            // tableAdapterManager
+            // 
+            this.tableAdapterManager.BackupDataSetBeforeUpdate = false;
+            this.tableAdapterManager.schiessbuchTableAdapter = this.schiessbuchTableAdapter;
+            this.tableAdapterManager.schuetzenTableAdapter = this.schuetzenTableAdapter;
+            this.tableAdapterManager.trefferTableAdapter = null;
+            this.tableAdapterManager.UpdateOrder = schiessbuch.siusclubDataSetTableAdapters.TableAdapterManager.UpdateOrderOption.InsertUpdateDelete;
+            // 
+            // schiessbuchTableAdapter
+            // 
+            this.schiessbuchTableAdapter.ClearBeforeFill = true;
+            // 
+            // schuetzenlisteTableAdapter
+            // 
+            this.schuetzenlisteTableAdapter.ClearBeforeFill = true;
+            // 
+            // trefferTableAdapter
+            // 
+            this.trefferTableAdapter.ClearBeforeFill = true;
+            // 
+            // vereineTableAdapter
+            // 
+            this.vereineTableAdapter.ClearBeforeFill = true;
+            // 
+            // uebersichtgemeindemeisterschaftTableAdapter
+            // 
+            this.uebersichtgemeindemeisterschaftTableAdapter.ClearBeforeFill = true;
+            // 
+            // vereinslisteTableAdapter
+            // 
+            this.vereinslisteTableAdapter.ClearBeforeFill = true;
+            // 
+            // datumlisteTableAdapter
+            // 
+            this.datumlisteTableAdapter.ClearBeforeFill = true;
+            // 
+            // vereinsheimSiusclubDataSet1
+            // 
+            this.vereinsheimSiusclubDataSet1.DataSetName = "VereinsheimSiusclubDataSet1";
+            this.vereinsheimSiusclubDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
+            // uebersichtgemeindemeisterschaftBindingSource2
+            // 
+            this.uebersichtgemeindemeisterschaftBindingSource2.DataMember = "uebersichtgemeindemeisterschaft";
+            this.uebersichtgemeindemeisterschaftBindingSource2.DataSource = this.vereinsheimSiusclubDataSet1;
+            // 
+            // uebersichtgemeindemeisterschaftTableAdapter1
+            // 
+            this.uebersichtgemeindemeisterschaftTableAdapter1.ClearBeforeFill = true;
+            // 
+            // uebersichtgemeindemeisterschaftTableAdapter3
+            // 
+            this.uebersichtgemeindemeisterschaftTableAdapter3.ClearBeforeFill = true;
+            // 
             // Schiessbuch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -7648,8 +7658,6 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSetBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenListeBindingSourceA)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schuetzenBindingSource)).EndInit();
             this.SchiessbuchContexMenu.ResumeLayout(false);
@@ -7658,21 +7666,19 @@ namespace schiessbuch
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchtrefferBindingSource)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.datumlisteBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaft)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinslisteBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator1)).EndInit();
             this.bindingNavigator1.ResumeLayout(false);
             this.bindingNavigator1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaftBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaftBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gemeindemeisterschaft)).EndInit();
             this.tabGemeindemeisterschaft.ResumeLayout(false);
             this.tabGemeindemeisterschaft.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.datumlisteBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.vereinslisteBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gmmDGV)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet2)).EndInit();
             this.tabEinzelscheibe.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEinzelScheibe)).EndInit();
             this.tabStandUebersicht.ResumeLayout(false);
@@ -7775,10 +7781,14 @@ namespace schiessbuch
             this.SchiessbuchTab.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.vereineBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.siusclubDataSet1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schiessbuchDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trefferDataGridView)).EndInit();
             this.tabControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.vereinsheimSiusclubDataSet1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uebersichtgemeindemeisterschaftBindingSource2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -8029,13 +8039,6 @@ namespace schiessbuch
         private DateTimePicker SchiessabendPicker;
         private PictureBox pictureBox1;
         private DataGridView schiessbuchDataGridView;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private DataGridViewTextBoxColumn session;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
-        private DataGridViewTextBoxColumn dt;
         private Label zielscheibeLabel;
         private TextBox zielscheibeTextBox;
         private DataGridView trefferDataGridView;
@@ -8371,6 +8374,14 @@ namespace schiessbuch
         private Label txtSchuetzeStand4;
         private ToolStripMenuItem vereinsmeisterToolStripMenuItem;
         private ToolStripMenuItem jahresübersichtToolStripMenuItem;
+        private ToolStripMenuItem disziplinkorrigierenToolStripMenuItem;
+        private DataGridViewTextBoxColumn colDisziplin;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private DataGridViewTextBoxColumn session;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
+        private DataGridViewTextBoxColumn dt;
     }
 }
 

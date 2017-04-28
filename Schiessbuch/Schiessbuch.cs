@@ -52,6 +52,9 @@ namespace schiessbuch
         private string strSchuetzenListeBindingSourceFilter;
         private bool generateOverview;
         private Bitmap[] StandZielscheiben;
+        private Object imageThreadLock = new Object();
+        private Object schiessbuchTableAdapterThreadLock = new Object();
+        private Object trefferTableAdapterThreadLock = new Object();
 
         /// <summary>
         /// Konstanten
@@ -685,6 +688,7 @@ namespace schiessbuch
 
                 foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
                 {
+                    if (row.Cells["schuetze"].Value == null) return; // Das Databinding ist schon weg. Es hat keinen Sinn mehr, sich darüber Werte zu beschaffen.
                     SchussInfo si = new SchussInfo(
                         float.Parse(row.Cells["xrahmeninmm"].Value.ToString()),
                         float.Parse(row.Cells["yrahmeninmm"].Value.ToString()),
@@ -749,7 +753,10 @@ namespace schiessbuch
                     strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
 
                     pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                    CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    lock (imageThreadLock)
+                    {
+                        CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    }
                 }
                 bInTmBildUpdateTimer = false;
             }
@@ -5349,8 +5356,17 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                         }
                         //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                        schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                        trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        //lock (schiessbuchTableAdapterThreadLock)
+                        //{
+                        //    schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                        //}
+                        BeginInvoke(new MethodInvoker(delegate () { schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch); }));
+                        BeginInvoke(new MethodInvoker(delegate () { trefferTableAdapter.Fill(siusclubDataSet.treffer); }));
+                        //lock (trefferTableAdapterThreadLock)
+                        //{
+                        //    trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                        //}
+                        
                         foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
                         {
                             //row.Selected = false;
@@ -5417,8 +5433,15 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             {
                                 trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                             }
+                            
+                            //lock (trefferTableAdapterThreadLock)
+                            //{
+                            //    trefferTableAdapter.Fill(siusclubDataSet.treffer);
+                            //}
+                            //Invoke(trefferTableAdapterFillDelegate);
+                            BeginInvoke(new MethodInvoker(delegate () { trefferTableAdapter.Fill(siusclubDataSet.treffer); }));
 
-                            trefferTableAdapter.Fill(siusclubDataSet.treffer);
+
                             foreach (DataGridViewRow row in trefferDataGridView.Rows)
                             {
                                 row.Selected = false;
@@ -5432,8 +5455,9 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             }
                             //schiessbuchBindingSource.ResetBindings(false);
                             //trefferBindingSource.ResetBindings(false);
-                            if (TrefferScrollposition != -1)
-                                trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+
+                            //if (TrefferScrollposition != -1)
+                            //    trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
                             UpdateKoenig();
                         }
                     }
@@ -5444,6 +5468,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
             //throw new NotImplementedException();
         }
+
 
         bool bInTmBildUpdateTimer = false;
         private void TmBildUpdateTimer_Tick(object sender, EventArgs e)
@@ -5458,7 +5483,10 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
 
                     pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                    CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    lock (imageThreadLock)
+                    {
+                        CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    } 
                 }
                 bInTmBildUpdateTimer = false;
             }
@@ -5484,6 +5512,40 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
         private void jahresübersichtToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GenerateJahresübersichtVereinsmeister();
+        }
+
+        private void disziplinkorrigierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisziplinAendern diszAendern = new DisziplinAendern();
+            DialogResult result = diszAendern.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                // Der Benutzer hat hier auf OK gedrückt
+                // die Disziplin soll also geändert werden.
+                // Es soll sowohl die Disziplin in der Tabelle "schiessbuch"
+                // als auch die Disziplin in der Tabelle "treffer" geändert werden.
+                // Dabei muss aber darauf geachtet werden, dass nur die alte Disziplin
+                // durch die neue ersetzt wird.
+                // Das ist insbesondere dann wichtig, wenn für die gleiche Session-ID
+                // "treffer"-Einträge mit verschiedenen Disziplinen existieren.
+                // Das kann beispielsweise bei der Gemeindemeisterschaft passieren...
+                // Andernfalls würde unabhängig von der aktuellen Disziplin diese durch die
+                // neue ersetzt werden, was nicht passieren soll.
+                string oldDisziplin = schiessbuchDataGridView["colDisziplin", mouseLocation.RowIndex].Value.ToString();
+                string newDisziplin = diszAendern.cbDisziplinen.SelectedValue.ToString() ;
+                string session = schiessbuchDataGridView["session", mouseLocation.RowIndex].Value.ToString();
+                schiessbuchTableAdapter.UpdateQuerySetDisziplinInSchiessbuchForSession(newDisziplin, session);
+                schiessbuchTableAdapter.UpdateQuerySetDisziplinInTrefferForSessionAndOldDisziplin(newDisziplin, oldDisziplin, session);
+
+                schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
+                schiessbuchDataGridView.Invalidate();
+
+            }
+        }
+
+        private void trefferDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            MessageBox.Show("Treffer DataError");
         }
     }
 }
