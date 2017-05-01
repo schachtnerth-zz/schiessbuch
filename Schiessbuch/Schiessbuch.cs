@@ -3571,6 +3571,8 @@ ORDER BY
             else
                 seitenlaenge = (int)pb.Height;
 
+            if (pb.Image == null) return; // Am Anfang ist noch keine Zielscheibe gesetzt... Deshalb hier raus, sonst gibts eine Exception
+
             if (ergebnisbilder[stand].maxAbstand > pb.Image.Width / 2)
                 ergebnisbilder[stand].maxAbstand = pb.Image.Width / 2;
 

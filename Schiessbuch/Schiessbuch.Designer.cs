@@ -1636,7 +1636,6 @@ namespace schiessbuch
             // stand1Zielscheibe
             // 
             this.stand1Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand1Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
             this.stand1Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand1Zielscheibe.Name = "stand1Zielscheibe";
             this.stand1Zielscheibe.Size = new System.Drawing.Size(102, 199);
@@ -2280,7 +2279,6 @@ namespace schiessbuch
             // stand2Zielscheibe
             // 
             this.stand2Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand2Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftpistole;
             this.stand2Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand2Zielscheibe.Name = "stand2Zielscheibe";
             this.stand2Zielscheibe.Size = new System.Drawing.Size(102, 199);
@@ -2924,7 +2922,6 @@ namespace schiessbuch
             // stand3Zielscheibe
             // 
             this.stand3Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand3Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
             this.stand3Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand3Zielscheibe.Name = "stand3Zielscheibe";
             this.stand3Zielscheibe.Size = new System.Drawing.Size(102, 199);
@@ -3568,7 +3565,6 @@ namespace schiessbuch
             // stand6Zielscheibe
             // 
             this.stand6Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand6Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
             this.stand6Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand6Zielscheibe.Name = "stand6Zielscheibe";
             this.stand6Zielscheibe.Size = new System.Drawing.Size(102, 199);
@@ -4212,7 +4208,6 @@ namespace schiessbuch
             // stand5Zielscheibe
             // 
             this.stand5Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand5Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
             this.stand5Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand5Zielscheibe.Name = "stand5Zielscheibe";
             this.stand5Zielscheibe.Size = new System.Drawing.Size(102, 199);
@@ -4856,7 +4851,6 @@ namespace schiessbuch
             // stand4Zielscheibe
             // 
             this.stand4Zielscheibe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stand4Zielscheibe.Image = global::schiessbuch.Properties.Resources.Luftgewehr;
             this.stand4Zielscheibe.Location = new System.Drawing.Point(0, 0);
             this.stand4Zielscheibe.Name = "stand4Zielscheibe";
             this.stand4Zielscheibe.Size = new System.Drawing.Size(102, 199);
