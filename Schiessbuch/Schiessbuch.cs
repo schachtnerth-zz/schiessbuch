@@ -733,205 +733,17 @@ namespace schiessbuch
             }
         }
 
-        private Thread RefreshTimerWorkerThread = null;
         private delegate void RefreshTimerTickDelegate();
-        private RefreshTimerTickDelegate refreshTimerTickDelegate = null;
         private bool bTimerUpdateStillRunning=false;
 
         //private System.Windows.Forms.Timer tmBildUpdateTimer = new System.Windows.Forms.Timer();
         private static System.Threading.Timer tmBildUpdateTimer;
-
-        private void BildUpdateTimerCallback(object state)
-        {  
-            if (!bInTmBildUpdateTimer)
-            {
-                bInTmBildUpdateTimer = true;
-                PictureBox pb;
-                string strControlName;
-                for (int i = 0; i < 6; i++)
-                {
-                    strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
-
-                    pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                    lock (imageThreadLock)
-                    {
-                        CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
-                    }
-                }
-                bInTmBildUpdateTimer = false;
-            }
-
-//            throw new NotImplementedException();
-        }
-
-        bool bInRefreshTimerTick = false;
-        private void RefreshTimer_Tick(object sender, EventArgs e)
-        {
-            if (!bInRefreshTimerTick)
-            {
-                bInRefreshTimerTick = true;
-                //  this.RefreshTimerWorkerThread = new Thread(RefreshTimerWorker);
-                //  this.RefreshTimerWorkerThread.Start();
-
-                //this.refreshTimerTickDelegate = new RefreshTimerTickDelegate(RefreshTimerWorker);
-                RefreshTimerWorker();
-                bInRefreshTimerTick = false;
-            }
-        }
-
-        private void RefreshTimerWorker()
-        {
-            if (!bTimerUpdateStillRunning)
-            {
-                bTimerUpdateStillRunning = true;
-                if (generateEinzelScheibe)
-                {
-                    setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
-                    UpdateStandTrefferDaten(standFuerEinzelScheibe);
-                }
-                if (generateOverview)
-                {
-                    updateOverview();
-                    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
-                    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
-                    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
-                    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
-                    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
-                    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
-                }
-                if (databaseRequestCounter == 0)
-                {
-
-
-                    // trefferBindingSource.ResetBindings(false);
-                    // schuetzenBindingSource.ResetBindings(false);
-                    // schiessbuchBindingSource.ResetBindings(false);
-                    if (GetEreignisseCount() != ereignisse_count)
-                    {
-                        ereignisse_count = GetEreignisseCount();
-                        treffer_count = GetTrefferCount();
-                        int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
-                        int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
-                        List<string> eventsSelected = new List<string>();
-                        List<long> trefferSelected = new List<long>();
-                        foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
-                        {
-                            eventsSelected.Add(row.Cells["session"].Value.ToString());
-                        }
-                        foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
-                        {
-                            trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
-                        }
-                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                        schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                        trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                        foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
-                        {
-                            //row.Selected = false;
-                            foreach (string selItem in eventsSelected)
-                            {
-                                if (row.Cells["session"].Value.ToString() == selItem)
-                                {
-                                    row.Selected = true;
-                                    schiessbuchBindingSource.Position = row.Index;
-                                }
-                            }
-                        }
-                        foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                        {
-                            row.Selected = false;
-                            foreach (long selId in trefferSelected)
-                            {
-                                if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                                {
-                                    row.Selected = true;
-                                }
-                            }
-                        }
-                        //schiessbuchBindingSource.ResetBindings(false);
-                        //trefferBindingSource.ResetBindings(false);
-
-                        if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
-                            schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
-                        if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
-                            trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                        //siusclubDataSet.Reset();
-                        //schiessbuchBindingSource.ResetBindings(false);
-
-                        //schiessbuchDataGridView.DataSource = null;
-                        //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
-
-                        //MessageBox.Show("Tick");
-                        //schiessbuchBindingSource.ResetBindings(false);
-                        //trefferBindingSource.ResetBindings(false);
-                        //schuetzenBindingSource.ResetBindings(false);
-
-                        //schiessbuchDataGridView.Refresh();
-                        //schiessbuchDataGridView.Invalidate();
-
-                        //siusclubDataSet.Reset();
-                        //trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                        //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                        //schiessbuchDataGridView.Invalidate();
-                        // SELECT für König:
-                        // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
-                        // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
-                        // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
-                        //UpdateKoenig();
-                    }
-                    else
-                    {
-                        if (GetTrefferCount() != treffer_count)
-                        {
-                            treffer_count = GetTrefferCount();
-                            int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
-                            List<long> trefferSelected = new List<long>();
-                            foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
-                            {
-                                trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
-                            }
-
-                            trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                            {
-                                row.Selected = false;
-                                foreach (long selId in trefferSelected)
-                                {
-                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                                    {
-                                        row.Selected = true;
-                                    }
-                                }
-                            }
-                            //schiessbuchBindingSource.ResetBindings(false);
-                            //trefferBindingSource.ResetBindings(false);
-                            if (TrefferScrollposition != -1)
-                                trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
-                            UpdateKoenig();
-                        }
-                    }
-                }
-                databaseRequestCounter = (databaseRequestCounter + 1) % Properties.Settings.Default.DatabaseInterval;
-                bTimerUpdateStillRunning = false;
-            }   
-        }
-
-
 
         /// <summary>
         /// Hier wird die Übersichtsseite aktualisiert, also neu gezeichnet.
         /// </summary>
         private void updateOverview()
         {
-            Pen pen = new Pen(Color.Red, 1f);
-            Brush brush = new SolidBrush(Color.Red);
-            Brush brush2 = new SolidBrush(Color.Blue);
-            Brush brush3 = new SolidBrush(Color.Green);
-            Brush brush4 = new SolidBrush(Color.LightGray);
-            float num = 4.5f;
-            float num2 = 23.622f;
-            float num3 = num * num2;
             try
             {
                 for (int stand = 1; stand <= 6; stand++)
@@ -948,6 +760,47 @@ namespace schiessbuch
             for (int iStand = 0; iStand < 6; iStand++)
                 this.setzeZielscheibeInUebersicht(iStand);
         }
+
+        private void BildUpdateTimerCallback(object state)
+        {  
+            if (!bInTmBildUpdateTimer)
+            {
+                bInTmBildUpdateTimer = true;
+                updateOverview();
+                PictureBox pb;
+                string strControlName;
+                for (int i = 0; i < 6; i++)
+                {
+                    strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
+
+                    pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
+                    lock (imageThreadLock)
+                    {
+                        CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                    }
+                    if (ergebnisbilder[i].bIsChanged) UpdateZielscheibeThreadsafe((PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"]);
+                }
+                bInTmBildUpdateTimer = false;
+            }
+
+//            throw new NotImplementedException();
+        }
+
+        public void UpdateZielscheibeThreadsafe(PictureBox pb)
+        {
+            if (pb.InvokeRequired) // just if you call in thread
+            {
+                pb.Invoke(new Action(() => pb.Invalidate()));
+            }
+            else
+            {
+                pb.Invalidate();
+            }
+        }
+
+        bool bInRefreshTimerTick = false;
+
+
 
         private delegate void SetControlPropertyThreadSafeDelegate(
             Control control,
@@ -979,8 +832,8 @@ namespace schiessbuch
         private void UpdateStandTrefferDaten(int stand)
         {
             this.aktuelleTreffer[stand - 1].Clear();
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
             request.Method = "GET";
             XDocument document = new XDocument();
             //document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
@@ -1138,7 +991,7 @@ namespace schiessbuch
 
         Ergebnisbild[] ergebnisbilder;
 
-        private void CreateGraphicsForAnzeige(Ergebnisbild ergebnis, float boxWidth, float boxHeight, float imgWidth, float imgHeight, int stand, List<SchussInfo>[] trefferliste)
+        private void CreateGraphicsForAnzeige(ref Ergebnisbild ergebnis, float boxWidth, float boxHeight, float imgWidth, float imgHeight, int stand, List<SchussInfo>[] trefferliste)
         {
             Pen pen = new Pen(Color.Red, 1f);
             Font font = new Font("Arial", 1f);
@@ -2484,7 +2337,7 @@ ORDER BY
 
         private void startUebersicht()
         {
-            tmBildUpdateTimer.Change(0, 2000);
+            tmBildUpdateTimer.Change(0, Convert.ToInt32(schiessbuch.Properties.Settings.Default.TimerInterval * 1000));
             //TmBildUpdateTimer_Tick(null, null);
             //tmBildUpdateTimer.Start();
             foreach (Ergebnisbild ereignisbild in ergebnisbilder)
@@ -5158,6 +5011,8 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
         private void Schiessbuch_Load(object sender, EventArgs e)
         {
+            Splash splash = new Splash();
+            splash.Show();
             DoubleBuffered = true;
             lblProbe1.ForeColor = Color.Blue; lblProbe1.Text = "";
             lblProbe2.ForeColor = Color.Blue; lblProbe2.Text = "";
@@ -5298,6 +5153,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             //schiessbuchDataGridView.Sort(dataGridViewTextBoxColumn8, System.ComponentModel.ListSortDirection.Ascending);
             //schiessbuchDataGridView.Invalidate();
             schuetzenlisteschiessbuchBindingSource.Sort = "dt DESC";
+            splash.Hide();
         }
 
         bool inErstelleAuswertungBackgroundWorker = false;
@@ -5322,16 +5178,16 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
                     UpdateStandTrefferDaten(standFuerEinzelScheibe);
                 }
-                if (generateOverview)
-                {
-                    updateOverview();
-                    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
-                    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
-                    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
-                    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
-                    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
-                    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
-                }
+                //if (generateOverview)
+                //{
+                //    updateOverview();
+                //    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
+                //    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
+                //    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
+                //    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
+                //    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
+                //    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
+                //}
                 if (databaseRequestCounter == 0)
                 {
 
@@ -5485,7 +5341,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
                     lock (imageThreadLock)
                     {
-                        CreateGraphicsForAnzeige(ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                        CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
                     } 
                 }
                 bInTmBildUpdateTimer = false;
