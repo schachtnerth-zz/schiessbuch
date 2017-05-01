@@ -2339,7 +2339,7 @@ ORDER BY
         {
             tmBildUpdateTimer.Change(0, Convert.ToInt32(schiessbuch.Properties.Settings.Default.TimerInterval * 1000));
             //TmBildUpdateTimer_Tick(null, null);
-            //tmBildUpdateTimer.Start();
+            //tmBildUpdateTimer.Start();bla
             foreach (Ergebnisbild ereignisbild in ergebnisbilder)
             {
                 ereignisbild.bIsChanged = true; // Nach dem Umstellen auf den Übersicht-Tab sollen alle Bilder nochmal neu gezeichnet werden - zur Sicherheit ;-)
