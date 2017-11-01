@@ -7642,6 +7642,7 @@ namespace schiessbuch
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Schiessbuch";
             this.Text = "Schiessbuch";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Schiessbuch_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Schiessbuch_FormClosed);
             this.Load += new System.EventHandler(this.Schiessbuch_Load);

@@ -55,6 +55,7 @@ namespace schiessbuch
         private Object imageThreadLock = new Object();
         private Object schiessbuchTableAdapterThreadLock = new Object();
         private Object trefferTableAdapterThreadLock = new Object();
+        private Object QuitAppThreadLock = new Object();
 
         /// <summary>
         /// Konstanten
@@ -774,10 +775,11 @@ namespace schiessbuch
                     strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
 
                     pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                    lock (imageThreadLock)
-                    {
-                        CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
-                    }
+                //    lock (imageThreadLock)
+                //    {
+                        // CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
+                        CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, 0, 0, i, aktuelleTreffer);
+                 //   }
                     if (ergebnisbilder[i].bIsChanged) UpdateZielscheibeThreadsafe((PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"]);
                 }
                 bInTmBildUpdateTimer = false;
@@ -807,6 +809,11 @@ namespace schiessbuch
             string propertyName,
             object propertyValue);
 
+        private delegate object GetControlPropertyThreadSafeDelegate(
+            Control control,
+            string propertyValue);
+
+
         public static void SetControlPropertyThreadSafe(
             Control control,
             string propertyName,
@@ -829,11 +836,30 @@ namespace schiessbuch
             }
         }
 
+        public static object GetControlPropertyThreadSafe(
+            Control control,
+            string propertyName)
+        {
+            if (control.InvokeRequired)
+            {
+                return control.Invoke(new GetControlPropertyThreadSafeDelegate(GetControlPropertyThreadSafe), new object[] { control, propertyName });
+            }
+            else
+            {
+                return control.GetType().InvokeMember(
+                    propertyName,
+                    BindingFlags.GetProperty,
+                    null,
+                    control,
+                    null);
+            }
+        }
+
         private void UpdateStandTrefferDaten(int stand)
         {
             this.aktuelleTreffer[stand - 1].Clear();
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://192.168.178.202/trefferliste?stand=" + stand.ToString());
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/trefferliste.xml");
             request.Method = "GET";
             XDocument document = new XDocument();
             //document = XDocument.Load(@"C:\Users\Thomas\Downloads\trefferliste.xml");
@@ -993,6 +1019,9 @@ namespace schiessbuch
 
         private void CreateGraphicsForAnzeige(ref Ergebnisbild ergebnis, float boxWidth, float boxHeight, float imgWidth, float imgHeight, int stand, List<SchussInfo>[] trefferliste)
         {
+            // TODO: Die Signatur der Methode muss geändert werden, dass imgHeight und imgWidth nicht mehr übergeben werden...
+            imgWidth = StandZielscheiben[stand].Width;
+            imgHeight = StandZielscheiben[stand].Height;
             Pen pen = new Pen(Color.Red, 1f);
             Font font = new Font("Arial", 1f);
             float kaliber = 4.5f;
@@ -3571,10 +3600,24 @@ ORDER BY
             else
                 seitenlaenge = (int)pb.Height;
 
-            if (pb.Image == null) return; // Am Anfang ist noch keine Zielscheibe gesetzt... Deshalb hier raus, sonst gibts eine Exception
+            int iW, iH;
 
-            if (ergebnisbilder[stand].maxAbstand > pb.Image.Width / 2)
-                ergebnisbilder[stand].maxAbstand = pb.Image.Width / 2;
+            // if (pb.Image == null)
+            //    return; // Am Anfang ist noch keine Zielscheibe gesetzt... Deshalb hier raus, sonst gibts eine Exception
+            try
+            {
+                iW = ergebnisbilder[stand].bild.Width;
+                iH = ergebnisbilder[stand].bild.Height;
+            }
+            catch (NullReferenceException nre)
+            {
+                iW = 0;
+                iH = 0;
+            }
+
+
+            if (ergebnisbilder[stand].maxAbstand > iW / 2)
+                ergebnisbilder[stand].maxAbstand = iW / 2;
 
             if (ergebnisbilder[stand].IsValid())
             {
@@ -3687,8 +3730,10 @@ ORDER BY
             catch (ArgumentOutOfRangeException)
             { // Exception soll einfach ignoriert werden 
             }
-            SetImageAcrossThread(((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]), bScheibe);
-            //((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]).Image = bScheibe;
+
+            // Normalerweise muss die leere Zielscheibe hier nicht gesetzt werden. Die Scheibe mit den Treffern wird ja sowieso noch eingeblendet...
+            // Hoffentlich wird dadurch das Flackern verhindert...
+            // SetImageAcrossThread(((PictureBox)((SplitContainer)this.UebersichtTableLayoutPanel.Controls["Stand" + strStand + "SplitContainer"]).Panel1.Controls["Stand" + strStand + "Zielscheibe"]), bScheibe);
 
             // Disziplin setzen
             try
@@ -3955,11 +4000,22 @@ ORDER BY
 
         private void Schiessbuch_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DoUpdates.Checked = false;
-            //tmBildUpdateTimer.Stop();
-            tmBildUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                DoUpdates.Checked = false;
+                //tmBildUpdateTimer.Stop();
+                tmBildUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                RefreshTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                DialogResult res = MessageBox.Show("Soll eine Sicherung der Datenbank erstellt werden?", "Sicherung erstellen", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (res != DialogResult.Cancel)
+            {
+                trefferBindingSource.DataSource = null;
+                trefferDataGridView.DataSource = null;
+                trefferBindingSource.Clear();
+                schiessbuchBindingSource.DataSource = null;
+                schiessbuchDataGridView.DataSource = null;
+                schiessbuchBindingSource.Clear();
+            }
             if (res == DialogResult.Yes)
             {
                 if (Properties.Settings.Default.BackupFileName.Length > 0 && Properties.Settings.Default.BackupDirectory.Length > 0)
@@ -3986,7 +4042,6 @@ ORDER BY
             }
             if (res == DialogResult.No) e.Cancel = false;
             if (res == DialogResult.Cancel) e.Cancel = true;
-
         }
 
         bool RefreshTimerRunning = false;
@@ -4908,33 +4963,41 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
         private void schiessbuchDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs anError)
         {
-            MessageBox.Show("DataError-Ereignis aufgetreten");
-            MessageBox.Show("Error happened " + anError.Context.ToString());
+            if (anError.Context == DataGridViewDataErrorContexts.Display)
+            {
+                // Ich gehe davon aus, dass das nur passiert, wenn das Programm beendet wird und die Datenquelle nicht mehr verfügbar ist...
 
-            if (anError.Context == DataGridViewDataErrorContexts.Commit)
-            {
-                MessageBox.Show("Commit error");
             }
-            if (anError.Context == DataGridViewDataErrorContexts.CurrentCellChange)
+            else
             {
-                MessageBox.Show("Cell change");
-            }
-            if (anError.Context == DataGridViewDataErrorContexts.Parsing)
-            {
-                MessageBox.Show("parsing error");
-            }
-            if (anError.Context == DataGridViewDataErrorContexts.LeaveControl)
-            {
-                MessageBox.Show("leave control error");
-            }
+                MessageBox.Show("DataError-Ereignis aufgetreten");
+                MessageBox.Show("Error happened " + anError.Context.ToString());
 
-            if ((anError.Exception) is ConstraintException)
-            {
-                DataGridView view = (DataGridView)sender;
-                view.Rows[anError.RowIndex].ErrorText = "an error";
-                view.Rows[anError.RowIndex].Cells[anError.ColumnIndex].ErrorText = "an error";
+                if (anError.Context == DataGridViewDataErrorContexts.Commit)
+                {
+                    MessageBox.Show("Commit error");
+                }
+                if (anError.Context == DataGridViewDataErrorContexts.CurrentCellChange)
+                {
+                    MessageBox.Show("Cell change");
+                }
+                if (anError.Context == DataGridViewDataErrorContexts.Parsing)
+                {
+                    MessageBox.Show("parsing error");
+                }
+                if (anError.Context == DataGridViewDataErrorContexts.LeaveControl)
+                {
+                    MessageBox.Show("leave control error");
+                }
 
-                anError.ThrowException = false;
+                if ((anError.Exception) is ConstraintException)
+                {
+                    DataGridView view = (DataGridView)sender;
+                    view.Rows[anError.RowIndex].ErrorText = "an error";
+                    view.Rows[anError.RowIndex].Cells[anError.ColumnIndex].ErrorText = "an error";
+
+                    anError.ThrowException = false;
+                }
             }
         }
 
@@ -5023,6 +5086,8 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
             lblProbe5.ForeColor = Color.Blue; lblProbe5.Text = "";
             lblProbe6.ForeColor = Color.Blue; lblProbe6.Text = "";
             Schiessabend.AutoGenerateColumns = false;
+
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
             tmBildUpdateTimer = new System.Threading.Timer(BildUpdateTimerCallback);
             RefreshTimer = new System.Threading.Timer(RefreshTimerCallback);
@@ -5224,37 +5289,111 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                         //{
                         //    trefferTableAdapter.Fill(siusclubDataSet.treffer);
                         //}
+
+                        for (int i=0; i < schiessbuchDataGridView.Rows.Count; i++)
+                        {
+                            for (int j=0; j < eventsSelected.Count; j++)
+                            {
+                                if (trefferDataGridView.InvokeRequired)
+                                {
+                                    this.Invoke((MethodInvoker)delegate ()
+                                    {
+                                        if (schiessbuchDataGridView.Rows[i].Cells["session"].Value.ToString() == eventsSelected[j])
+                                        {
+                                            schiessbuchDataGridView.Rows[i].Selected = true;
+                                            schiessbuchBindingSource.Position = schiessbuchDataGridView.Rows[i].Index;
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    if (schiessbuchDataGridView.Rows[i].Cells["session"].Value.ToString() == eventsSelected[j])
+                                    {
+                                        schiessbuchDataGridView.Rows[i].Selected = true;
+                                        schiessbuchBindingSource.Position = schiessbuchDataGridView.Rows[i].Index;
+                                    }
+                                }
+                            }
+                        }
+
+                        for (int i = 0; i < trefferDataGridView.Rows.Count; i++)
+                        {
+                            trefferDataGridView.Rows[i].Selected = false;
+                            for (int j = 0; j < trefferSelected.Count; j++)
+                            {
+                                if (trefferDataGridView.InvokeRequired)
+                                {
+                                    this.Invoke((MethodInvoker)delegate ()
+                                    {
+                                        if (long.Parse(trefferDataGridView.Rows[i].Cells["id"].Value.ToString()) == trefferSelected[j])
+                                        {
+                                            trefferDataGridView.Rows[i].Selected = true;
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    if (long.Parse(trefferDataGridView.Rows[i].Cells["id"].Value.ToString()) == trefferSelected[j])
+                                    {
+                                        trefferDataGridView.Rows[i].Selected = true;
+                                    }
+                                }
+                            }
+                        }
                         
-                        foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
-                        {
-                            //row.Selected = false;
-                            foreach (string selItem in eventsSelected)
-                            {
-                                if (row.Cells["session"].Value.ToString() == selItem)
-                                {
-                                    row.Selected = true;
-                                    schiessbuchBindingSource.Position = row.Index;
-                                }
-                            }
-                        }
-                        foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                        {
-                            row.Selected = false;
-                            foreach (long selId in trefferSelected)
-                            {
-                                if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                                {
-                                    row.Selected = true;
-                                }
-                            }
-                        }
+                        //foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
+                        //{
+                        //    //row.Selected = false;
+                        //    foreach (string selItem in eventsSelected)
+                        //    {
+                        //        if (row.Cells["session"].Value.ToString() == selItem)
+                        //        {
+                        //            row.Selected = true;
+                        //            schiessbuchBindingSource.Position = row.Index;
+                        //        }
+                        //    }
+                        //}
+                        //foreach (DataGridViewRow row in trefferDataGridView.Rows)
+                        //{
+                        //    row.Selected = false;
+                        //    foreach (long selId in trefferSelected)
+                        //    {
+                        //        if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                        //        {
+                        //            row.Selected = true;
+                        //        }
+                        //    }
+                        //}
                         //schiessbuchBindingSource.ResetBindings(false);
                         //trefferBindingSource.ResetBindings(false);
 
-                        if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
-                            schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
-                        if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
-                            trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                        if (schiessbuchDataGridView.InvokeRequired)
+                        {
+                            this.Invoke((MethodInvoker)delegate ()
+                            {
+                                if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
+                                    schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
+                            });
+                        } else
+                        {
+                            if (SchiessbuchScrollposition != -1 && schiessbuchDataGridView.RowCount > 0)
+                                schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
+                        }
+
+                        if (trefferDataGridView.InvokeRequired)
+                        {
+                            this.Invoke((MethodInvoker)delegate ()
+                            {
+                                if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
+                                    trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                            });
+                        }
+                        else
+                        {
+                            if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
+                                trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
+                        }
+
                         //siusclubDataSet.Reset();
                         //schiessbuchBindingSource.ResetBindings(false);
 
@@ -5299,18 +5438,46 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             //Invoke(trefferTableAdapterFillDelegate);
                             BeginInvoke(new MethodInvoker(delegate () { trefferTableAdapter.Fill(siusclubDataSet.treffer); }));
 
-
-                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                            {
-                                row.Selected = false;
-                                foreach (long selId in trefferSelected)
+                            if (trefferDataGridView.Rows.Count > 0) // es scheint so, als ob diese Schleife auf jeden Fall immer zweimal durchlaufen wird,
+                                                                    // auch wenn der Rowcount 0 ist. Das soll hier abgefangen werden.
+                                for (int i=0; i < trefferDataGridView.Rows.Count; i++)
                                 {
-                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+                                    if (trefferDataGridView.Rows.Count == 0) continue; 
+                                    trefferDataGridView.Rows[i].Selected = false;
+                                    for (int j=0; j < trefferSelected.Count; j++)
                                     {
-                                        row.Selected = true;
+                                        if (trefferDataGridView.InvokeRequired)
+                                        {
+                                            this.Invoke((MethodInvoker)delegate ()
+                                            {
+                                                if (long.Parse(trefferDataGridView.Rows[i].Cells["id"].Value.ToString()) == trefferSelected[j])
+                                                {
+                                                    trefferDataGridView.Rows[i].Selected = true;
+                                                }
+                                            });
+                                        }
+                                        else
+                                        {
+                                            if (long.Parse(trefferDataGridView.Rows[i].Cells["id"].Value.ToString()) == trefferSelected[j])
+                                            {
+                                                trefferDataGridView.Rows[i].Selected = true;
+                                            }
+                                        }
+                                    
                                     }
                                 }
-                            }
+
+//                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
+//                            {
+//                                row.Selected = false;
+//                                foreach (long selId in trefferSelected)
+//                                {
+//                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
+//                                    {
+//                                        row.Selected = true;
+//                                    }
+//                                }
+//                            }
                             //schiessbuchBindingSource.ResetBindings(false);
                             //trefferBindingSource.ResetBindings(false);
 
@@ -5341,10 +5508,10 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     strControlName = "stand" + (i + 1).ToString() + "Zielscheibe";
 
                     pb = (PictureBox)Controls["tabControl1"].Controls["tabStandUebersicht"].Controls["UebersichtTableLayoutPanel"].Controls["Stand" + (i + 1).ToString() + "SplitContainer"].Controls[0].Controls["stand" + (i + 1).ToString() + "Zielscheibe"];
-                    lock (imageThreadLock)
-                    {
+                    //lock (imageThreadLock)
+                    //{
                         CreateGraphicsForAnzeige(ref ergebnisbilder[i], pb.Width, pb.Height, pb.Image.Width, pb.Image.Height, i, aktuelleTreffer);
-                    } 
+                    //} 
                 }
                 bInTmBildUpdateTimer = false;
             }
@@ -5403,7 +5570,15 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
 
         private void trefferDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            MessageBox.Show("Treffer DataError");
+            if (e.Context == DataGridViewDataErrorContexts.Display)
+            {
+
+            }
+            else
+            {
+                MessageBox.Show("Treffer DataError");
+                MessageBox.Show(e.Exception.ToString());
+            }
         }
     }
 }
