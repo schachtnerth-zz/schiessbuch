@@ -1987,6 +1987,7 @@ namespace schiessbuch
             this.stopUebersicht();
             this.stopEinzelScheibe();
             tmBildUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            RefreshTimer.Change(Timeout.Infinite, Timeout.Infinite);
             if (tabControl1.SelectedTab.Text.Equals("König"))
                 UpdateKoenig();
             if (tabControl1.SelectedTab.Text.Equals("Tagesauswertung"))
@@ -1998,6 +1999,8 @@ namespace schiessbuch
                 startUebersicht();
             if (tabControl1.SelectedTab.Text.Equals("Gemeindemeisterschaft"))
                 ErstelleAuswertungGemeindemeisterschaft();
+            if (tabControl1.SelectedTab.Text.Equals("Schießbuch"))
+                RefreshTimer.Change(0, (int)Properties.Settings.Default.TimerInterval * 1000);
             if (!tabControl1.SelectedTab.Name.Equals("tabEinzelscheibe"))
                 tabControl1.TabPages.RemoveByKey("tabEinzelscheibe");
             else
@@ -5245,31 +5248,21 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                     setzeZielscheibeInEinzelansicht(standFuerEinzelScheibe);
                     UpdateStandTrefferDaten(standFuerEinzelScheibe);
                 }
-                //if (generateOverview)
-                //{
-                //    updateOverview();
-                //    if (ergebnisbilder[0].bIsChanged) stand1Zielscheibe.Invalidate();
-                //    if (ergebnisbilder[1].bIsChanged) stand2Zielscheibe.Invalidate();
-                //    if (ergebnisbilder[2].bIsChanged) stand3Zielscheibe.Invalidate();
-                //    if (ergebnisbilder[3].bIsChanged) stand4Zielscheibe.Invalidate();
-                //    if (ergebnisbilder[4].bIsChanged) stand5Zielscheibe.Invalidate();
-                //    if (ergebnisbilder[5].bIsChanged) stand6Zielscheibe.Invalidate();
-                //}
+
                 if (databaseRequestCounter == 0)
                 {
-
-
-                    // trefferBindingSource.ResetBindings(false);
-                    // schuetzenBindingSource.ResetBindings(false);
-                    // schiessbuchBindingSource.ResetBindings(false);
                     if (GetEreignisseCount() != ereignisse_count)
                     {
+                        // Wenn sich die Einträge im Schießbuch von denen in der Datenbank unterscheiden,...
                         ereignisse_count = GetEreignisseCount();
                         treffer_count = GetTrefferCount();
+
+                        // Merke die momentane Scroll-Position des DGV
                         int SchiessbuchScrollposition = schiessbuchDataGridView.FirstDisplayedScrollingRowIndex;
                         int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
                         List<string> eventsSelected = new List<string>();
                         List<long> trefferSelected = new List<long>();
+                        // Merke, welche Zeilen selected sind im Schießbuch und in der Trefferliste
                         foreach (DataGridViewRow row in schiessbuchDataGridView.SelectedRows)
                         {
                             eventsSelected.Add(row.Cells["session"].Value.ToString());
@@ -5278,18 +5271,12 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                         {
                             trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                         }
-                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                        //lock (schiessbuchTableAdapterThreadLock)
-                        //{
-                        //    schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                        //}
+
+                        // Aktualisiere die DataTables
                         BeginInvoke(new MethodInvoker(delegate () { schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch); }));
                         BeginInvoke(new MethodInvoker(delegate () { trefferTableAdapter.Fill(siusclubDataSet.treffer); }));
-                        //lock (trefferTableAdapterThreadLock)
-                        //{
-                        //    trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                        //}
 
+                        // Stelle die Markierungen im Schießbuch wieder her
                         for (int i=0; i < schiessbuchDataGridView.Rows.Count; i++)
                         {
                             for (int j=0; j < eventsSelected.Count; j++)
@@ -5316,6 +5303,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             }
                         }
 
+                        // Stelle die Markierungen in der Trefferliste wieder her
                         for (int i = 0; i < trefferDataGridView.Rows.Count; i++)
                         {
                             trefferDataGridView.Rows[i].Selected = false;
@@ -5341,32 +5329,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             }
                         }
                         
-                        //foreach (DataGridViewRow row in schiessbuchDataGridView.Rows)
-                        //{
-                        //    //row.Selected = false;
-                        //    foreach (string selItem in eventsSelected)
-                        //    {
-                        //        if (row.Cells["session"].Value.ToString() == selItem)
-                        //        {
-                        //            row.Selected = true;
-                        //            schiessbuchBindingSource.Position = row.Index;
-                        //        }
-                        //    }
-                        //}
-                        //foreach (DataGridViewRow row in trefferDataGridView.Rows)
-                        //{
-                        //    row.Selected = false;
-                        //    foreach (long selId in trefferSelected)
-                        //    {
-                        //        if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-                        //        {
-                        //            row.Selected = true;
-                        //        }
-                        //    }
-                        //}
-                        //schiessbuchBindingSource.ResetBindings(false);
-                        //trefferBindingSource.ResetBindings(false);
-
+                        // Stelle die Scrollposition im Schießbuch wieder her
                         if (schiessbuchDataGridView.InvokeRequired)
                         {
                             this.Invoke((MethodInvoker)delegate ()
@@ -5380,6 +5343,7 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                                 schiessbuchDataGridView.FirstDisplayedScrollingRowIndex = SchiessbuchScrollposition;
                         }
 
+                        // Stelle die Scrollposition in der Trefferliste wieder her
                         if (trefferDataGridView.InvokeRequired)
                         {
                             this.Invoke((MethodInvoker)delegate ()
@@ -5393,51 +5357,28 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                             if (TrefferScrollposition != -1 && trefferDataGridView.RowCount > 0)
                                 trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
                         }
-
-                        //siusclubDataSet.Reset();
-                        //schiessbuchBindingSource.ResetBindings(false);
-
-                        //schiessbuchDataGridView.DataSource = null;
-                        //schiessbuchDataGridView.DataSource = schiessbuchBindingSource;
-
-                        //MessageBox.Show("Tick");
-                        //schiessbuchBindingSource.ResetBindings(false);
-                        //trefferBindingSource.ResetBindings(false);
-                        //schuetzenBindingSource.ResetBindings(false);
-
-                        //schiessbuchDataGridView.Refresh();
-                        //schiessbuchDataGridView.Invalidate();
-
-                        //siusclubDataSet.Reset();
-                        //trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                        //schuetzenTableAdapter.Fill(siusclubDataSet.schuetzen);
-                        //schiessbuchTableAdapter.Fill(siusclubDataSet.schiessbuch);
-                        //schiessbuchDataGridView.Invalidate();
-                        // SELECT für König:
-                        // set @row=0;select @row:=@row+1 AS Rang, Schütze, Teiler, Typ FROM (SELECT Schütze, MIN(Teiler) AS Teiler, Typ from (select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis AS Teiler, 'LG' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LG Koenig" UNION select CONCAT(name, ', ', vorname) AS Schütze, schuetzen.id as ID, ergebnis / 2.6 AS Teiler, 'LP' AS Typ from schiessbuch inner join schuetzen on schuetzen.id=schiessbuch.id where disziplin="LP Koenig") T GROUP BY ID ORDER BY Teiler ASC ) T2
-                        // ComboBoxSelectionChange(); (unsure if needed) update Statistics regularly
-                        // Was ist mit den Datagridviews? werden die automatisch aktualisiert?
-                        //UpdateKoenig();
                     }
                     else
                     {
+                        // Wenn die Einträge im Schießbuch in der Datenbank und im Programm identisch sind, ...
                         if (GetTrefferCount() != treffer_count)
                         {
+                            // ... aber die Einträge in der Trefferliste sich unterscheiden, verzweige hierher
                             treffer_count = GetTrefferCount();
+
+                            // Merke Scrollposition in der Trefferliste
                             int TrefferScrollposition = trefferDataGridView.FirstDisplayedScrollingRowIndex;
                             List<long> trefferSelected = new List<long>();
+                            // Merke markierte Zeilen in der Trefferliste
                             foreach (DataGridViewRow row in trefferDataGridView.SelectedRows)
                             {
                                 trefferSelected.Add(long.Parse(row.Cells["id"].Value.ToString()));
                             }
-                            
-                            //lock (trefferTableAdapterThreadLock)
-                            //{
-                            //    trefferTableAdapter.Fill(siusclubDataSet.treffer);
-                            //}
-                            //Invoke(trefferTableAdapterFillDelegate);
+
+                            // Aktualisiere die Trefferliste
                             BeginInvoke(new MethodInvoker(delegate () { trefferTableAdapter.Fill(siusclubDataSet.treffer); }));
 
+                            // Stelle die Markierungen der Trefferliste wieder her
                             if (trefferDataGridView.Rows.Count > 0) // es scheint so, als ob diese Schleife auf jeden Fall immer zweimal durchlaufen wird,
                                                                     // auch wenn der Rowcount 0 ist. Das soll hier abgefangen werden.
                                 for (int i=0; i < trefferDataGridView.Rows.Count; i++)
@@ -5467,22 +5408,6 @@ SELECT 11, COUNT(ring) from treffer where session='" + strSession + "' and schri
                                     }
                                 }
 
-//                            foreach (DataGridViewRow row in trefferDataGridView.Rows)
-//                            {
-//                                row.Selected = false;
-//                                foreach (long selId in trefferSelected)
-//                                {
-//                                    if (long.Parse(row.Cells["id"].Value.ToString()) == selId)
-//                                    {
-//                                        row.Selected = true;
-//                                    }
-//                                }
-//                            }
-                            //schiessbuchBindingSource.ResetBindings(false);
-                            //trefferBindingSource.ResetBindings(false);
-
-                            //if (TrefferScrollposition != -1)
-                            //    trefferDataGridView.FirstDisplayedScrollingRowIndex = TrefferScrollposition;
                             UpdateKoenig();
                         }
                     }
